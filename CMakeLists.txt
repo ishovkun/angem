@@ -1,36 +1,71 @@
-# angem/CMakeLists.txt
+cmake_minimum_required (VERSION 3.7)
 
-ADD_LIBRARY(angem
-  Point.hpp
-  PointSet.hpp
-  PointSet.cpp
-  Basis.hpp
-  Plane.hpp
-  Shape.hpp
-  Polygon.hpp
-  Polyhedron.hpp
-  Tetrahedron.hpp
-  Hexahedron.hpp
-  Wedge.hpp
-  Rectangle.hpp
-  Collisions.hpp
-  CollisionGJK.hpp
-  Line.hpp
-  PolyGroup.hpp
-)
+set(CMAKE_CXX_STANDARD 17)
 
-SET_TARGET_PROPERTIES (
-    angem
-    PROPERTIES LINKER_LANGUAGE CXX
-)
+# for ycmd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
+  EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+  )
+ENDIF()
 
-TARGET_INCLUDE_DIRECTORIES(angem PRIVATE
+# boost is optional for 256-bit integers (for mesh library)
+# but it works muuuch faster with it
+find_package(Boost 1.65.1)
+if(Boost_FOUND)
+  message("Boost found. Using boost libraries for hashing.")
+  message("To turn off edit the CMakeLists file.")
+  INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+  add_definitions(-DUSE_BOOST)
+else()
+  # 256 bit integer lib (for mesh)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/uint256)
+  ADD_SUBDIRECTORY(src/uint256)
+ENDIF()
+
+# angem
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/angem)
+ADD_SUBDIRECTORY(src/angem)
+
+# angem
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/mesh)
+ADD_SUBDIRECTORY(src/mesh)
+
+# muparser
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/muparser)
+ADD_SUBDIRECTORY(src/muparser)
+
+# simdata
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/gprs-data)
+ADD_SUBDIRECTORY(src/gprs-data)
+
+# parser
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/parsers)
+ADD_SUBDIRECTORY(src/parsers)
+
+
+# targets
+# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
+
+ADD_EXECUTABLE(msh2gprs ${CMAKE_SOURCE_DIR}/src/main.cpp)
+
+TARGET_INCLUDE_DIRECTORIES(msh2gprs PRIVATE
 	${CMAKE_SOURCE_DIR}/src
 )
 
-
-if(Boost_FOUND)
-  TARGET_LINK_LIBRARIES(angem ${Boost_LIBRARIES})
-else()
-  TARGET_LINK_LIBRARIES(angem uint256)
+if (CMAKE_COMPILER_IS_GNUCC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
+    # target_compile_options(msh2gprs PUBLIC "-Wall -Wextra -pedantic")
 endif()
+
+# memory leak debugging
+# set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+# set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+
+# for profiling memory leaks
+# TARGET_LINK_LIBRARIES(msh2gprs gprs_data parsers mesh uint256 -lstdc++fs -lasan)
+# last flag for std::filesystem
+TARGET_LINK_LIBRARIES(msh2gprs gprs_data parsers mesh -lstdc++fs)

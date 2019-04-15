@@ -15,22 +15,22 @@ else()
 ENDIF()
 
 ADD_LIBRARY(angem
-  Point.hpp
-  PointSet.hpp
-  PointSet.cpp
-  Basis.hpp
-  Plane.hpp
-  Shape.hpp
-  Polygon.hpp
-  Polyhedron.hpp
-  Tetrahedron.hpp
-  Hexahedron.hpp
-  Wedge.hpp
-  Rectangle.hpp
-  Collisions.hpp
-  CollisionGJK.hpp
-  Line.hpp
-  PolyGroup.hpp
+  angem/Point.hpp
+  angem/PointSet.hpp
+  angem/PointSet.cpp
+  angem/Basis.hpp
+  angem/Plane.hpp
+  angem/Shape.hpp
+  angem/Polygon.hpp
+  angem/Polyhedron.hpp
+  angem/Tetrahedron.hpp
+  angem/Hexahedron.hpp
+  angem/Wedge.hpp
+  angem/Rectangle.hpp
+  angem/Collisions.hpp
+  angem/CollisionGJK.hpp
+  angem/Line.hpp
+  angem/PolyGroup.hpp
 )
 
 SET_TARGET_PROPERTIES (

@@ -26,40 +26,40 @@ else()
 ENDIF()
 
 # angem
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/angem)
-ADD_SUBDIRECTORY(src/angem)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
+ADD_SUBDIRECTORY(src)
 
 # angem
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/mesh)
-ADD_SUBDIRECTORY(src/mesh)
+# INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/mesh)
+# ADD_SUBDIRECTORY(src/mesh)
 
-# muparser
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/muparser)
-ADD_SUBDIRECTORY(src/muparser)
+# # muparser
+# INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/muparser)
+# ADD_SUBDIRECTORY(src/muparser)
 
-# simdata
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/gprs-data)
-ADD_SUBDIRECTORY(src/gprs-data)
+# # simdata
+# INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/gprs-data)
+# ADD_SUBDIRECTORY(src/gprs-data)
 
-# parser
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/parsers)
-ADD_SUBDIRECTORY(src/parsers)
+# # parser
+# INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/parsers)
+# ADD_SUBDIRECTORY(src/parsers)
 
 
 # targets
 # set(CMAKE_BUILD_TYPE Debug)
 # set(CMAKE_BUILD_TYPE Release)
 
-ADD_EXECUTABLE(msh2gprs ${CMAKE_SOURCE_DIR}/src/main.cpp)
+# ADD_EXECUTABLE(msh2gprs ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
-TARGET_INCLUDE_DIRECTORIES(msh2gprs PRIVATE
-	${CMAKE_SOURCE_DIR}/src
-)
+# TARGET_INCLUDE_DIRECTORIES(msh2gprs PRIVATE
+# 	${CMAKE_SOURCE_DIR}/src
+# )
 
-if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
-    # target_compile_options(msh2gprs PUBLIC "-Wall -Wextra -pedantic")
-endif()
+# if (CMAKE_COMPILER_IS_GNUCC)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
+#     # target_compile_options(msh2gprs PUBLIC "-Wall -Wextra -pedantic")
+# endif()
 
 # memory leak debugging
 # set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
@@ -68,4 +68,4 @@ endif()
 # for profiling memory leaks
 # TARGET_LINK_LIBRARIES(msh2gprs gprs_data parsers mesh uint256 -lstdc++fs -lasan)
 # last flag for std::filesystem
-TARGET_LINK_LIBRARIES(msh2gprs gprs_data parsers mesh -lstdc++fs)
+# TARGET_LINK_LIBRARIES(msh2gprs gprs_data parsers mesh -lstdc++fs)

@@ -327,8 +327,10 @@ Plane<Scalar>::strike_angle() const
   Scalar rdip = static_cast<Scalar>(acos(basis(2)[2]));
 
   // avoid taking acos(+- 1) -- causes errors due to roundoff
-  const double v1 = std::clamp( basis(2)[0] / sin(rdip), -1.0, 1.0);
-  const double v2 = std::clamp( basis(2)[1] / sin(rdip), -1.0, 1.0);
+  // const double v1 = std::clamp( basis(2)[0] / sin(rdip), -1.0, 1.0);
+  // const double v2 = std::clamp( basis(2)[1] / sin(rdip), -1.0, 1.0);
+  const double v1 = std::min(std::max(-1.0, basis(2)[0]), 1.0);
+  const double v2 = std::min(std::max(-1.0, basis(2)[1]), 1.0);
 
   Scalar rstrike_from_cos = acos(v1) - M_PI / 2.;
   Scalar rstrike_from_sin = asin(v2) - M_PI / 2.;

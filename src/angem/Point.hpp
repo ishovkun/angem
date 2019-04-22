@@ -93,7 +93,7 @@ class Point
   // Euclidian norm
   Scalar norm() const;
   // divide by norm
-  void normalize();
+  Point<dim,Scalar> & normalize();
 
   // also this class defines the following external functions
   // point-wise sum
@@ -445,12 +445,13 @@ Scalar Point<dim,Scalar>::norm() const
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::normalize()
+Point<dim,Scalar> & Point<dim,Scalar>::normalize()
 {
   Scalar nor = norm();
   assert (std::isfinite(static_cast<Scalar>(1) / nor));
   for (int i=0; i<dim; ++i)
     coords[i] /= nor;
+  return *this;
 }
 
 // EXTERNAL OPERATORS
@@ -545,6 +546,16 @@ void cross_product(const Point<3, Scalar> & p1,
                    Point<3, Scalar>       & result)
 {
   p1.cross(p2, result);
+}
+
+
+template<typename Scalar>
+Point<3,Scalar> cross_product(const Point<3, Scalar> & p1,
+                              const Point<3, Scalar> & p2)
+{
+  Point<3,Scalar> result;
+  p1.cross(p2, result);
+  return result;
 }
 
 

@@ -7,9 +7,9 @@
 // 128 ints for point hashing
 #ifdef USE_BOOST
 #include <boost/multiprecision/cpp_int.hpp>
-#else
-#include <uint256/uint128_t.h>
 #endif
+// #else
+// #include "uint256/uint128_t.h"
 
 namespace angem
 {

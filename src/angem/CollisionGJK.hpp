@@ -7,9 +7,10 @@
 
 #pragma once
 
+#include "angem/Shape.hpp"
+#include "angem/Point.hpp"
+
 #include <vector>
-#include "Shape.hpp"
-#include "Point.hpp"
 
 namespace angem
 {

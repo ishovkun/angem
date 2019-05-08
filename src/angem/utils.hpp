@@ -2,7 +2,7 @@
 
 #include <limits>  // std::numeric_limits
 #include "Point.hpp"
-#include "PointSet.hpp"
+// #include "PointSet.hpp"
 
 namespace angem
 {
@@ -63,15 +63,15 @@ remove_duplicates(const std::vector<Point<dim,Scalar>> & points,
 
 // remove duplicates (with tolerance) from the vector of points
 // this function is O(n)
-template<int dim, typename Scalar>
-void remove_duplicates(std::vector<Point<dim,Scalar>> & points,
-                       const double tolerance = 1e-6)
-{
-  PointSet<dim,Scalar> pset;
-  for (const auto & p : points)
-    pset.insert(p);
-  points = std::move(pset.points);
-}
+// template<int dim, typename Scalar>
+// void remove_duplicates(std::vector<Point<dim,Scalar>> & points,
+                       // const double tolerance = 1e-6)
+// {
+  // PointSet<dim,Scalar> pset;
+  // for (const auto & p : points)
+    // pset.insert(p);
+  // points = std::move(pset.points);
+// }
 
 
 template<int dim, typename Scalar>

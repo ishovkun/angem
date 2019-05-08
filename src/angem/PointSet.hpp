@@ -13,6 +13,7 @@
 
 namespace angem
 {
+#ifndef WIN32  // windows platform
 
 #ifdef USE_BOOST
 using pset_hash_type = boost::multiprecision::uint128_t;
@@ -211,5 +212,7 @@ pset_hash_type PointSet<dim,Scalar>::hash_value(const Point<dim,Scalar> &p) cons
 
   return result;
 }
+
+#endif
 
 }  // end namespace

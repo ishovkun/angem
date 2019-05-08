@@ -3,6 +3,7 @@
 namespace angem
 {
 
+#ifndef WIN32  // windows platform
 template<>
 PointSet<3,double>::PointSet(const double tol)
     :
@@ -15,4 +16,5 @@ PointSet<3,double>::PointSet(const double tol)
   lower = -upper;
 }
 
+#endif
 }

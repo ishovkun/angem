@@ -4,8 +4,8 @@
 # but it works muuuch faster with it
 ADD_LIBRARY(angem
   angem/Point.hpp
-  angem/PointSet.hpp
-  angem/PointSet.cpp
+  # angem/PointSet.hpp
+  # angem/PointSet.cpp
   angem/Basis.hpp
   angem/Plane.hpp
   angem/Shape.hpp

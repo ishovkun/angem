@@ -1,15 +1,25 @@
 #pragma once
 
 #include <limits>  // std::numeric_limits
-#include <Point.hpp>
-#include <PointSet.hpp>
+#include "Point.hpp"
+#include "PointSet.hpp"
 
 namespace angem
 {
 
-template<int dim, typename Scalar>
-Point<dim,Scalar>
-compute_center_mass(const std::vector<Point<dim,Scalar>> & points)
+// template<int dim, typename Scalar>
+// Point<dim,Scalar>
+// compute_center_mass(const std::vector<Point<dim,Scalar>> & points)
+// {
+//   Point<dim, Scalar> center = {0, 0, 0};
+//   for (const auto & p : points)
+//     center += p;
+//   center /= static_cast<Scalar>(points.size());
+//   return center;
+// }
+
+template<int dim, typename Scalar, typename Iterable>
+Point<dim,Scalar> compute_center_mass(const Iterable & points)
 {
   Point<dim, Scalar> center = {0, 0, 0};
   for (const auto & p : points)
@@ -88,6 +98,47 @@ inline
 Scalar radians(const Scalar angle)
 {
   return angle * static_cast<Scalar>(M_PI) / static_cast<Scalar>(180.);
+}
+
+
+// template<int dim, typename Scalar>
+template<int dim, typename Scalar, typename Iterable>
+std::size_t
+find_closest_index(const Point<dim,Scalar> & point,
+                   const std::vector<Point<dim,Scalar>> & points)
+{
+  Scalar min_dist = std::numeric_limits<Scalar>::max();
+  std::size_t closest = 0;
+  for (std::size_t i = 0; i < points.size(); ++i)
+  {
+    const Scalar current = point.distance(points[i]);
+    if (current < min_dist)
+    {
+      min_dist = current;
+      closest = i;
+    }
+  }
+  return closest;
+}
+
+
+template<int dim, typename Scalar, typename Iterable>
+Point<dim,Scalar>
+find_closest(const Point<dim,Scalar> & point,
+             const Iterable          & points)
+{
+  Scalar min_dist = std::numeric_limits<Scalar>::max();
+  Point<dim,Scalar> closest;
+  for (auto it = points.begin(); it != points.end(); ++it)
+  {
+    const Scalar current_dist = point.distance(*it);
+    if (current_dist < min_dist)
+    {
+      min_dist = current_dist;
+      closest = *it;
+    }
+  }
+  return closest;
 }
 
 }

@@ -141,7 +141,7 @@ class Point
 template<int dim, typename Scalar>
 Point<dim,Scalar>::Point()
 {
-  static_assert(dim > 0 and dim <= 3,
+  static_assert(dim > 0 && dim <= 3,
                 "Only 1,2, and 3 dimensions are supported");
   for (int i=0; i<dim; ++i)
     coords[i] = 0;
@@ -151,7 +151,7 @@ Point<dim,Scalar>::Point()
 template<int dim, typename Scalar>
 Point<dim,Scalar>::Point(const Point<dim, Scalar> & p)
 {
-  static_assert(dim > 0 and dim <= 3,
+  static_assert(dim > 0 && dim <= 3,
                 "Only 1,2, and 3 dimensions are supported");
   for (int i=0; i<dim; ++i)
     coords[i] = p.coords[i];
@@ -161,7 +161,7 @@ Point<dim,Scalar>::Point(const Point<dim, Scalar> & p)
 template<int dim, typename Scalar>
 Point<dim,Scalar>::Point(const std::vector<Scalar> & v)
 {
-  static_assert(dim > 0 and dim <= 3,
+  static_assert(dim > 0 && dim <= 3,
                 "Only 1,2, and 3 dimensions are supported");
   assert(v.size() == dim);
   for (int i=0; i<dim; ++i)

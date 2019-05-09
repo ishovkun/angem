@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Shape.hpp>
-#include <Plane.hpp>
-#include <PointSet.hpp>
-#include <Polygon.hpp>
-#include <PolyGroup.hpp>
+#include "Shape.hpp"
+#include "Plane.hpp"
+#include "PointSet.hpp"
+#include "Polygon.hpp"
+#include "PolyGroup.hpp"
 #include <typeinfo>
 #include <exception>
 

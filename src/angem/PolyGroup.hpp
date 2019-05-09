@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Point.hpp>
-#include <Polygon.hpp>
-#include <PointSet.hpp>
+#include "Point.hpp"
+#include "Polygon.hpp"
+#include "PointSet.hpp"
 
 namespace angem
 {

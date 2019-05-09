@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Polyhedron.hpp>
-#include <Exceptions.hpp>
+#include "Polyhedron.hpp"
+#include "Exceptions.hpp"
 
 namespace angem
 {

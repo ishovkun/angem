@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Shape.hpp>
-#include <Plane.hpp>
-#include <PointSet.hpp>
+#include "Shape.hpp"
+#include "Plane.hpp"
+#include "PointSet.hpp"
 
-#include <utils.hpp>
+#include "utils.hpp"
 #include <iostream>
 
 namespace angem

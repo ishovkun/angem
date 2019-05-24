@@ -1,6 +1,6 @@
 #include "angem/PointSet.hpp"
 
-// #ifndef WIN32  // windows platform
+#ifndef WIN32  // windows platform
 
 namespace angem
 {
@@ -21,4 +21,4 @@ PointSet<3,double>::PointSet(const double tol)
 
 }  // end namesace
 
-// #endif
+#endif

@@ -1,9 +1,12 @@
-#include "PointSet.hpp"
+#include "angem/PointSet.hpp"
+
+// #ifndef WIN32  // windows platform
 
 namespace angem
 {
 
-#ifndef WIN32  // windows platform
+template class PointSet<3,double>;
+
 template<>
 PointSet<3,double>::PointSet(const double tol)
     :
@@ -16,5 +19,6 @@ PointSet<3,double>::PointSet(const double tol)
   lower = -upper;
 }
 
-#endif
-}
+}  // end namesace
+
+// #endif

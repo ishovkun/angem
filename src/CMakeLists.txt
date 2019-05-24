@@ -2,7 +2,7 @@
 
 # boost is optional for 256-bit integers (for mesh library)
 # but it works muuuch faster with it
-ADD_LIBRARY(angem
+ADD_LIBRARY(angem SHARED
   angem/Point.hpp
   angem/PointSet.hpp
   angem/PointSet.cpp

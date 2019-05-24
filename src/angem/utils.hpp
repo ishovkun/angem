@@ -7,16 +7,16 @@
 namespace angem
 {
 
-// template<int dim, typename Scalar>
-// Point<dim,Scalar>
-// compute_center_mass(const std::vector<Point<dim,Scalar>> & points)
-// {
-//   Point<dim, Scalar> center = {0, 0, 0};
-//   for (const auto & p : points)
-//     center += p;
-//   center /= static_cast<Scalar>(points.size());
-//   return center;
-// }
+template<int dim, typename Scalar>
+Point<dim,Scalar>
+compute_center_mass(const std::vector<Point<dim,Scalar>> & points)
+{
+  Point<dim, Scalar> center = {0, 0, 0};
+  for (const auto & p : points)
+    center += p;
+  center /= static_cast<Scalar>(points.size());
+  return center;
+}
 
 template<int dim, typename Scalar, typename Iterable>
 Point<dim,Scalar> compute_center_mass(const Iterable & points)
@@ -124,8 +124,8 @@ find_closest_index(const Point<dim,Scalar> & point,
 
 template<int dim, typename Scalar, typename Iterable>
 Point<dim,Scalar>
-find_closest(const Point<dim,Scalar> & point,
-             const Iterable          & points)
+find_closest(const Point<dim,Scalar>              & point,
+             const std::vector<Point<dim,Scalar>> & points)
 {
   Scalar min_dist = std::numeric_limits<Scalar>::max();
   Point<dim,Scalar> closest;
@@ -139,6 +139,27 @@ find_closest(const Point<dim,Scalar> & point,
     }
   }
   return closest;
+}
+
+
+template<int dim, typename Scalar>
+std::size_t
+find_closest_vertex(const Point<dim,Scalar>              & point,
+                    const std::vector<Point<dim,Scalar>> & all_vertices,
+                    const std::vector<std::size_t>       & subset)
+{
+  Scalar min_dist = std::numeric_limits<Scalar>::max();
+  std::size_t closest_index = 0;
+  for (const std::size_t i : subset)
+  {
+    const Scalar current_dist = point.distance(all_vertices[i]);
+    if (current_dist < min_dist)
+    {
+      min_dist = current_dist;
+      closest_index = i;
+    }
+  }
+  return closest_index;
 }
 
 }

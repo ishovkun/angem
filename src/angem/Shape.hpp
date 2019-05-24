@@ -1,6 +1,7 @@
 #pragma once
 
 #include "angem/Point.hpp"
+#include "angem/utils.hpp"
 
 #include <limits>
 #include <iostream>
@@ -14,7 +15,7 @@ class Shape
    public:
     // constructors
     Shape();
-    Shape(const std::vector<const Point<3,Scalar>> & point_list);
+    Shape(const std::vector<Point<3,Scalar>> & point_list);
     Shape(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
           const std::vector<std::size_t>     & indices);
     // setters
@@ -43,7 +44,7 @@ Shape<Scalar>::Shape()
 
 
 template<typename Scalar>
-Shape<Scalar>::Shape(const std::vector<const Point<3,Scalar>> & point_list)
+Shape<Scalar>::Shape(const std::vector<Point<3,Scalar>> & point_list)
     :
     points(point_list)
 {}

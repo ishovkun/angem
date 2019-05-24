@@ -1,5 +1,5 @@
 #pragma once
-#include "Point.hpp"
+#include "angem/Point.hpp"
 
 #include <unordered_map>
 #include <algorithm>
@@ -11,9 +11,10 @@
 // #else
 // #include "uint256/uint128_t.h"
 
+// #ifndef WIN32  // windows platform
+
 namespace angem
 {
-#ifndef WIN32  // windows platform
 
 #ifdef USE_BOOST
 using pset_hash_type = boost::multiprecision::uint128_t;
@@ -31,11 +32,11 @@ using pset_hash_type = __int128;
  * Note: I use 128-bit ints and doubles for this calculations
  * might be redundant
  */
-
 template<int dim, typename Scalar>
 class PointSet
 {
  public:
+  // create a point set with the tolerance tol
   PointSet(const double tol = 1e-6);
   // search for point in set and append if not found.
   // returns point index in set
@@ -213,6 +214,7 @@ pset_hash_type PointSet<dim,Scalar>::hash_value(const Point<dim,Scalar> &p) cons
   return result;
 }
 
-#endif
 
 }  // end namespace
+
+// #endif  // win32

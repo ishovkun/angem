@@ -44,9 +44,9 @@ compute_center_mass(const std::vector<Point<dim,Scalar> *> & points)
 // this function is O(n²)
 template<int dim, typename Scalar>
 void
-remove_duplicates(const std::vector<Point<dim,Scalar>> & points,
-                  std::vector<Point<dim,Scalar>>       & result,
-                  const double                           tolerance = 0)
+remove_duplicates_slow(const std::vector<Point<dim,Scalar>> & points,
+                       std::vector<Point<dim,Scalar>>       & result,
+                       const double                           tolerance = 0)
 {
   // returns result vector that contains only unique entries of points vector
   // two points are considered duplicate if the distance between them is

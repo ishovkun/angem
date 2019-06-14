@@ -4,10 +4,10 @@
 #include "Plane.hpp"
 #include "Polygon.hpp"
 #include "Polyhedron.hpp"
-#include <Exceptions.hpp>
+#include "Exceptions.hpp"
 // #include "PolyGroup.hpp"
-#include <CollisionGJK.hpp>
-#include <utils.hpp>
+#include "CollisionGJK.hpp"
+#include "utils.hpp"
 
 
 /* This module contains various algorithms for simple shape intersections.
@@ -345,6 +345,49 @@ bool collision(const Line<3,Scalar>         & line,
 }
 
 
+// collision of a line segment with a polygon
+template <typename Scalar>
+bool collision(const Point<3,Scalar>        & p0,
+               const Point<3,Scalar>        & p1,
+               const Polygon<Scalar>        & poly,
+               std::vector<Point<3,Scalar>> & intersection,
+               const double                   tol = 1e-10)
+{
+  std::vector<Point<3,Scalar>> new_section;
+  if (poly.point_inside(p0, tol) && fabs(poly.plane.distance(p0)) < tol)
+  {
+    // std::cout << "beer: " << fabs(poly.plane.distance(p0)) <<std::endl << std::flush;
+    new_section.push_back(p0);
+  }
+  if (poly.point_inside(p1, tol) && fabs(poly.plane.distance(p1)) < tol)
+  {
+    // std::cout << "beer1" << std::endl << std::flush;
+    new_section.push_back(p1);
+  }
+
+  if (new_section.empty())
+  {
+    const std::size_t ibegin = new_section.size();
+
+    collision(p0, p1,  poly.plane, new_section, tol);
+    for (std::size_t i=ibegin; i<new_section.size(); ++i)
+      if (!poly.point_inside(new_section[i], tol))
+        new_section.erase(new_section.begin() + i);
+  }
+
+  for (const auto & p : new_section)
+    intersection.push_back(p);
+
+  // if (!new_section.empty())
+    // std::cout << "newsect: "<< new_section << std::endl << std::flush;
+
+  if (new_section.empty())
+    return false;
+  else
+    return true;
+}
+
+
 // collision of a line segment with a polyhedron
 template <typename Scalar>
 bool collision(const Point<3,Scalar>        & l0,
@@ -376,7 +419,7 @@ bool collision(const Point<3,Scalar>        & l0,
           new_section.erase(new_section.begin() + i);
     }
 
-    remove_duplicates(new_section, tol);
+    remove_duplicates_slow(new_section, tol);
   }
 
   for (const auto & p : new_section)

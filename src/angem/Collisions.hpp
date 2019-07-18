@@ -5,6 +5,7 @@
 #include "Polygon.hpp"
 #include "Polyhedron.hpp"
 #include "Exceptions.hpp"
+#include "angem/utils.hpp"
 // #include "PolyGroup.hpp"
 #include "CollisionGJK.hpp"
 #include "utils.hpp"
@@ -419,7 +420,7 @@ bool collision(const Point<3,Scalar>        & l0,
           new_section.erase(new_section.begin() + i);
     }
 
-    remove_duplicates_slow(new_section, tol);
+    angem::remove_duplicates_slow(new_section, tol);
   }
 
   for (const auto & p : new_section)

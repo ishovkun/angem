@@ -61,6 +61,20 @@ remove_duplicates_slow(const std::vector<Point<dim,Scalar>> & points,
 }
 
 
+template<int dim, typename Scalar>
+std::vector<Point<dim,Scalar>>
+remove_duplicates_slow(const std::vector<Point<dim,Scalar>> & points,
+                       const double                           tolerance = 0)
+{
+  // returns result vector that contains only unique entries of points vector
+  // two points are considered duplicate if the distance between them is
+  // less than tolerance
+  std::vector<Point<dim,Scalar>> result;
+  remove_duplicates_slow(points, result, tolerance);
+  return result;
+}
+
+
 // remove duplicates (with tolerance) from the vector of points
 // this function is O(n)
 // template<int dim, typename Scalar>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Polyhedron.hpp>
-#include <Tetrahedron.hpp>
-#include <Exceptions.hpp>
+#include "angem/Polyhedron.hpp"
+#include "angem/Tetrahedron.hpp"
+#include "angem/Exceptions.hpp"
 
 /* Hexahedron vertex numbering:
 Hexahedron:             Hexahedron20:          Hexahedron27:

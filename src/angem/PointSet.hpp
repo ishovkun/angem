@@ -61,6 +61,7 @@ class PointSet
 
   // variables
   std::vector<Point<dim,Scalar>> points;
+
  private:
   pset_hash_type hash_value(const Point<dim,Scalar> &) const;
 

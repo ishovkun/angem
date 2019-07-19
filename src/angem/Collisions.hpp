@@ -432,4 +432,34 @@ bool collision(const Point<3,Scalar>        & l0,
     return true;
 }
 
+
+// implements ray casting algorithm
+// the surface doesn't have to be convex
+// the code doesn't guarantee that the surface is enclosed
+// NOTE: runtime is O(surface_vertices.size())
+template <typename Scalar>
+bool point_inside_surface(const Point<3,Scalar>        & point,  // point
+                          const Point<3,Scalar>        & external,  // external point
+                          const std::vector<angem::Point<3,double>>   & surface_vertices,
+                          const std::vector<std::vector<std::size_t>> & surface_elements)
+{
+  const angem::Shape<double> ray({point, external});
+
+  std::vector<angem::Point<3,double>> section_points;
+  int n_collisions = 0;  // if odd true else false
+
+  for (const auto & face_vertices : surface_elements)
+  {
+    const angem::Polygon<double> tria(surface_vertices,  face_vertices);
+    angem::collision(point, external, tria, section_points);
+  }
+
+  angem::PointSet<3, double> unique_points(1e-4);
+  for (const auto & p : section_points)
+    unique_points.insert(p);
+
+  // if odd return true
+  return (unique_points.size() % 2 == 1);
+}
+
 }  // end namespace

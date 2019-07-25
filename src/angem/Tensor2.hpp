@@ -21,14 +21,21 @@ class Tensor2
   // GETTERS
   inline T & operator()(const int i, const int j);
   inline const T & operator()(const int i, const int j) const;
+  inline T & operator()(const std::size_t i, const std::size_t j);
+  inline const T & operator()(const std::size_t i, const std::size_t j) const;
 
   // fuctions
+  // dot product with another tensor
   template<int d, typename Scalar>
   friend Tensor2<d,Scalar> product(const Tensor2<d,Scalar> & t1,
                                    const Tensor2<d,Scalar> & t2);
+  // dot product with a vector
   template<int d, typename Scalar>
   friend Point<d,Scalar> product(const Tensor2<d,Scalar> & t,
                                  const Point<d,Scalar>   & p);
+
+  // dot product with a vector
+  Point<dim,T> operator*(const Point<dim,T>   & p) const;
 
  private:
   // storage 2d array (2nd order tensor)
@@ -58,7 +65,15 @@ Tensor2<dim,T>::Tensor2(const std::vector<T> & v)
 template <int dim, typename T>
 T & Tensor2<dim,T>::operator()(const int i, const int j)
 {
-  assert(i > 0); assert(j > 0);
+  assert(i >= 0); assert(j >= 0);
+  assert(i < dim); assert(j < dim);
+  return storage[i][j];
+}
+
+
+template <int dim, typename T>
+T & Tensor2<dim,T>::operator()(const std::size_t i, const std::size_t j)
+{
   assert(i < dim); assert(j < dim);
   return storage[i][j];
 }
@@ -68,6 +83,14 @@ template <int dim, typename T>
 const T & Tensor2<dim,T>::operator()(const int i, const int j) const
 {
   assert(i > 0); assert(j > 0);
+  assert(i < dim); assert(j < dim);
+  return storage[i][j];
+}
+
+
+template <int dim, typename T>
+const T & Tensor2<dim,T>::operator()(const std::size_t i, const std::size_t j) const
+{
   assert(i < dim); assert(j < dim);
   return storage[i][j];
 }
@@ -96,6 +119,19 @@ Point<d,Scalar> product(const Tensor2<d,Scalar> & t,
   for (int i = 0; i < d; i++)
     for (int j = 0; j < d; j++)
       result[i] += t(i, j) * p(j);
+  return result;
+}
+
+
+template <int dim, typename T>
+Point<dim,T> Tensor2<dim,T>::operator*(const Point<dim,T>   & p) const
+{
+  Point<dim,T> result;
+
+  for (int i = 0; i < dim; i++)
+    for (int j = 0; j < dim; j++)
+      result[i] += storage[i][j] * p(j);
+  return result;
 }
 
 }  // end namespace

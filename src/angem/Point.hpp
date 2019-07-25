@@ -75,6 +75,7 @@ class Point
   void operator-=(const Scalar x);
   // component-wise multiplication
   void operator*=(const Scalar x);
+  // Point<dim,Scalar> operator*(const Scalar x);
   // component-wise division
   void operator/=(const Scalar x);
   // dot product
@@ -105,9 +106,22 @@ class Point
   friend Point<d, S> operator-(const Point<d,S> & p1,
                                const Point<d,S> & p2);
   // multiplication by number
-  template <int d, typename S1, typename S2>
-  friend Point<d, S1> operator*(const Point<d,S1> & p1,
-                                const S2          & x);
+  template <int d, typename S>
+  friend Point<d, S> operator*(const Point<d,S> & p1,
+                               const double       x);
+  // multiplication by number
+  template <int d, typename S>
+  friend Point<d, S> operator*(const double       x,
+                               const Point<d,S> & p1);
+  // multiplication by number
+  template <int d, typename S>
+  friend Point<d, S> operator*(const Point<d,S> & p1,
+                               const int       x);
+  // multiplication by number
+  template <int d, typename S>
+  friend Point<d, S> operator*(const int       x,
+                               const Point<d,S> & p1);
+
   // division by number
   template <int d, typename S1, typename S2>
   friend Point<d, S1> operator/(const Point<d,S1> & p1,
@@ -365,6 +379,14 @@ void Point<dim,Scalar>::operator*=(const Scalar x)
 }
 
 
+// template<int dim, typename Scalar>
+// Point<dim,Scalar> Point<dim,Scalar>::operator*(const Scalar x)
+// {
+//   for (int i=0; i<dim; ++i)
+//     coords[i] *= x;
+// }
+
+
 template<int dim, typename Scalar>
 void Point<dim,Scalar>::operator/=(const Scalar x)
 {
@@ -477,14 +499,38 @@ Point<dim, Scalar> operator-(const Point<dim, Scalar> & p1,
 }
 
 
-template<int dim, typename Scalar1, typename Scalar2>
-Point<dim, Scalar1> operator*(const Point<dim, Scalar1> & p1,
-                              const Scalar2             & x)
+template<int dim, typename Scalar>
+Point<dim, Scalar> operator*(const Point<dim, Scalar> & p1,
+                             const double               x)
 {
-  Point<dim, Scalar1> result;
+  Point<dim, Scalar> result;
   for (int i=0; i<dim; ++i)
-    result[i] = p1.coords[i] * static_cast<Scalar1>(x);
+    result[i] = p1.coords[i] * x;
   return result;
+}
+
+
+template<int dim, typename Scalar>
+Point<dim, Scalar> operator*(const double               x,
+                             const Point<dim, Scalar> & p1)
+{
+  return p1 * x;
+}
+
+
+template<int dim, typename Scalar>
+Point<dim, Scalar> operator*(const Point<dim, Scalar> & p1,
+                             const int               x)
+{
+  return p1 * static_cast<double>(x);
+}
+
+
+template<int dim, typename Scalar>
+Point<dim, Scalar> operator*(const int               x,
+                             const Point<dim, Scalar> & p1)
+{
+  return p1 * static_cast<double>(x);
 }
 
 
@@ -517,12 +563,12 @@ Scalar operator*(const Point<dim, Scalar> & p1,
 }
 
 
-template<int dim, typename Scalar1, typename Scalar2>
-Point<dim, Scalar1> operator*(const Scalar2             & x,
-                              const Point<dim, Scalar1> & p)
-{
-  return p * x;
-}
+// template<int dim, typename Scalar1, typename Scalar2>
+// Point<dim, Scalar1> operator*(const Scalar2             & x,
+//                               const Point<dim, Scalar1> & p)
+// {
+//   return p * x;
+// }
 
 
 template<int dim, typename Scalar>

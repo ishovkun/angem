@@ -44,6 +44,8 @@ class Polygon: public Shape<Scalar>
 
   // compute the area of the polygon
   Scalar area() const;
+  // compute the center of mass of the polygons
+  virtual Point<3,Scalar> center() const override;
   // helper function: get a vector of edges represented by pairs of vertex indices
   std::vector<Edge> get_edges() const;
 
@@ -236,14 +238,14 @@ Polygon<Scalar>::reorder_indices(const std::vector<Point<3, Scalar>> &verts,
 }
 
 
-// compute triangle area
-template<typename Scalar>
-Scalar area(const Point<3,Scalar> & p1,
-            const Point<3,Scalar> & p2,
-            const Point<3,Scalar> & p3)
-{
-  return 0;
-}
+// // compute triangle area
+// template<typename Scalar>
+// Scalar area(const Point<3,Scalar> & p1,
+//             const Point<3,Scalar> & p2,
+//             const Point<3,Scalar> & p3)
+// {
+//   return 0;
+// }
 
 
 template<typename Scalar>
@@ -330,6 +332,32 @@ Plane<Scalar> Polygon<Scalar>::get_side(const Edge & edge) const
                      this->points[edge.second],
                      point3);
   return side;
+}
+
+
+template<typename Scalar>
+Point<3,Scalar> Polygon<Scalar>::center() const
+{
+  Point<3,Scalar> u, v, n, c;
+  double poly_area = 0;
+
+  /* This essentially breaks the poly into triangles with
+   * vertices in points[0], points[j], points[j+1] */
+  for (std::size_t j=1; j<this->points.size()-1; j++)
+  {
+    /* compute normal and offset w from first 3 vertices */
+    // u and v are tangent vectors
+    u = this->points[j] - this->points[0];
+    v = this->points[j+1] - this->points[0];
+    // normal vector components (not normalized)
+    n = cross_product(u, v);
+    const double areatmp = 0.5 * n.norm();
+    c += areatmp/3 * (this->points[0] + this->points[j] + this->points[j+1]);
+    poly_area += areatmp;
+  }
+
+  c /= area;
+  return c;
 }
 
 }

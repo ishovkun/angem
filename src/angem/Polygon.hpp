@@ -339,7 +339,7 @@ template<typename Scalar>
 Point<3,Scalar> Polygon<Scalar>::center() const
 {
   Point<3,Scalar> u, v, n, c;
-  double poly_area = 0;
+  Scalar poly_area = 0;
 
   /* This essentially breaks the poly into triangles with
    * vertices in points[0], points[j], points[j+1] */
@@ -351,12 +351,12 @@ Point<3,Scalar> Polygon<Scalar>::center() const
     v = this->points[j+1] - this->points[0];
     // normal vector components (not normalized)
     n = cross_product(u, v);
-    const double areatmp = 0.5 * n.norm();
+    const Scalar areatmp = 0.5 * n.norm();
     c += areatmp/3 * (this->points[0] + this->points[j] + this->points[j+1]);
     poly_area += areatmp;
   }
 
-  c /= area;
+  c /= poly_area;
   return c;
 }
 

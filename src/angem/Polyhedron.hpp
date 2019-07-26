@@ -26,10 +26,12 @@ class Polyhedron: public Shape<Scalar>
   // getters
   int id() const {return vtk_id;}
   virtual Scalar volume() const;
+  virtual Point<3,Scalar> center() const override;
   bool point_inside(const Point<3,Scalar> & p) const;
 
   const std::vector<std::vector<std::size_t>> & get_faces() const;
   std::vector<std::vector<std::size_t>> & get_faces();
+  std::vector<Polygon<Scalar>> get_face_polygons() const;
 
 
  protected:
@@ -102,7 +104,7 @@ Polyhedron<Scalar>::get_faces() const
 template<typename Scalar>
 Scalar Polyhedron<Scalar>::volume() const
 {
-  const Point<3,Scalar> c = this->center();
+  const Point<3,Scalar> c = Shape<Scalar>::center();
   Scalar vol = 0;
   for (const auto & face_indices : get_faces())
   {
@@ -113,6 +115,14 @@ Scalar Polyhedron<Scalar>::volume() const
   }
   return vol;
 }
+
+
+// template<typename Scalar>
+// Scalar Polyhedron<Scalar>::center() const
+// {
+//   // center of mass of an arbitrary polyhedron is
+//   // not the same as the center of mass of the vertices!!!
+// }
 
 // template<typename Scalar>
 // Scalar Polyhedron<Scalar>::volume() const
@@ -207,5 +217,47 @@ std::ostream &operator<<(std::ostream             & os,
   return os;
 }
 
+template<typename Scalar>
+std::vector<Polygon<Scalar>> Polyhedron<Scalar>::get_face_polygons() const
+{
+  std::vector<Polygon<Scalar>> polys;
+  for (const auto & face_indices : get_faces())
+    polys.emplace_back(this->points, face_indices);
+  return polys;
+}
+
+
+template<typename Scalar>
+Point<3,Scalar> Polyhedron<Scalar>::center() const
+{
+  /* Polyhedron center of mass is not the same as the
+   * mass center of vertices!!!
+   * Algorithm: split polyhedron into pyramids (we know their volume),
+   * we also know their center of mass so we're good. */
+
+  const auto faces = get_face_polygons();
+  Point<3,Scalar> face_center_mass;
+  for (const auto & face : faces)
+    face_center_mass += face.center();
+  face_center_mass /= faces.size();
+
+  Point<3,Scalar> c;  // polyhedron center mass
+  Scalar vol = 0;
+  for (const auto & face : faces)
+  {
+    const auto face_center = face.center();
+    const Scalar h = face.plane.normal().dot( face_center - face_center_mass );
+    const Scalar volumetmp = fabs(h * face.area()) / 3.;
+
+    if (std::isnan(volumetmp))
+      throw std::runtime_error("invalid polyhedron volume");
+
+    c += (face_center + 0.25*(face_center_mass - face_center))*volumetmp;
+    vol += volumetmp;
+  }
+
+  c /= vol;
+  return c;
+}
 
 }  // end namespace

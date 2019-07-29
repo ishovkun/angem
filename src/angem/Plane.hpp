@@ -140,8 +140,7 @@ void Plane<Scalar>::set_data(const Point<3,Scalar> & p1,
                              const Point<3,Scalar> & p2,
                              const Point<3,Scalar> & p3)
 {
-  // assert(p1 != p2 and p2 != p3 and p1 != p3);
-  if (p1 != p2 and p2 != p3 and p1 != p3)
+  if (p1 == p2 || p2 == p3 || p1 == p3)
     throw std::invalid_argument("Duplicated points while initializing plane");
 
   point = p1;

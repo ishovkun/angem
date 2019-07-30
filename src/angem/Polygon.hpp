@@ -97,7 +97,7 @@ Polygon<Scalar>::Polygon(const PointSet<3,Scalar>           & all_mesh_vertices,
 {
   assert(indices.size() > 2);
   std::vector<Point<3,Scalar>> point_list;
-  for (const std::size_t & i : indices)
+  for (const std::size_t i : indices)
     point_list.push_back(all_mesh_vertices[i]);
   set_data(point_list);
 }

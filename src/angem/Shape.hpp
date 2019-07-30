@@ -62,7 +62,7 @@ template<typename Scalar>
 Shape<Scalar>::Shape(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
                      const std::vector<std::size_t>     & indices)
 {
-  for (const std::size_t & i : indices)
+  for (const std::size_t i : indices)
     points.push_back(all_mesh_vertices[i]);
 }
 

@@ -17,14 +17,39 @@ class Tensor2
   Tensor2();
   // create point from std::vector
   Tensor2(const std::vector<T> & v);
-
+  // create a unit tensor
+  static Tensor2<dim,T> make_unit_tensor();
   // GETTERS
   inline T & operator()(const int i, const int j);
   inline const T & operator()(const int i, const int j) const;
   inline T & operator()(const std::size_t i, const std::size_t j);
   inline const T & operator()(const std::size_t i, const std::size_t j) const;
 
-  // fuctions
+  // dot product with a vector
+  Point<dim,T> operator*(const Point<dim,T>   & p) const;
+  // inline component multiply by a scalar
+  void operator*=(const T & x);
+  // inline component divide by a scalar
+  void operator/=(const T & x);
+
+  //  FRIEND FUNCTIONS
+  // left dot product
+  template<int d, typename Scalar>
+  friend Point<d,Scalar> operator*(const Point<d,Scalar>   & p,
+                                   const Tensor2<d,Scalar> & t);
+  // component-wise product with a scalar
+  template<int d, typename Scalar>
+  friend Tensor2<d,Scalar> operator*(const Scalar            & x,
+                                     const Tensor2<d,Scalar> & t);
+  // component-wise multiply by a scalar
+  template<int d, typename Scalar>
+  friend Tensor2<d,Scalar> operator*(const Tensor2<d,Scalar> & t,
+                                     const Scalar            & x);
+  // component-wise divide by a scalar
+  template<int d, typename Scalar>
+  friend Tensor2<d,Scalar> operator/(const Tensor2<d,Scalar> & t,
+                                     const Scalar            & x);
+
   // dot product with another tensor
   template<int d, typename Scalar>
   friend Tensor2<d,Scalar> product(const Tensor2<d,Scalar> & t1,
@@ -34,8 +59,6 @@ class Tensor2
   friend Point<d,Scalar> product(const Tensor2<d,Scalar> & t,
                                  const Point<d,Scalar>   & p);
 
-  // dot product with a vector
-  Point<dim,T> operator*(const Point<dim,T>   & p) const;
 
  private:
   // storage 2d array (2nd order tensor)
@@ -63,6 +86,18 @@ Tensor2<dim,T>::Tensor2(const std::vector<T> & v)
 
 
 template <int dim, typename T>
+Tensor2<dim,T>
+Tensor2<dim,T>::make_unit_tensor()
+{
+  Tensor2<dim,T> ut;
+  for (int i = 0; i < dim; i++)
+    ut(i, i) = 1;
+  return ut;
+}
+
+
+
+template <int dim, typename T>
 T & Tensor2<dim,T>::operator()(const int i, const int j)
 {
   assert(i >= 0); assert(j >= 0);
@@ -82,7 +117,7 @@ T & Tensor2<dim,T>::operator()(const std::size_t i, const std::size_t j)
 template <int dim, typename T>
 const T & Tensor2<dim,T>::operator()(const int i, const int j) const
 {
-  assert(i > 0); assert(j > 0);
+  assert(i >= 0); assert(j >= 0);
   assert(i < dim); assert(j < dim);
   return storage[i][j];
 }
@@ -131,6 +166,69 @@ Point<dim,T> Tensor2<dim,T>::operator*(const Point<dim,T>   & p) const
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
       result[i] += storage[i][j] * p(j);
+  return result;
+}
+
+
+template <int dim, typename T>
+void Tensor2<dim,T>::operator*=(const T & x)
+{
+  for (int i = 0; i < dim; i++)
+    for (int j = 0; j < dim; j++)
+      storage[i][j] *= x;
+}
+
+
+template <int dim, typename T>
+void Tensor2<dim,T>::operator/=(const T & x)
+{
+  for (int i = 0; i < dim; i++)
+    for (int j = 0; j < dim; j++)
+      storage[i][j] /= x;
+}
+
+//    left dot product
+template <int dim, typename T>
+Point<dim,T> operator*(const Point<dim,T>   & p,
+                       const Tensor2<dim,T> & t)
+{
+  Point<dim,T> result;
+
+  for (int i = 0; i < dim; i++)
+    for (int j = 0; j < dim; j++)
+      result[j] += p(i) * t.storage[i][j];
+  return result;
+
+}
+
+
+template<int d, typename Scalar>
+Tensor2<d,Scalar> operator*(const Tensor2<d,Scalar> & t,
+                            const Scalar            & x)
+{
+  auto result = t;
+  for (int i = 0; i < d; i++)
+    for (int j = 0; j < d; j++)
+      result *= x;
+  return result;
+}
+
+template<int d, typename Scalar>
+Tensor2<d,Scalar> operator*(const Scalar            & x,
+                            const Tensor2<d,Scalar> & t)
+{
+  return operator*(t, x);
+}
+
+
+template<int d, typename Scalar>
+Tensor2<d,Scalar> operator/(const Tensor2<d,Scalar> & t,
+                            const Scalar            & x)
+{
+  auto result = t;
+  for (int i = 0; i < d; i++)
+    for (int j = 0; j < d; j++)
+      result /= x;
   return result;
 }
 

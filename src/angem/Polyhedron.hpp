@@ -28,6 +28,8 @@ class Polyhedron: public Shape<Scalar>
   virtual Scalar volume() const;
   virtual Point<3,Scalar> center() const override;
   bool point_inside(const Point<3,Scalar> & p) const;
+  bool point_on_boundary(const Point<3,Scalar> & p,
+                         const double tolerance = 1e-4) const;
 
   const std::vector<std::vector<std::size_t>> & get_faces() const;
   std::vector<std::vector<std::size_t>> & get_faces();
@@ -187,7 +189,7 @@ template<typename Scalar>
 bool Polyhedron<Scalar>::point_inside(const Point<3,Scalar> & p) const
 {
   const Point<3,Scalar> c = this->center();
-  for (const auto face : faces)
+  for (const auto & face : faces)
   {
     Plane<Scalar> plane(this->points[face[0]],
                         this->points[face[1]],
@@ -196,6 +198,20 @@ bool Polyhedron<Scalar>::point_inside(const Point<3,Scalar> & p) const
       return false;
   }
   return true;
+}
+
+
+template<typename Scalar>
+bool Polyhedron<Scalar>::point_on_boundary(const Point<3,Scalar> & p,
+                                           const double tolerance) const
+{
+  for (const auto & face : faces)
+  {
+    Plane<Scalar> plane(this->points[face[0]], this->points[face[1]], this->points[face[2]]);
+    if (plane.distance(p) < tolerance)
+      return true;
+  }
+  return false;
 }
 
 

@@ -11,6 +11,8 @@
 namespace angem
 {
 
+using Edge = std::pair<std::size_t, std::size_t>;
+
 template<typename Scalar>
 class Polyhedron: public Shape<Scalar>
 {
@@ -35,6 +37,7 @@ class Polyhedron: public Shape<Scalar>
   std::vector<std::vector<std::size_t>> & get_faces();
   std::vector<Polygon<Scalar>> get_face_polygons() const;
 
+  std::vector<Edge> get_edges() const;
 
  protected:
   std::vector<std::vector<std::size_t>> faces;
@@ -275,5 +278,32 @@ Point<3,Scalar> Polyhedron<Scalar>::center() const
   c /= vol;
   return c;
 }
+
+
+template<typename Scalar>
+std::vector<Edge> Polyhedron<Scalar>::get_edges() const
+{
+  std::vector<Edge> edges;
+  for (const std::vector<size_t> & face : faces)
+    for (std::size_t i = 0; i < face.size(); ++i)
+    {
+      std::size_t i1, i2;
+      if (i < face.size() - 1)
+      {
+        i1 = face[ i ];
+        i2 = face[i + 1];
+      }
+      else
+      {
+        i1 = face[i];
+        i2 = face[ 0 ];
+      }
+      auto edge = std::minmax(i1, i2);
+      if (std::find( edges.begin(), edges.end(), edge ) == edges.end())
+        edges.push_back( std::move(edge) );
+    }
+  return edges;
+}
+
 
 }  // end namespace

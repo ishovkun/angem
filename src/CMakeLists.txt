@@ -4,6 +4,7 @@
 # but it works muuuch faster with it
 ADD_LIBRARY(angem SHARED
   angem/PointSet.cpp
+  angem/QuickHull.cpp
 )
 
 SET_TARGET_PROPERTIES (

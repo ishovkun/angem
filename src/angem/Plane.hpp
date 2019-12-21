@@ -97,7 +97,15 @@ Plane<Scalar>::Plane(const Point<3,Scalar> & point,
     :
     point(point)
 {
-  assert(fabs(normal.norm() - 1) < 1e-12);
+#ifdef DEBUG_BUILD
+  if (fabs(normal.norm() - 1) > 1e-12)
+  {
+    std::cout << "normal = " << normal << std::endl;
+    std::cout << "norm = " << normal.norm() << std::endl;
+    throw std::invalid_argument( "normal length should be 1" );
+  }
+#endif
+
   compute_basis(normal);
   compute_algebraic_coeff();
 }
@@ -140,16 +148,17 @@ void Plane<Scalar>::set_data(const Point<3,Scalar> & p1,
                              const Point<3,Scalar> & p2,
                              const Point<3,Scalar> & p3)
 {
+#ifndef NDEBUG
   if (p1 == p2 || p2 == p3 || p1 == p3)
-  {
-    std::cout << "pos" << p1 << " | "  << p2 << " | " <<p3 << std::endl;
     throw std::invalid_argument("Duplicated points while initializing plane");
-  }
+  if ( (( p2 - p1 ).cross(p3 - p2)).norm() < 1e-6 )
+    throw std::invalid_argument("Initializing plane with colinear vectors");
+#endif
 
   point = p1;
   // define two tangent vectors
-  const Point<3> t1 = p1 - p2;
-  const Point<3> t2 = p1 - p3;
+  const Point<3,Scalar> t1 = p1 - p2;
+  const Point<3,Scalar> t2 = p1 - p3;
   Point<3,Scalar> normal = cross(t1, t2);
   normal.normalize();
 

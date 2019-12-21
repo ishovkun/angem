@@ -469,8 +469,9 @@ Scalar Point<dim,Scalar>::norm() const
 template<int dim, typename Scalar>
 Point<dim,Scalar> & Point<dim,Scalar>::normalize()
 {
-  Scalar nor = norm();
-  assert (std::isfinite(static_cast<Scalar>(1) / nor));
+  const Scalar nor = norm();
+  if (!std::isfinite(static_cast<Scalar>(1) / nor))
+    throw std::invalid_argument("cannot normalize zero vector");
   for (int i=0; i<dim; ++i)
     coords[i] /= nor;
   return *this;

@@ -297,6 +297,20 @@ void split(const Polygon<Scalar> & poly,
   }
 }
 
+// marks polygons above fracture as 1
+// polygons below fracture as 0
+template <typename Scalar>
+void split(const Polyhedron<Scalar> & polyhedron,
+           const Plane<Scalar>      & plane,
+           PolyGroup<Scalar>        & result,
+           const int                  marker_below = 0,
+           const int                  marker_above = 1)
+{
+  for (const Polygon<Scalar> & face : polyhedron.get_face_polygons())
+  {
+    split<Scalar>(face, plane, result, marker_below, marker_above);
+  }
+}
 
 // throws std::runtime_error
 template <typename Scalar>

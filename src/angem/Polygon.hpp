@@ -58,6 +58,7 @@ class Polygon: public Shape<Scalar>
   // order indices vector so that the corresponding points are in a clockwise fashiok
   static  void reorder_indices(const std::vector<Point<3, Scalar>> &verts,
                                std::vector<std::size_t>            &indices);
+  angem::Point<3,double> normal() const { return plane.normal(); }
 
   // Attributes
   Plane<Scalar> plane;

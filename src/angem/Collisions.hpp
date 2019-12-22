@@ -40,9 +40,9 @@ bool collision(const Plane<Scalar> & pl1,
    Thus the planes P1, P2 and P3 intersect in a unique point P0 which must be on L.
    Using the formula for the intersection of 3 planes,
    where d3 = 0 for P3, we get:
-        (d2 n1 - d1 n2) x n3
+        (d2 n1 - d1 n2) × n3
    p3 = --------------------
-           (n1 x n2) · n3
+           (n1 × n2) · n3
    Ref:
    http://geomalgorithms.com/a05-_intersect-1.html
   */
@@ -52,7 +52,6 @@ bool collision(const Plane<Scalar> & pl1,
   if (n3.norm() < 1e-16)
     return false;
   n3.normalize();
-
 
   intersection.direction = n3;
 
@@ -64,9 +63,7 @@ bool collision(const Plane<Scalar> & pl1,
 
   Point<3,Scalar> numerator = (d2*n1 - d1*n2).cross(n3);
   Scalar denumenator = (n1.cross(n2)).dot(n3);
-
   intersection.point = numerator / denumenator;
-
   return true;
 }
 
@@ -241,7 +238,7 @@ void split(const Polygon<Scalar> & poly,
   std::vector<Point<3,Scalar>> section;
   collision(poly, plane, section);
 
-  if (section.size() == 0)
+  if (section.empty())  // everythin either above or below
   {
     std::vector<std::size_t> indices;
     bool above = false;
@@ -266,7 +263,6 @@ void split(const Polygon<Scalar> & poly,
   }
 
   std::vector<std::size_t> above, below;
-
   for (const auto p : poly.get_points())
   {
     const std::size_t ind = result.vertices.insert(p);
@@ -274,7 +270,6 @@ void split(const Polygon<Scalar> & poly,
       above.push_back(ind);
     else
       below.push_back(ind);
-
   }
 
   for (Point<3,Scalar> & p : section)
@@ -283,7 +278,6 @@ void split(const Polygon<Scalar> & poly,
     above.push_back(ind);
     below.push_back(ind);
   }
-
 
   if (above.size() > 2)
   {
@@ -304,15 +298,29 @@ void split(const Polyhedron<Scalar> & polyhedron,
            const Plane<Scalar>      & plane,
            PolyGroup<Scalar>        & result,
            const int                  marker_below = 0,
-           const int                  marker_above = 1)
+           const int                  marker_above = 1,
+           const int                  marker_split = 2)
 {
   for (const Polygon<Scalar> & face : polyhedron.get_face_polygons())
-  {
     split<Scalar>(face, plane, result, marker_below, marker_above);
-  }
+
+  // add a polygon that represents the intersection
+  std::vector<size_t> section_poly_verts;
+  const std::vector<Point<3,double>> poly_vertices;
+  section_poly_verts.reserve(result.vertices.size() - poly_vertices.size());
+  const double h = poly_vertices[1].distance(poly_vertices[0]);
+  for (size_t i = 0; i < result.vertices.size(); i++)
+    if (plane.distance(result.vertices[i]) < 1e-4 * h)  // on the plane
+      section_poly_verts.push_back(i);
+  // sort vertices so they form a polygon
+  Polygon<Scalar>::reorder_indices( result.vertices.points,
+                                    section_poly_verts );
+  result.polygons.push_back( std::move(section_poly_verts) );
+  result.markers.push_back( marker_split );
 }
 
-// throws std::runtime_error
+// Compute the intersection  of a line and a plane
+//  throws std::runtime_error
 template <typename Scalar>
 bool collision(const Line<3,Scalar> & line,
                const Plane<Scalar>  & plane,

@@ -203,8 +203,8 @@ bool collision(const Point<3,Scalar>        & l0,
   // segment : l0, l1
   // intersection: d = (p0 - l0) · n / (l · n)
   // call collision of all edges
-  const Scalar d1 = plane.distance(l0);
-  const Scalar d2 = plane.distance(l1);
+  const Scalar d1 = plane.signed_distance(l0);
+  const Scalar d2 = plane.signed_distance(l1);
 
   // both points are on the plane
   if (fabs(d1) + fabs(d2) < tol)
@@ -306,17 +306,27 @@ void split(const Polyhedron<Scalar> & polyhedron,
 
   // add a polygon that represents the intersection
   std::vector<size_t> section_poly_verts;
-  const std::vector<Point<3,double>> poly_vertices;
+  // vertices of the polyhedron
+  const std::vector<Point<3,double>> & poly_vertices = polyhedron.get_points();
+  assert( poly_vertices.size() > 2 );
+  // number of points in intersecting polygon is equal to the total number of points
+  // in the split minus the number of vertices in the polyhedron
   section_poly_verts.reserve(result.vertices.size() - poly_vertices.size());
+  // element size
   const double h = poly_vertices[1].distance(poly_vertices[0]);
+  // figure out which points lie on the plane
   for (size_t i = 0; i < result.vertices.size(); i++)
-    if (plane.distance(result.vertices[i]) < 1e-4 * h)  // on the plane
+    if (std::fabs(plane.signed_distance(result.vertices[i])) < 1e-4 * h)
       section_poly_verts.push_back(i);
-  // sort vertices so they form a polygon
-  Polygon<Scalar>::reorder_indices( result.vertices.points,
-                                    section_poly_verts );
-  result.polygons.push_back( std::move(section_poly_verts) );
-  result.markers.push_back( marker_split );
+  // postprocessing: create a polygon from the points
+  if (!section_poly_verts.empty())
+  {
+    // sort vertices so they form a polygon
+    Polygon<Scalar>::reorder_indices(result.vertices.points, section_poly_verts);
+    result.polygons.push_back(std::move(section_poly_verts));
+    result.markers.push_back(marker_split);
+  }
+
 }
 
 // Compute the intersection  of a line and a plane

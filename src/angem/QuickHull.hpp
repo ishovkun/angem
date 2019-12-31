@@ -185,7 +185,7 @@ namespace angem {
 	bool QuickHull<T>::addPointToFace(typename MeshBuilder<T>::Face& f, IndexType pointIndex) {
 		// const T D = mathutils::getSignedDistanceToPlane(m_vertexData[ pointIndex ],
 		// 												f.m_P);
-		const T D = f.m_P.distance( m_vertexData[ pointIndex ] );
+		const T D = f.m_P.signed_distance( m_vertexData[ pointIndex ] );
 		// if (D > 0 && D*D > m_epsilonSquared*f.m_P.m_sqrNLength) {
 		if (D > 0 && D > m_epsilonSquared*f.m_P.normal().norm()) {
 			if (!f.m_pointsOnPositiveSide) {

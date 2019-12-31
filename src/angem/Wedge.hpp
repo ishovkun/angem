@@ -124,7 +124,7 @@ Scalar Wedge<Scalar>::volume() const
   const auto b = pts[1].distance(pts[2]);
   const auto c = pts[0].distance(pts[3]);
   const Plane<Scalar> pln(pts[1], pts[2], pts[4]);
-  const auto h = fabs(pln.distance(pts[0]));
+  const auto h = fabs(pln.signed_distance(pts[0]));
   return b*h/3. * (a + c/2);
 }
 

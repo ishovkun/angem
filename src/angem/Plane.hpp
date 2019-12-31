@@ -63,9 +63,8 @@ class Plane
   Point<3,Scalar> local_coordinates(const Point<3,Scalar> & p) const;
   // project vector (no account for plane location)
   Point<3,Scalar> project_vector(const Point<3,Scalar> & p) const;
-
   // signed distance from point to plane (> 0 if point is above plane)
-  Scalar distance(const Point<3,Scalar> & p) const;
+  Scalar signed_distance(const Point<3,Scalar> & p) const;
 
   // true if point is above the plane
   bool above(const Point<3,Scalar> & p) const;
@@ -187,7 +186,7 @@ void Plane<Scalar>::compute_algebraic_coeff()
 
 
 template <typename Scalar>
-Scalar Plane<Scalar>::distance(const Point<3,Scalar> & p) const
+Scalar Plane<Scalar>::signed_distance(const Point<3,Scalar> & p) const
 {
   /* dot product of point by perpendicular vector:
    * if < 0: point is below the plane
@@ -204,7 +203,7 @@ Scalar Plane<Scalar>::distance(const Point<3,Scalar> & p) const
 template <typename Scalar>
 bool Plane<Scalar>::above(const Point<3,Scalar> & p) const
 {
-  if (distance(p) > 0)
+  if (signed_distance(p) > 0)
     return true;
   else
     return false;

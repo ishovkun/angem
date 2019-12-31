@@ -164,7 +164,7 @@ namespace angem {
                     const Plane<T>& P = pvf.m_P;
                     pvf.m_visibilityCheckedOnIteration = iter;
                     // const T d = P.m_N.dotProduct(activePoint)+P.m_D;
-                    const T d = P.normal().dot( activePoint ) + P.distance({0,0,0});
+                    const T d = P.normal().dot( activePoint ) + P.signed_distance({0,0,0});
                     if (d > 0) {
                         pvf.m_isVisibleFaceOnCurrentIteration = 1;
                         pvf.m_horizonEdgesOnCurrentIteration = 0;
@@ -484,7 +484,7 @@ namespace angem {
         Plane<T> trianglePlane(baseTriangleVertices[0], baseTriangleVertices[1], baseTriangleVertices[2]);
         for (size_t i = 0; i < vCount; i++) {
             // const T d = std::abs(mathutils::getSignedDistanceToPlane(m_vertexData[i],trianglePlane));
-            const T d = std::abs( trianglePlane.distance( m_vertexData[i] ) );
+            const T d = std::abs( trianglePlane.signed_distance( m_vertexData[i] ) );
             if (d > maxD) {
                 maxD = d;
                 maxI = i;

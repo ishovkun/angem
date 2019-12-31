@@ -58,10 +58,13 @@ class Polygon: public Shape<Scalar>
   // order indices vector so that the corresponding points are in a clockwise fashiok
   static  void reorder_indices(const std::vector<Point<3, Scalar>> &verts,
                                std::vector<std::size_t>            &indices);
-  angem::Point<3,double> normal() const { return plane.normal(); }
+  angem::Point<3,double> normal() const { return plane().normal(); }
+  inline const Plane<Scalar> & plane() const { return m_plane; }
+  inline Plane<Scalar> & plane() { return m_plane; }
 
+ protected:
   // Attributes
-  Plane<Scalar> plane;
+  Plane<Scalar> m_plane;
 };
 
 
@@ -125,9 +128,9 @@ Polygon<Scalar>::set_data(const std::vector<Point<3,Scalar>> & point_list)
      as the center of mass. So i need to do only one check
   */
   if ( ((point_list[0] - cm).cross(point_list[1] - cm)).norm() > 1e-16 )
-    plane.set_data(cm, point_list[0], point_list[1]);
+    plane().set_data(cm, point_list[0], point_list[1]);
   else
-    plane.set_data(cm, point_list[0], point_list[2]);
+    plane().set_data(cm, point_list[0], point_list[2]);
 
   reorder(this->points);
 
@@ -139,7 +142,7 @@ void
 Polygon<Scalar>::move(const Point<3,Scalar> & p)
 {
   Shape<Scalar>::move(p);
-  plane.move(p);
+  plane().move(p);
 }
 
 
@@ -303,12 +306,12 @@ template<typename Scalar>
 bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
                                    const Scalar             tol) const
 {
-  if ( this->plane.distance(p) > tol )
+  if ( this->plane().distance(p) > tol )
     return false;
 
   const auto & points = this->points;
   const Point<3,Scalar> cm = this->center();
-  const Point<3,Scalar> n = this->plane.normal();
+  const Point<3,Scalar> n = this->plane().normal();
   for (const auto & edge : get_edges())
   {
     Plane<Scalar> side = get_side(edge);
@@ -327,7 +330,7 @@ Plane<Scalar> Polygon<Scalar>::get_side(const Edge & edge) const
     throw std::out_of_range("Edge does not exist");
 
   Point<3,Scalar> point3 =
-      this->points[edge.first] + plane.normal() * (this->points[edge.first] -
+      this->points[edge.first] + m_plane.normal() * (this->points[edge.first] -
                                                    this->points[edge.second]).norm();
   Plane<Scalar> side(this->points[edge.first],
                      this->points[edge.second],

@@ -115,7 +115,7 @@ Scalar Polyhedron<Scalar>::volume() const
   {
     const auto face_poly = Polygon<Scalar>(this->points, face_indices);
     const Scalar face_area = face_poly.area();
-    const Scalar h = c.distance(face_poly.plane.project_point(c));
+    const Scalar h = c.distance(face_poly.plane().project_point(c));
     vol += 1./3. * h * face_area;
   }
   return vol;
@@ -265,7 +265,7 @@ Point<3,Scalar> Polyhedron<Scalar>::center() const
   for (const auto & face : faces)
   {
     const auto face_center = face.center();
-    const Scalar h = face.plane.normal().dot( face_center - face_center_mass );
+    const Scalar h = face.plane().normal().dot( face_center - face_center_mass );
     const Scalar volumetmp = fabs(h * face.area()) / 3.;
 
     if (std::isnan(volumetmp))

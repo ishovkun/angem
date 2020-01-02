@@ -17,6 +17,8 @@ class Tensor2
   Tensor2();
   // create point from std::vector
   Tensor2(const std::vector<T> & v);
+  // returns dim * dim
+  static size_t size() { return dim*dim; }
   // create a unit tensor
   static Tensor2<dim,T> make_unit_tensor();
   // GETTERS

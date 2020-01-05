@@ -40,7 +40,7 @@ class Polyhedron: public Shape<Scalar>
   std::vector<Edge> get_edges() const;
 
  protected:
-  std::vector<std::vector<std::size_t>> faces;
+  std::vector<std::vector<std::size_t>> m_faces;
   const int vtk_id;
 };
 
@@ -56,8 +56,7 @@ template<typename Scalar>
 Polyhedron<Scalar>::Polyhedron(const std::vector<Point<3,Scalar>>          & vertices,
                                const std::vector<std::vector<std::size_t>> & faces,
                                const int vtk_id)
-    :
-    vtk_id(vtk_id)
+    : vtk_id(vtk_id)
 {
   set_data(vertices, faces);
 }
@@ -69,22 +68,22 @@ Polyhedron<Scalar>::set_data(const std::vector<Point<3,Scalar>>          & verti
                              const std::vector<std::vector<std::size_t>> & faces)
 {
   assert(vertices.size() > 3);
-  this->faces.resize(faces.size());
+  m_faces.resize(faces.size());
 
   PointSet<3,Scalar> pset;
   std::size_t iface = 0;
   for (const auto & face : faces)
   {
-    this->faces[iface].reserve(face.size());
+    m_faces[iface].reserve(face.size());
     for(const auto ivert : face)
     {
       const Point<3,Scalar> p = vertices[ivert];
-      this->faces[iface].push_back(pset.insert(p));
+      m_faces[iface].push_back(pset.insert(p));
     }
     iface++;
   }
 
-  this->points.reserve(vertices.size());
+  this->points.reserve(pset.size());
   for (const auto & p : pset.points)
     this->points.push_back(p);
 }
@@ -94,7 +93,7 @@ template<typename Scalar>
 std::vector<std::vector<std::size_t>> &
 Polyhedron<Scalar>::get_faces()
 {
-  return faces;
+  return m_faces;
 }
 
 
@@ -102,7 +101,7 @@ template<typename Scalar>
 const std::vector<std::vector<std::size_t>> &
 Polyhedron<Scalar>::get_faces() const
 {
-  return faces;
+  return m_faces;
 }
 
 
@@ -192,7 +191,7 @@ template<typename Scalar>
 bool Polyhedron<Scalar>::point_inside(const Point<3,Scalar> & p) const
 {
   const Point<3,Scalar> c = this->center();
-  for (const auto & face : faces)
+  for (const auto & face : m_faces)
   {
     Plane<Scalar> plane(this->points[face[0]],
                         this->points[face[1]],
@@ -208,7 +207,7 @@ template<typename Scalar>
 bool Polyhedron<Scalar>::point_on_boundary(const Point<3,Scalar> & p,
                                            const double tolerance) const
 {
-  for (const auto & face : faces)
+  for (const auto & face : m_faces)
   {
     Plane<Scalar> plane(this->points[face[0]], this->points[face[1]], this->points[face[2]]);
     if (plane.distance(p) < tolerance)
@@ -284,7 +283,7 @@ template<typename Scalar>
 std::vector<Edge> Polyhedron<Scalar>::get_edges() const
 {
   std::vector<Edge> edges;
-  for (const std::vector<size_t> & face : faces)
+  for (const std::vector<size_t> & face : m_faces)
     for (std::size_t i = 0; i < face.size(); ++i)
     {
       std::size_t i1, i2;

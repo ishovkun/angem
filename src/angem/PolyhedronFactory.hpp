@@ -82,8 +82,7 @@ class PolyhedronFactory
 
   template<typename Scalar>
   static std::vector<std::vector<std::size_t>>
-  get_global_faces(const std::vector<std::size_t> & indices,
-                   const int  vtk_id)
+  get_global_faces(const std::vector<std::size_t> & indices, const int vtk_id)
   {
     switch (vtk_id)
     {

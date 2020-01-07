@@ -16,7 +16,7 @@ class Line
 {
  public:
   // Default constructor. creates an invalid line. Sometimes useful.
-  Line();
+  // Line();
   // Creates a line from a point and direction vectors
   Line(const Point<dim,Scalar> & point,
        const Point<dim,Scalar> & direction);
@@ -26,9 +26,9 @@ class Line
 };
 
 
-template <int dim, typename Scalar>
-Line<dim,Scalar>::Line()
-{}
+// template <int dim, typename Scalar>
+// Line<dim,Scalar>::Line()
+// {}
 
 
 template <int dim, typename Scalar>

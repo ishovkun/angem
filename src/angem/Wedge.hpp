@@ -74,12 +74,12 @@ Wedge<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)
   assert(vertices.size() == 6);
 
   this->points = vertices;
-  this->faces.resize(5);
-  this->faces[0] = {0, 1, 2};
-  this->faces[1] = {3, 4, 5};
-  this->faces[2] = {0, 3, 4, 1};
-  this->faces[3] = {1, 2, 5, 4};
-  this->faces[4] = {0, 3, 5, 2};
+  this->m_faces.resize(5);
+  this->m_faces[0] = {0, 1, 2};
+  this->m_faces[1] = {3, 4, 5};
+  this->m_faces[2] = {0, 3, 4, 1};
+  this->m_faces[3] = {1, 2, 5, 4};
+  this->m_faces[4] = {0, 3, 5, 2};
 }
 
 

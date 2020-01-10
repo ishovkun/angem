@@ -91,12 +91,12 @@ Pyramid<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices,
     counter++;
   }
 
-  this->faces.resize(5);
-  this->faces[0] = {0, 1, 2, 3};
-  this->faces[1] = {0, 4, 3};
-  this->faces[2] = {0, 1, 4};
-  this->faces[3] = {1, 4, 2};
-  this->faces[4] = {2, 3, 4};
+  this->m_faces.resize(5);
+  this->m_faces[0] = {0, 1, 2, 3};
+  this->m_faces[1] = {0, 4, 3};
+  this->m_faces[2] = {0, 1, 4};
+  this->m_faces[3] = {1, 4, 2};
+  this->m_faces[4] = {2, 3, 4};
 }
 
 

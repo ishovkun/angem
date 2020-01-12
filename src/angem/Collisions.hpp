@@ -103,14 +103,6 @@ bool collision(const Polygon<Scalar>        & poly1,
                std::vector<Point<3,Scalar>> & intersection,
                const double                   tol = 1e-10)
 {
-  // CollisionGJK<double> collision_gjk;
-  // if (!collision_gjk.check(poly1, poly2))
-  // {
-  //   std::cout << "no GJK" << std::endl;
-  //   return false;
-  // }
-  // std::cout << "yes GJK" << std::endl;
-
   if (poly1.plane.normal().parallel(poly2.plane.normal(), tol))
   {
     // 1. find vertices of each poly inside another
@@ -143,8 +135,6 @@ bool collision(const Polygon<Scalar>        & poly1,
       pset.points.clear();
       pset.points = pts1;
     }
-    // if (all_inside1 or all_inside2)
-    //   throw std::runtime_error("wtf");
 
     // 2.
     if ( !pset.empty() and !all_inside1 and !all_inside2 )
@@ -414,9 +404,6 @@ bool collision(const Point<3,Scalar>        & p0,
   for (const auto & p : new_section)
     intersection.push_back(p);
 
-  // if (!new_section.empty())
-    // std::cout << "newsect: "<< new_section << std::endl << std::flush;
-
   if (new_section.empty())
     return false;
   else
@@ -448,7 +435,7 @@ bool collision(const Point<3,Scalar>        & l0,
       const std::size_t ibegin = new_section.size();
 
       Polygon<Scalar> poly_face(points, face);
-      collision(l0, l1,  poly_face.plane, new_section, tol);
+      collision(l0, l1,  poly_face.plane(), new_section, tol);
 
       for (std::size_t i=ibegin; i<new_section.size(); ++i)
         if (!poly_face.point_inside(new_section[i], tol))

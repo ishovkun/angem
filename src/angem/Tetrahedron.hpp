@@ -75,11 +75,11 @@ Tetrahedron<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)
   assert(vertices.size() == 4);
 
   this->points = vertices;
-  this->faces.resize(4);
-  this->faces[0] = {0, 1, 3};
-  this->faces[1] = {1, 2, 3};
-  this->faces[2] = {0, 2, 3};
-  this->faces[3] = {0, 1, 2};
+  this->m_faces.resize(4);
+  this->m_faces[0] = {0, 1, 3};
+  this->m_faces[1] = {1, 2, 3};
+  this->m_faces[2] = {0, 2, 3};
+  this->m_faces[3] = {0, 1, 2};
 }
 
 

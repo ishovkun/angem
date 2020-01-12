@@ -147,7 +147,7 @@ class Point
 
 
  protected:
-  Scalar coords[dim];  // array of coordinate components
+  Scalar _storage[dim];  // array of coordinate components
 };
 
 
@@ -158,17 +158,16 @@ Point<dim,Scalar>::Point()
   static_assert(dim > 0 && dim <= 3,
                 "Only 1,2, and 3 dimensions are supported");
   for (int i=0; i<dim; ++i)
-    coords[i] = 0;
+    _storage[i] = 0;
 }
 
 
 template<int dim, typename Scalar>
 Point<dim,Scalar>::Point(const Point<dim, Scalar> & p)
 {
-  static_assert(dim > 0 && dim <= 3,
-                "Only 1,2, and 3 dimensions are supported");
+  static_assert(dim > 0 && dim <= 3, "Only 1,2, and 3 dimensions are supported");
   for (int i=0; i<dim; ++i)
-    coords[i] = p.coords[i];
+    _storage[i] = p._storage[i];
 }
 
 
@@ -179,7 +178,7 @@ Point<dim,Scalar>::Point(const std::vector<Scalar> & v)
                 "Only 1,2, and 3 dimensions are supported");
   assert(v.size() == dim);
   for (int i=0; i<dim; ++i)
-    coords[i] = v[i];
+    _storage[i] = v[i];
 }
 
 
@@ -189,7 +188,7 @@ void Point<dim,Scalar>::operator=(std::vector<Scalar> & v)
 {
   assert(v.size() == dim);
   for (int i=0; i<dim; ++i)
-    coords[i] = v[i];
+    _storage[i] = v[i];
 }
 
 
@@ -197,7 +196,7 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::clear()
 {
   for (int i=0; i<dim; ++i)
-    coords[i] = 0;
+    _storage[i] = 0;
 }
 
 
@@ -206,8 +205,8 @@ template<int dim, typename Scalar>
 Point<dim,Scalar>::Point(const Scalar x, const Scalar y)
 {
   static_assert(dim == 2, "Only 2d objects can be initialized this way");
-  this->coords[0] = x;
-  this->coords[1] = y;
+  this->_storage[0] = x;
+  this->_storage[1] = y;
 }
 
 
@@ -216,9 +215,9 @@ Point<dim,Scalar>::Point(const Scalar x, const Scalar y, const Scalar z)
 {
   static_assert(dim == 3,
                 "Only 3d objects can be initialized this way");
-  coords[0] = x;
-  coords[1] = y;
-  coords[2] = z;
+  _storage[0] = x;
+  _storage[1] = y;
+  _storage[2] = z;
 }
 
 
@@ -226,7 +225,7 @@ Point<dim,Scalar>::Point(const Scalar x, const Scalar y, const Scalar z)
 template<int dim, typename Scalar>
 Scalar Point<dim,Scalar>::x() const
 {
-  return coords[0];
+  return _storage[0];
 }
 
 
@@ -235,7 +234,7 @@ Scalar Point<dim,Scalar>::y() const
 {
   static_assert(dim > 1,
                 "1d objects have only one coordinate");
-  return coords[1];
+  return _storage[1];
 }
 
 
@@ -244,7 +243,7 @@ Scalar Point<dim,Scalar>::z() const
 {
   static_assert(dim == 3,
                 "Only 3D objects have z coordinate");
-  return coords[2];
+  return _storage[2];
 }
 
 
@@ -252,7 +251,7 @@ template<int dim, typename Scalar>
 Scalar Point<dim,Scalar>::operator() (int i) const
 {
   assert(i < dim);
-  return coords[i];
+  return _storage[i];
 }
 
 
@@ -260,7 +259,7 @@ template<int dim, typename Scalar>
 const Scalar & Point<dim,Scalar>::operator[] (int i) const
 {
   assert(i < dim);
-  return coords[i];
+  return _storage[i];
 }
 
 
@@ -268,7 +267,7 @@ const Scalar & Point<dim,Scalar>::operator[] (int i) const
 template<int dim, typename Scalar>
 Scalar & Point<dim,Scalar>::x()
 {
-  return coords[0];
+  return _storage[0];
 }
 
 
@@ -276,7 +275,7 @@ template<int dim, typename Scalar>
 Scalar & Point<dim,Scalar>::y()
 {
   assert(dim > 1);
-  return coords[1];
+  return _storage[1];
 }
 
 
@@ -285,7 +284,7 @@ Scalar & Point<dim,Scalar>::z()
 {
   static_assert(dim == 3,
                 "Only 3D objects have z coordinate");
-  return coords[2];
+  return _storage[2];
 }
 
 
@@ -293,7 +292,7 @@ template<int dim, typename Scalar>
 Scalar & Point<dim,Scalar>::operator[] (int i)
 {
   assert(i < dim);
-  return coords[i];
+  return _storage[i];
 }
 
 
@@ -303,7 +302,7 @@ bool Point<dim,Scalar>::operator==(const Point<dim, Scalar> & p) const
 {
   for (int i=0; i<dim; ++i)
   {
-    if (coords[i] == p(i))
+    if (_storage[i] == p(i))
       continue;
     else
       return false;
@@ -317,7 +316,7 @@ bool Point<dim,Scalar>::operator!=(const Point<dim, Scalar> & p) const
 {
   for (int i=0; i<dim; ++i)
   {
-    if (coords[i] == p(i))
+    if (_storage[i] == p(i))
       continue;
     else
       return true;
@@ -343,7 +342,7 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::operator+=(const Point<dim, Scalar> & p)
 {
   for (int i=0; i<dim; ++i)
-    coords[i] += p(i);
+    _storage[i] += p(i);
 }
 
 
@@ -351,7 +350,7 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::operator-=(const Point<dim, Scalar> & p)
 {
   for (int i=0; i<dim; ++i)
-    coords[i] -= p(i);
+    _storage[i] -= p(i);
 }
 
 
@@ -359,7 +358,7 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::operator+=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
-    coords[i] += x;
+    _storage[i] += x;
 }
 
 
@@ -367,7 +366,7 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::operator-=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
-    coords[i] -= x;
+    _storage[i] -= x;
 }
 
 
@@ -375,7 +374,7 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::operator*=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
-    coords[i] *= x;
+    _storage[i] *= x;
 }
 
 
@@ -383,7 +382,7 @@ void Point<dim,Scalar>::operator*=(const Scalar x)
 // Point<dim,Scalar> Point<dim,Scalar>::operator*(const Scalar x)
 // {
 //   for (int i=0; i<dim; ++i)
-//     coords[i] *= x;
+//     _storage[i] *= x;
 // }
 
 
@@ -391,7 +390,7 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::operator/=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
-    coords[i] /= x;
+    _storage[i] /= x;
 }
 
 
@@ -400,7 +399,7 @@ Scalar Point<dim,Scalar>::dot(const Point<dim, Scalar> & p) const
 {
   Scalar result = static_cast<Scalar>(0);
   for (int i=0; i<dim; ++i)
-    result += coords[i] * p(i);
+    result += _storage[i] * p(i);
   return result;
 }
 
@@ -409,9 +408,9 @@ template<int dim, typename Scalar>
 void Point<dim,Scalar>::cross(const Point<3, Scalar> & p,
                               Point<3, Scalar>       & result) const
 {
-  result[0] = coords[1]*p(2) - coords[2]*p(1);
-  result[1] = coords[2]*p(0) - coords[0]*p(2);
-  result[2] = coords[0]*p(1) - coords[1]*p(0);
+  result[0] = _storage[1]*p(2) - _storage[2]*p(1);
+  result[1] = _storage[2]*p(0) - _storage[0]*p(2);
+  result[2] = _storage[0]*p(1) - _storage[1]*p(0);
 }
 
 
@@ -446,7 +445,7 @@ Scalar Point<dim,Scalar>::distance(const Point<dim, Scalar> & p) const
   Scalar result = static_cast<Scalar>(0);
   for (int i=0; i<dim; ++i)
   {
-    const Scalar d = coords[i] - p(i);
+    const Scalar d = _storage[i] - p(i);
     result += d * d;
   }
   return std::sqrt(result);
@@ -459,7 +458,7 @@ Scalar Point<dim,Scalar>::norm() const
   Scalar result = static_cast<Scalar>(0);
   for (int i=0; i<dim; ++i)
   {
-    const Scalar d = coords[i];
+    const Scalar d = _storage[i];
     result += d * d;
   }
   return std::sqrt(result);
@@ -473,7 +472,7 @@ Point<dim,Scalar> & Point<dim,Scalar>::normalize()
   if (!std::isfinite(static_cast<Scalar>(1) / nor))
     throw std::invalid_argument("cannot normalize zero vector");
   for (int i=0; i<dim; ++i)
-    coords[i] /= nor;
+    _storage[i] /= nor;
   return *this;
 }
 
@@ -506,7 +505,7 @@ Point<dim, Scalar> operator*(const Point<dim, Scalar> & p1,
 {
   Point<dim, Scalar> result;
   for (int i=0; i<dim; ++i)
-    result[i] = p1.coords[i] * x;
+    result[i] = p1._storage[i] * x;
   return result;
 }
 
@@ -541,7 +540,7 @@ Point<dim, Scalar1> operator/(const Point<dim, Scalar1> & p1,
 {
   Point<dim, Scalar1> result;
   for (int i=0; i<dim; ++i)
-    result[i] = p1.coords[i] / static_cast<Scalar1>(x);
+    result[i] = p1._storage[i] / static_cast<Scalar1>(x);
   return result;
 }
 

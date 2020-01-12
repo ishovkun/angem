@@ -306,7 +306,7 @@ template<typename Scalar>
 bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
                                    const Scalar             tol) const
 {
-  if ( this->plane().distance(p) > tol )
+  if ( std::fabs(this->plane().signed_distance(p)) > tol )
     return false;
 
   const auto & points = this->points;
@@ -315,7 +315,7 @@ bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
   for (const auto & edge : get_edges())
   {
     Plane<Scalar> side = get_side(edge);
-    if (side.above(p) != side.above(cm) and side.distance(p) > tol)
+    if (side.above(p) != side.above(cm) and std::fabs( side.signed_distance(p) ) > tol)
       return false;
   }
 

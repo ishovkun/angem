@@ -63,13 +63,13 @@ Hexahedron<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)
   assert(vertices.size() == 8);
 
   this->points = vertices;
-  this->faces.resize(6);
-  this->faces[0] = {0, 1, 2, 3};
-  this->faces[1] = {4, 5, 6, 7};
-  this->faces[2] = {0, 4, 5, 1};
-  this->faces[3] = {3, 7, 6, 2};
-  this->faces[4] = {0, 4, 7, 3};
-  this->faces[5] = {1, 5, 6, 2};
+  this->m_faces.resize(6);
+  this->m_faces[0] = {0, 1, 2, 3};
+  this->m_faces[1] = {4, 5, 6, 7};
+  this->m_faces[2] = {0, 4, 5, 1};
+  this->m_faces[3] = {3, 7, 6, 2};
+  this->m_faces[4] = {0, 4, 7, 3};
+  this->m_faces[5] = {1, 5, 6, 2};
 }
 
 

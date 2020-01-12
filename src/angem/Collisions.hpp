@@ -303,6 +303,9 @@ void split(const Polyhedron<Scalar> & polyhedron,
 {
   for (const Polygon<Scalar> & face : polyhedron.get_face_polygons())
     split<Scalar>(face, plane, result, marker_below, marker_above);
+  // sort face vertices so they form polygons
+  for (auto & face : result.polygons)
+    Polygon<Scalar>::reorder_indices(result.vertices.points, face);
 
   // add a polygon that represents the intersection
   std::vector<size_t> section_poly_verts;

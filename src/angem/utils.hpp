@@ -2,7 +2,6 @@
 
 #include <limits>  // std::numeric_limits
 #include "Point.hpp"
-// #include "PointSet.hpp"
 
 namespace angem
 {

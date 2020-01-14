@@ -95,15 +95,14 @@ bool collision(const Polygon<Scalar>        & poly,
 
 
 
-// collision of a polygon with a plane
-// can be 1 points, two points, or zero points
+// collision of two polygons
 template <typename Scalar>
 bool collision(const Polygon<Scalar>        & poly1,
                const Polygon<Scalar>        & poly2,
                std::vector<Point<3,Scalar>> & intersection,
                const double                   tol = 1e-10)
 {
-  if (poly1.plane.normal().parallel(poly2.plane.normal(), tol))
+  if (poly1.plane().normal().parallel(poly2.plane().normal(), tol))
   {
     // 1. find vertices of each poly inside another
     // 2. find intersection of edges if any points inside
@@ -163,7 +162,7 @@ bool collision(const Polygon<Scalar>        & poly1,
   else // two polygons in non-parallel planes
   {
     std::vector<Point<3,Scalar>> v_section;
-    angem::collision(poly1, poly2.plane, v_section, tol);
+    angem::collision(poly1, poly2.plane(), v_section, tol);
     bool result = false;
     for (const auto & p : v_section)
       if (poly2.point_inside(p, tol) and poly1.point_inside(p, tol))

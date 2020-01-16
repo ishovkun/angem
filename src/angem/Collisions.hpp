@@ -222,10 +222,13 @@ void split(const Polygon<Scalar> & poly,
            const Plane<Scalar>   & plane,
            PolyGroup<Scalar>     & result,
            const int               marker_below = 0,
-           const int               marker_above = 1)
+           const int               marker_above = 1,
+           const double            tolerance = 1e-6)
 {
   std::vector<Point<3,Scalar>> section;
-  collision(poly, plane, section);
+  std::cout << "collision poly plane" << std::endl;
+  collision(poly, plane, section, tolerance);
+  std::cout << "ok" << std::endl;
 
   if (section.empty())  // everythin either above or below
   {
@@ -288,13 +291,23 @@ void split(const Polyhedron<Scalar> & polyhedron,
            PolyGroup<Scalar>        & result,
            const int                  marker_below = 0,
            const int                  marker_above = 1,
-           const int                  marker_split = 2)
+           const int                  marker_split = 2,
+           const double               tolerance = 1e-6)
 {
   for (const Polygon<Scalar> & face : polyhedron.get_face_polygons())
-    split<Scalar>(face, plane, result, marker_below, marker_above);
+  {
+    std::cout << "before " << result.vertices.size() << std::endl;
+    split<Scalar>(face, plane, result, marker_below, marker_above, tolerance);
+    std::cout << "after " << result.vertices.size() << std::endl;
+    for (const size_t i : result.polygons.back())
+      std::cout << i << " ";
+    std::cout << std::endl;
+  }
   // sort face vertices so they form polygons
+  std::cout << "reordering" << std::endl;
   for (auto & face : result.polygons)
     Polygon<Scalar>::reorder_indices(result.vertices.points, face);
+  std::cout << "ok" << std::endl;
 
   // add a polygon that represents the intersection
   std::vector<size_t> section_poly_verts;

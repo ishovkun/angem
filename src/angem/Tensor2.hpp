@@ -61,6 +61,10 @@ class Tensor2
   friend Point<d,Scalar> product(const Tensor2<d,Scalar> & t,
                                  const Point<d,Scalar>   & p);
 
+  // printout
+  template <int d, typename S>
+  friend std::ostream &operator<<(std::ostream     & os,
+                                  const Point<d,S> & p);
 
  private:
   // storage 2d array (2nd order tensor)
@@ -233,5 +237,28 @@ Tensor2<d,Scalar> operator/(const Tensor2<d,Scalar> & t,
       result /= x;
   return result;
 }
+
+// Printing
+template<int dim, typename Scalar>
+std::ostream &operator<<(std::ostream            & os,
+                         const Tensor2<dim,Scalar> & tensor)
+{
+  os << "(";
+  for (int i=0; i<dim; ++i)
+  {
+    for (int j=0; j<dim; ++j)
+    {
+      os << tensor(i, j);
+      if (j != dim - 1)
+        os << " ";
+    }
+
+    if (i != dim - 1)
+      os << "; ";
+  }
+  os << ")";
+  return os;
+}
+
 
 }  // end namespace

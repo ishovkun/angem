@@ -437,9 +437,10 @@ bool collision(const Point<3,Scalar>        & l0,
       Polygon<Scalar> poly_face(points, face);
       collision(l0, l1,  poly_face.plane(), new_section, tol);
 
-      for (std::size_t i=ibegin; i<new_section.size(); ++i)
+      for (std::size_t i=ibegin; i<new_section.size();)
         if (!poly_face.point_inside(new_section[i], tol))
           new_section.erase(new_section.begin() + i);
+        else i++;
     }
 
     angem::remove_duplicates_slow(new_section, tol);

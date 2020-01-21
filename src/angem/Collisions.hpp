@@ -386,22 +386,16 @@ bool collision(const Point<3,Scalar>        & p0,
                const double                   tol = 1e-10)
 {
   std::vector<Point<3,Scalar>> new_section;
-  if (poly.point_inside(p0, tol) && fabs(poly.plane.distance(p0)) < tol)
-  {
-    // std::cout << "beer: " << fabs(poly.plane.distance(p0)) <<std::endl << std::flush;
+  if (poly.point_inside(p0, tol) && fabs(poly.plane().signed_distance(p0)) < tol)
     new_section.push_back(p0);
-  }
-  if (poly.point_inside(p1, tol) && fabs(poly.plane.distance(p1)) < tol)
-  {
-    // std::cout << "beer1" << std::endl << std::flush;
+  if (poly.point_inside(p1, tol) && fabs(poly.plane().signed_distance(p1)) < tol)
     new_section.push_back(p1);
-  }
 
   if (new_section.empty())
   {
     const std::size_t ibegin = new_section.size();
 
-    collision(p0, p1,  poly.plane, new_section, tol);
+    collision(p0, p1,  poly.plane(), new_section, tol);
     for (std::size_t i=ibegin; i<new_section.size(); ++i)
       if (!poly.point_inside(new_section[i], tol))
         new_section.erase(new_section.begin() + i);

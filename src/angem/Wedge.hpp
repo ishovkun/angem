@@ -59,7 +59,7 @@ template<typename Scalar>
 Wedge<Scalar>::Wedge(const std::vector<Point<3,Scalar>> & vertices,
                      const std::vector<std::size_t>     & indices)
     :
-    Polyhedron<Scalar>(13)
+    Polyhedron<Scalar>(VTK_ID::WedgeID)
 {
   set_data(vertices, indices);
 }

@@ -48,7 +48,7 @@ template<typename Scalar>
 Hexahedron<Scalar>::Hexahedron(const std::vector<Point<3,Scalar>> & vertices,
                                const std::vector<std::size_t>     & indices)
     :
-    Polyhedron<Scalar>(12)
+    Polyhedron<Scalar>(VTK_ID::HexahedronID)
 {
   set_data(vertices, indices);
 }

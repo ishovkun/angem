@@ -5,6 +5,7 @@
 #include "PointSet.hpp"
 #include "Polygon.hpp"
 #include "PolyGroup.hpp"
+#include "VTK_ID.hpp"
 #include <typeinfo>
 #include <exception>
 

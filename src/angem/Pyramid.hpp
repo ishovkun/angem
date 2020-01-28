@@ -50,7 +50,7 @@ template<typename Scalar>
 Pyramid<Scalar>::Pyramid(const std::vector<Point<3,Scalar>> & vertices,
                          const std::vector<std::size_t>     & indices)
     :
-    Polyhedron<Scalar>(14)
+    Polyhedron<Scalar>(VTK_ID::PyramidID)
 {
   set_data(vertices, indices);
 }

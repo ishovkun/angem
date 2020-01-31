@@ -15,11 +15,14 @@ std::vector<Point<3,Scalar>> project(const Polygon<Scalar> & poly1,
 {
   if ( std::fabs(poly1.normal().dot( poly2.normal() )) < tol)
     throw std::invalid_argument("Polygons are orthogonal");
+
   const std::vector<Point<3,Scalar>> projected_frac_vertices =
       poly2.plane().project_points(poly1.get_points());
+
   const Polygon<Scalar> proj_poly(projected_frac_vertices);
   std::vector<Point<3,Scalar>> intersection;
-  if (!collision(proj_poly, poly2, intersection))
+
+  if (!collision(proj_poly, poly2, intersection, tol))
     throw std::runtime_error("projection does not exist");
   return intersection;
 }

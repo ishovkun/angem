@@ -124,7 +124,6 @@ bool collision(const Polygon<Scalar>        & poly1,
       else
         all_inside1 = false;
 
-    // std::cout << pset.points << std::endl;
     if (all_inside1)
     {
       pset.points.clear();
@@ -135,6 +134,12 @@ bool collision(const Polygon<Scalar>        & poly1,
       pset.points.clear();
       pset.points = pts1;
     }
+    if (all_inside1 && all_inside2)
+    {
+      for (const auto &p : pts1)
+        intersection.push_back(p);
+      return true;
+    }
 
     // 2.
     if ( !pset.empty() and !all_inside1 and !all_inside2 )
@@ -144,8 +149,7 @@ bool collision(const Polygon<Scalar>        & poly1,
         Plane<Scalar> side = poly1.get_side(edge1);
         for (const auto & edge2 : poly2.get_edges())
         {
-          collision(pts2[edge2.first], pts2[edge2.second],
-                    side, v_points, tol);
+          collision(pts2[edge2.first], pts2[edge2.second], side, v_points, tol);
           for (const auto & p : v_points)
             if (poly1.point_inside(p))
               pset.insert(p);
@@ -155,7 +159,7 @@ bool collision(const Polygon<Scalar>        & poly1,
     for (const auto & p: pset.points)
       intersection.push_back(p);
 
-    if (pset.size() > 0)
+    if (!pset.empty())
       return true;
     else
       return false;

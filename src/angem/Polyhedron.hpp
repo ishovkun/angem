@@ -5,6 +5,7 @@
 #include "PointSet.hpp"
 #include "Polygon.hpp"
 #include "PolyGroup.hpp"
+#include "VTK_ID.hpp"
 #include <typeinfo>
 #include <exception>
 
@@ -37,6 +38,8 @@ class Polyhedron: public Shape<Scalar>
   std::vector<std::vector<std::size_t>> & get_faces();
   std::vector<Polygon<Scalar>> get_face_polygons() const;
 
+  // return vector of ordered pairs of vertex indices
+  // (ordering by index comparison)
   std::vector<Edge> get_edges() const;
 
  protected:
@@ -289,16 +292,22 @@ std::vector<Edge> Polyhedron<Scalar>::get_edges() const
       std::size_t i1, i2;
       if (i < face.size() - 1)
       {
-        i1 = face[ i ];
-        i2 = face[i + 1];
+        i1 = face[i];
+        i2 = face[i+1];
       }
       else
       {
         i1 = face[i];
-        i2 = face[ 0 ];
+        i2 = face[0];
       }
       auto edge = std::minmax(i1, i2);
-      if (std::find( edges.begin(), edges.end(), edge ) == edges.end())
+      auto it_edge = edges.begin();
+      if (std::find_if( edges.begin(), edges.end(),
+                     [&edge](const Edge & it)->bool
+                     {
+                       return it.first == edge.first &&
+                           it.second == edge.second;
+                     }) == edges.end())
         edges.push_back( std::move(edge) );
     }
   return edges;

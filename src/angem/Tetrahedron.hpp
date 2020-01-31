@@ -60,7 +60,7 @@ template<typename Scalar>
 Tetrahedron<Scalar>::Tetrahedron(const std::vector<Point<3,Scalar>> & vertices,
                                  const std::vector<std::size_t>     & indices)
     :
-    Polyhedron<Scalar>(10)
+    Polyhedron<Scalar>(VTK_ID::TetrahedronID)
 {
   set_data(vertices, indices);
 }

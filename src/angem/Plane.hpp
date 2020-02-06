@@ -83,7 +83,7 @@ class Plane
   // true if point is above the plane
   bool above(const Point<3,Scalar> & p) const;
 
-  void set_point(const Point<3,Scalar> & p) {this->point == p;}
+  void set_point(const Point<3,Scalar> & p) {this->point = p;}
 
   // ATTRIBUTES
   // point on the plane

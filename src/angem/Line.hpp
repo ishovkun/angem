@@ -15,28 +15,33 @@ template <int dim, typename Scalar>
 class Line
 {
  public:
-  // Default constructor. creates an invalid line. Sometimes useful.
-  // Line();
   // Creates a line from a point and direction vectors
   Line(const Point<dim,Scalar> & point,
        const Point<dim,Scalar> & direction);
 
-  Point<dim, Scalar> point;
-  Point<dim, Scalar> direction;
+  // distance between a line and a point
+  Scalar distance(const Point<dim,Scalar> & p);
+
+  Point<dim, Scalar> _point;
+  Point<dim, Scalar> _direction;
 };
-
-
-// template <int dim, typename Scalar>
-// Line<dim,Scalar>::Line()
-// {}
-
 
 template <int dim, typename Scalar>
 Line<dim,Scalar>::Line(const Point<dim,Scalar> & point,
                        const Point<dim,Scalar> & direction)
     :
-    point(point),
-    direction(direction)
+    _point(point),
+    _direction(direction)
 {}
+
+template <int dim, typename Scalar>
+Scalar Line<dim,Scalar>::distance(const Point<dim,Scalar> & p)
+{
+  const Point<dim,Scalar> & ab = _direction;
+  const Point<dim,Scalar> ac = p - _point;
+  const Scalar area = ab.cross(ac).norm();
+  const Scalar cd = area / ab.norm();
+  return cd;
+}
 
 }  // end namespace

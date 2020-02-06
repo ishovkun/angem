@@ -34,6 +34,20 @@ class Plane
         const Point<3,Scalar> & p2,
         const Point<3,Scalar> & p3);
 
+  // pick some three points from the cloud to initialize a plane
+  // convenient when have colinear edges in a polygon but want to initialize
+  // a plane
+  // Be very careful with this method sine it does not check whether
+  // all points belong to the same plane
+  Plane(const std::vector<Point<3,Scalar>> & cloud);
+  // pick some three points from the cloud to initialize a plane
+  // convenient when have colinear edges in a polygon but want to initialize
+  // a plane
+  // Be very careful with this method sine it does not check whether
+  // all points belong to the same plane
+  Plane(const std::vector<Point<3,Scalar>> & cloud,
+        const std::vector<size_t> specific_indices);
+
   // setter
   void set_data(const Point<3,Scalar> & p1,
                 const Point<3,Scalar> & p2,
@@ -69,6 +83,8 @@ class Plane
   // true if point is above the plane
   bool above(const Point<3,Scalar> & p) const;
 
+  void set_point(const Point<3,Scalar> & p) {this->point == p;}
+
   // ATTRIBUTES
   // point on the plane
   Point<3,Scalar> point;
@@ -96,18 +112,53 @@ Plane<Scalar>::Plane(const Point<3,Scalar> & point,
     :
     point(point)
 {
-#ifdef DEBUG_BUILD
-  if (fabs(normal.norm() - 1) > 1e-12)
-  {
-    std::cout << "normal = " << normal << std::endl;
-    std::cout << "norm = " << normal.norm() << std::endl;
-    throw std::invalid_argument( "normal length should be 1" );
-  }
-#endif
-
   compute_basis(normal);
   compute_algebraic_coeff();
 }
+
+template <typename Scalar>
+Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
+{
+  assert( cloud.size() > 2 );
+  const Point<3,Scalar> p1 = cloud[0], p2 = cloud[1];
+  Point<3,Scalar> p3;
+  bool found = false;
+  Line<3, Scalar> line(p1, p2 - p1);
+  for (std::size_t i=2; i<cloud.size(); ++i)
+  {
+    if (line.distance(cloud[i]) < 1e-6)
+      continue;
+    found = true;
+    p3 = cloud[i];
+  }
+  if (!found) throw std::invalid_argument("Cannot initialize a plane from a point cloud");
+
+  set_data(p1, p2, p3);
+}
+
+template <typename Scalar>
+Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud,
+                     const std::vector<size_t> specific_indices)
+{
+  assert( cloud.size() > 2 );
+  assert( specific_indices.size() > 2 );
+  const Point<3,Scalar> p1 = cloud[specific_indices[0]], p2 = cloud[specific_indices[1]];
+  Point<3,Scalar> p3;
+  bool found = false;
+  Line<3, Scalar> line(p1, p2 - p1);
+  for (std::size_t i=2; i<specific_indices.size(); ++i)
+  {
+    if (line.distance(cloud[specific_indices[i]]) < 1e-6)
+      continue;
+    found = true;
+    p3 = cloud[specific_indices[i]];
+  }
+  if (!found) throw std::invalid_argument("Cannot initialize a plane from a point cloud");
+
+  set_data(p1, p2, p3);
+}
+
+
 
 
 template <typename Scalar>

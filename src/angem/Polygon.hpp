@@ -117,21 +117,8 @@ Polygon<Scalar>::set_data(const std::vector<Point<3,Scalar>> & point_list)
   this->points = point_list;
   reorder(this->points);
   const Point<3, Scalar> cm = compute_center_mass(point_list);
-
-  /* i'd like the plane support point (first argument) to be
-     the center of the poly
-     to create the plane I need to pass three points that are not
-     aligned on a line this could happen if I do it like that:
-     plane.set_data(cm, point_list[1], point_list[2]);
-     Therefore, I need to selects points appropriately.
-     only two polygon vertices can potentially be on the same line
-     as the center of mass. So i need to do only one check
-  */
-  if ( ((point_list[0] - cm).cross(point_list[1] - cm)).norm() > 1e-16 )
-    plane().set_data(cm, point_list[0], point_list[1]);
-  else
-    plane().set_data(cm, point_list[0], point_list[2]);
-
+  m_plane = Plane<Scalar>(point_list);
+  m_plane.set_point( cm );
   reorder(this->points);
 
 }
@@ -152,21 +139,16 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
 {
   const std::size_t n_points = points.size();
   assert(n_points > 2);
-  if (n_points == 3)
-    return;
+  if (n_points == 3) return;
 
-  Plane<Scalar> plane;
   const Point<3,Scalar> cm = compute_center_mass(points);
-  if ( ((points[0] - cm).cross(points[1] - cm)).norm() > 1e-16 )
-    plane.set_data(cm, points[0], points[1]);
-  else
-    plane.set_data(cm, points[0], points[2]);
+  Plane<Scalar> plane = Plane<Scalar>(points);
+  plane.set_point(cm);
   Point<3,Scalar> normal = plane.normal();
 
   std::vector<Point<3, Scalar> > v_points;
-  std::vector<Point<3,Scalar>> copy = points;
-  v_points.push_back(copy.front());
-  copy.erase(copy.begin());
+  std::vector<Point<3,Scalar>> copy(points.begin()+1, points.end());
+  v_points.push_back(points.front());
 
   std::size_t safety_counter = 0, counter_max = 2 * copy.size();
   while (!copy.empty())
@@ -182,11 +164,10 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
     // find such vertex that all other vertices are on one side of the edge
     for (std::size_t i=0; i<copy.size(); ++i)
     {
-      // make plane object that we use to check on which side of the plane
-      // any point is
-      Scalar len = (copy[i] - v_points.back()).norm();
-      Point<3,Scalar> p_perp = v_points.back() + normal * len;
-      Plane<Scalar> pln(v_points.back(), p_perp, copy[i]);
+      // make plane object that we use to check on which side of the plane any point is
+      const Scalar len = (copy[i] - v_points.back()).norm();
+      const Point<3,Scalar> p_perp = v_points.back() + normal * len;
+      const Plane<Scalar> pln(v_points.back(), p_perp, copy[i]);
 
       bool all_above = true;
       bool orientation;
@@ -195,7 +176,7 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
       {
         if (points[j] == copy[i] || points[j] == v_points.back())
           continue;
-        const bool above = pln.above(points[j]);
+        const bool above = pln.signed_distance(points[j]) > -1e-8;
         if (!orientation_set)
         {
           orientation = above;
@@ -238,19 +219,7 @@ Polygon<Scalar>::reorder_indices(const std::vector<Point<3, Scalar>> &verts,
     std::size_t ind = find(points[i], verts, 1e-6);
     indices[i] = ind;
   }
-
 }
-
-
-// // compute triangle area
-// template<typename Scalar>
-// Scalar area(const Point<3,Scalar> & p1,
-//             const Point<3,Scalar> & p2,
-//             const Point<3,Scalar> & p3)
-// {
-//   return 0;
-// }
-
 
 template<typename Scalar>
 Scalar Polygon<Scalar>::area() const

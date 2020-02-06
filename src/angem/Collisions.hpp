@@ -296,13 +296,29 @@ template <typename Scalar>
 void split(const Polyhedron<Scalar> & polyhedron,
            const Plane<Scalar>      & plane,
            PolyGroup<Scalar>        & result,
+           std::vector<size_t>      & parent_face_indices,
            const int                  marker_below = 0,
            const int                  marker_above = 1,
            const int                  marker_split = 2,
            const double               tolerance = 1e-6)
 {
-  for (const Polygon<Scalar> & face : polyhedron.get_face_polygons())
+  // first split the faces of the polyhedron
+  std::vector<Polygon<Scalar>> face_polygons = polyhedron.get_face_polygons();
+  for (std::size_t i = 0; i < face_polygons.size(); ++i)
+  {
+    const Polygon<Scalar> & face = face_polygons[i];
+    const size_t old_n_split_poly = result.polygons.size();
     split<Scalar>(face, plane, result, marker_below, marker_above, tolerance);
+    const size_t new_n_split_poly = result.polygons.size();
+    if (new_n_split_poly - old_n_split_poly == 2)  // split successful
+    {
+      parent_face_indices.push_back(i);
+      parent_face_indices.push_back(i);
+    }
+    else // if (new_n_split_poly - old_n_split_poly == 1) // nothing split
+      parent_face_indices.push_back(i);
+  }
+
   // sort face vertices so they form polygons
   for (auto & face : result.polygons)
     Polygon<Scalar>::reorder_indices(result.vertices.points, face);
@@ -327,6 +343,7 @@ void split(const Polyhedron<Scalar> & polyhedron,
     // sort vertices so they form a polygon
     Polygon<Scalar>::reorder_indices(result.vertices.points, section_poly_verts);
     result.polygons.push_back(std::move(section_poly_verts));
+    parent_face_indices.push_back(result.polygons.size());
     result.markers.push_back(marker_split);
   }
 

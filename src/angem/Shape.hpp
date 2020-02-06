@@ -91,7 +91,7 @@ Shape<Scalar>::support(const Point<3,Scalar> & direction) const
 
   for (std::size_t i=0; i<points.size(); ++i)
   {
-    Scalar dist = points[i].dot(direction);
+    const Scalar dist = points[i].dot(direction);
     if (dist > max_dist)
     {
       max_dist = dist;

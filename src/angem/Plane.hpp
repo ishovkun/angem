@@ -121,10 +121,11 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
 {
   assert( cloud.size() > 2 );
   const Point<3,Scalar> p1 = cloud[0], p2 = cloud[1];
+  assert( p1.distance(p2) > 1e-8 );
   Point<3,Scalar> p3;
   bool found = false;
-  Line<3, Scalar> line(p1, p2 - p1);
-  for (std::size_t i=2; i<cloud.size(); ++i)
+  const Line<3, Scalar> line(p1, p2 - p1);
+  for (std::size_t i=2; i < cloud.size(); ++i)
   {
     if (line.distance(cloud[i]) < 1e-6)
       continue;
@@ -132,7 +133,6 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
     p3 = cloud[i];
   }
   if (!found) throw std::invalid_argument("Cannot initialize a plane from a point cloud");
-
   set_data(p1, p2, p3);
 }
 
@@ -158,15 +158,11 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud,
   set_data(p1, p2, p3);
 }
 
-
-
-
 template <typename Scalar>
 Plane<Scalar>::Plane(const Point<3,Scalar> & point,
                      const Scalar          & dip_angle,
                      const Scalar          & strike_angle)
-    :
-    point(point)
+    : point(point)
 {
   assert(dip_angle >= - 90 and dip_angle <= 90);
 
@@ -263,16 +259,17 @@ bool Plane<Scalar>::above(const Point<3,Scalar> & p) const
 
 // Determine if a set of points lies within a plane
 template <typename Scalar>
-bool align_on_plane(const std::vector<Point<3, Scalar>> & points)
+bool align_on_plane(const std::vector<Point<3, Scalar>> & points,
+                    const Scalar tol = 1e-8)
 {
   assert(points.size() > 2);
 
   if (points.size() == 3)
     return true;
 
-  Plane<Scalar> plane(points[0], points[1], points[2]);
-  for (std::size_t i=3; i<points.size(); ++i)
-    if ( fabs(plane.distance(points[i])) > 1e-16 )
+  Plane<Scalar> plane(points);
+  for (std::size_t i=2; i<points.size(); ++i)
+    if ( fabs(plane.signed_distance(points[i])) > tol )
       return false;
 
   return true;
@@ -295,7 +292,6 @@ void Plane<Scalar>::compute_basis(const Point<3,Scalar> & normal)
   Point<3,Scalar> e1 = project_vector(rv);
 
   // check
-  // assert(e1.norm() > 1e-16);
   if (e1.norm() < 1e-16 || (e1.cross(normal)).norm() < 1e-6)
   {
     rv = normal;

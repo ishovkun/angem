@@ -111,16 +111,12 @@ template<typename Scalar>
 void
 Polygon<Scalar>::set_data(const std::vector<Point<3,Scalar>> & point_list)
 {
-  // TODO: i don't check whether all points aren't on one line
   assert(point_list.size() >= 3);
-
   this->points = point_list;
   reorder(this->points);
   const Point<3, Scalar> cm = compute_center_mass(point_list);
   m_plane = Plane<Scalar>(point_list);
   m_plane.set_point( cm );
-  reorder(this->points);
-
 }
 
 
@@ -166,6 +162,7 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
     {
       // make plane object that we use to check on which side of the plane any point is
       const Scalar len = (copy[i] - v_points.back()).norm();
+      assert ( len > 0 );
       const Point<3,Scalar> p_perp = v_points.back() + normal * len;
       const Plane<Scalar> pln(v_points.back(), p_perp, copy[i]);
 
@@ -283,7 +280,7 @@ bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
   const Point<3,Scalar> n = this->plane().normal();
   for (const auto & edge : get_edges())
   {
-    Plane<Scalar> side = get_side(edge);
+    const Plane<Scalar> side = get_side(edge);
     if (side.above(p) != side.above(cm) and std::fabs( side.signed_distance(p) ) > tol)
       return false;
   }

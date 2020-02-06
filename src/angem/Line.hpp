@@ -20,8 +20,9 @@ class Line
        const Point<dim,Scalar> & direction);
 
   // distance between a line and a point
-  Scalar distance(const Point<dim,Scalar> & p);
+  Scalar distance(const Point<dim,Scalar> & p) const;
 
+ private:
   Point<dim, Scalar> _point;
   Point<dim, Scalar> _direction;
 };
@@ -35,7 +36,7 @@ Line<dim,Scalar>::Line(const Point<dim,Scalar> & point,
 {}
 
 template <int dim, typename Scalar>
-Scalar Line<dim,Scalar>::distance(const Point<dim,Scalar> & p)
+Scalar Line<dim,Scalar>::distance(const Point<dim,Scalar> & p) const
 {
   const Point<dim,Scalar> & ab = _direction;
   const Point<dim,Scalar> ac = p - _point;

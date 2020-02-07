@@ -354,15 +354,16 @@ void split(const Polyhedron<Scalar> & polyhedron,
 template <typename Scalar>
 bool collision(const Line<3,Scalar> & line,
                const Plane<Scalar>  & plane,
-               Point<3,Scalar>      & intersection)
+               Point<3,Scalar>      & intersection,
+               const double           tol = 1e-8)
 {
   // Plane : (p - p0) · n = 0
   // line p = d l + l0
   // intersection: d = (p0 - l0) · n / (l · n)
   // Note: if (l · n) == 0 then line is parallel to the plane
-  if (line.direction.dot(plane.normal()) < 1e-16)
+  if (std::fabs(line.direction.dot(plane.normal())) < tol)
   {
-    if (plane.distance(line.point) < 1e-16)
+    if (plane.distance(line.point) < tol)
       throw std::runtime_error("line and plane coinside.");
     return false;
   }
@@ -433,6 +434,8 @@ bool collision(const Point<3,Scalar>        & p0,
 
 
 // collision of a line segment with a polyhedron
+// the points l0 and l1 define a line segment
+// the output is saved into intersecion
 template <typename Scalar>
 bool collision(const Point<3,Scalar>        & l0,
                const Point<3,Scalar>        & l1,

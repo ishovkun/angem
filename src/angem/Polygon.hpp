@@ -275,13 +275,13 @@ bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
   if ( std::fabs(this->plane().signed_distance(p)) > tol )
     return false;
 
-  const auto & points = this->points;
   const Point<3,Scalar> cm = this->center();
-  const Point<3,Scalar> n = this->plane().normal();
   for (const auto & edge : get_edges())
   {
     const Plane<Scalar> side = get_side(edge);
-    if (side.above(p) != side.above(cm) and std::fabs( side.signed_distance(p) ) > tol)
+    if (std::fabs( side.signed_distance(p) ) > tol)
+      return false;
+    else if (side.above(p) != side.above(cm))
       return false;
   }
 
@@ -295,12 +295,10 @@ Plane<Scalar> Polygon<Scalar>::get_side(const Edge & edge) const
   if (edge.first >= this->points.size() or edge.second >= this->points.size())
     throw std::out_of_range("Edge does not exist");
 
-  Point<3,Scalar> point3 =
-      this->points[edge.first] + m_plane.normal() * (this->points[edge.first] -
-                                                   this->points[edge.second]).norm();
-  Plane<Scalar> side(this->points[edge.first],
-                     this->points[edge.second],
-                     point3);
+  const Point<3,Scalar> point3 = this->points[edge.first] +
+                                 m_plane.normal() * (this->points[edge.first] -
+                                                     this->points[edge.second]).norm();
+  Plane<Scalar> side(this->points[edge.first], this->points[edge.second], point3);
   return side;
 }
 

@@ -6,6 +6,8 @@
 
 #include "utils.hpp"
 #include <iostream>
+#include <numeric>      // std::iota
+#include <algorithm>    // std::sort
 
 namespace angem
 {
@@ -135,68 +137,53 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
 {
   const std::size_t n_points = points.size();
   assert(n_points > 2);
-  if (n_points == 3) return;
+  if (n_points == 3) return;  // no need to sort a triangle
 
   const Point<3,Scalar> cm = compute_center_mass(points);
   Plane<Scalar> plane = Plane<Scalar>(points);
-  plane.set_point(cm);
-  Point<3,Scalar> normal = plane.normal();
 
-  std::vector<Point<3, Scalar> > v_points;
-  std::vector<Point<3,Scalar>> copy(points.begin()+1, points.end());
-  v_points.push_back(points.front());
-
-  std::size_t safety_counter = 0, counter_max = 2 * copy.size();
-  while (!copy.empty())
+  // this is a version of Graham Scan but without enforcing convexity
+  // Just sort vertices by the polar angle with respect to the first point
+  // select the first point as the support in the polygon direction
+  Scalar max_dist = - std::numeric_limits<Scalar>::max();
+  std::size_t first = points.size();
+  const auto & x_direction = plane.get_basis()[0];
+  for (std::size_t i=0; i<points.size(); ++i)
   {
-    if (safety_counter >= counter_max)
-      throw std::runtime_error("polygon is not convex");
-
-    if (copy.size() == 1)
+    const Scalar dist = points[i].dot(x_direction);
+    if (dist > max_dist)
     {
-      v_points.push_back(copy[0]);
-      break;
+      max_dist = dist;
+      first = i;
     }
-    // find such vertex that all other vertices are on one side of the edge
-    for (std::size_t i=0; i<copy.size(); ++i)
-    {
-      // make plane object that we use to check on which side of the plane any point is
-      const Scalar len = (copy[i] - v_points.back()).norm();
-      assert ( len > 0 );
-      const Point<3,Scalar> p_perp = v_points.back() + normal * len;
-      const Plane<Scalar> pln(v_points.back(), p_perp, copy[i]);
-
-      bool all_above = true;
-      bool orientation;
-      bool orientation_set = false;  // set after first assignment
-      for (std::size_t j=0; j<points.size(); ++j)
-      {
-        if (points[j] == copy[i] || points[j] == v_points.back())
-          continue;
-        const bool above = pln.signed_distance(points[j]) > -1e-8;
-        if (!orientation_set)
-        {
-          orientation = above;
-          orientation_set = true;
-        }
-        if (above != orientation)
-        {
-          all_above = false;
-          break;
-        }
-      }
-      if (all_above)
-      {
-        v_points.push_back(copy[i]);
-        copy.erase(copy.begin() + i);
-        break;
-      }
-
-    }
-    safety_counter++;
   }
 
-  points = v_points;
+  // select a perpendicular y-direction
+  // comput the cosine of the p1-p angle and the y direction
+  // since angle ϵ [0, 2·π], and cosine is monotonically decreasing,
+  // we can sort point by ther ange
+  const auto & y_direction = plane.get_basis()[1];
+  std::vector<double>  cosines(points.size(), 0.0);
+  for (std::size_t i=0; i<points.size(); ++i)
+  {
+    if (i == first)
+      cosines[i] = - 1.1;  // cos can't be less than one
+                           // but we put the first point in the end of the list
+    else
+    {
+      const auto diff = points[i] - points[first];
+      cosines[i] = (y_direction).dot( diff ) / diff.norm();
+    }
+  }
+
+  // initialize original index locations
+  std::vector<size_t> idx(n_points);
+  iota(idx.begin(), idx.end(), 0);
+  std::sort(idx.begin(), idx.end(), [&cosines](size_t i1, size_t i2)
+                                    {return cosines[i1] > cosines[i2];});
+  const auto tmp = points;
+  for (std::size_t i=0; i<n_points; ++i)
+    points[i] = tmp[idx[i]];
 }
 
 
@@ -280,9 +267,8 @@ bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
   {
     const Plane<Scalar> side = get_side(edge);
     if (std::fabs( side.signed_distance(p) ) > tol)
-      return false;
-    else if (side.above(p) != side.above(cm))
-      return false;
+      if (side.above(p) != side.above(cm))
+        return false;
   }
 
   return true;

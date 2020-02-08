@@ -46,7 +46,7 @@ class Plane
   // Be very careful with this method sine it does not check whether
   // all points belong to the same plane
   Plane(const std::vector<Point<3,Scalar>> & cloud,
-        const std::vector<size_t> specific_indices);
+        const std::vector<size_t> & specific_indices);
 
   // setter
   void set_data(const Point<3,Scalar> & p1,
@@ -59,11 +59,11 @@ class Plane
   void move(const Point<3,Scalar> & p);
 
   // get const reference to the plane normal vector
-  const Point<3,Scalar> & normal() const {return basis(2);}
+  const Point<3,Scalar> & normal() const {return _basis(2);}
   // get non-const reference to the basis object
-  Basis<3,Scalar> & get_basis() {return basis;}
+  Basis<3,Scalar> & get_basis() {return _basis;}
   // get const reference to the basis object
-  const Basis<3,Scalar> & get_basis() const {return basis;}
+  const Basis<3,Scalar> & get_basis() const {return _basis;}
 
   // compute strike angle (degrees) from normal
   Scalar strike_angle() const;
@@ -97,7 +97,7 @@ class Plane
   // return two orthogonal vectors within the plane
   void compute_basis(const Point<3,Scalar> & normal);
 
-  Basis<3,Scalar> basis;
+  Basis<3,Scalar> _basis;
 };
 
 
@@ -119,7 +119,9 @@ Plane<Scalar>::Plane(const Point<3,Scalar> & point,
 template <typename Scalar>
 Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
 {
-  assert( cloud.size() > 2 );
+  if ( cloud.size() < 3 )
+    throw std::invalid_argument("Cannot create a plane from two points only");
+
   const Point<3,Scalar> p1 = cloud[0], p2 = cloud[1];
   assert( p1.distance(p2) > 1e-8 );
   Point<3,Scalar> p3;
@@ -132,13 +134,18 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
     found = true;
     p3 = cloud[i];
   }
-  if (!found) throw std::invalid_argument("Cannot initialize a plane from a point cloud");
+  if (!found)
+  {
+    for (auto & p : cloud)
+      std::cout << p << std::endl;
+    throw std::invalid_argument("Cannot initialize a plane from a point cloud");
+  }
   set_data(p1, p2, p3);
 }
 
 template <typename Scalar>
 Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud,
-                     const std::vector<size_t> specific_indices)
+                     const std::vector<size_t> &specific_indices)
 {
   assert( cloud.size() > 2 );
   assert( specific_indices.size() > 2 );
@@ -153,7 +160,12 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud,
     found = true;
     p3 = cloud[specific_indices[i]];
   }
-  if (!found) throw std::invalid_argument("Cannot initialize a plane from a point cloud");
+  if (!found)
+  {
+    for (const size_t i : specific_indices)
+      std::cout << cloud[specific_indices[i]] << std::endl;
+    throw std::invalid_argument("Cannot initialize a plane from a point cloud");
+  }
 
   set_data(p1, p2, p3);
 }
@@ -216,7 +228,7 @@ void Plane<Scalar>::set_data(const Point<3,Scalar> & p1,
 template <typename Scalar>
 void Plane<Scalar>::set_basis(const Basis<3,Scalar> & basis)
 {
-  this->basis = basis;
+  this->_basis = basis;
   compute_algebraic_coeff();
 }
 
@@ -225,7 +237,7 @@ void Plane<Scalar>::set_basis(const Basis<3,Scalar> & basis)
 template <typename Scalar>
 void Plane<Scalar>::compute_algebraic_coeff()
 {
-  const auto & normal = basis[2];
+  const auto & normal = _basis[2];
   d = normal(0)*point(0) +
       normal(1)*point(1) +
       normal(2)*point(2);
@@ -288,24 +300,22 @@ void Plane<Scalar>::compute_basis(const Point<3,Scalar> & normal)
    */
   // const Point<3,Scalar> rv = {normal.x() + 1, normal.y(), normal.z()};
   Point<3,Scalar> rv = normal;
-  rv[0] += 1;
-  Point<3,Scalar> e1 = project_vector(rv);
-
-  // check
-  if (e1.norm() < 1e-16 || (e1.cross(normal)).norm() < 1e-6)
+  size_t cnt = 0;
+  do
   {
-    rv = normal;
-    rv[1] += 1;
-    e1 = project_vector(rv);
-  }
+    rv[cnt] += 1;
+    cnt = (cnt < 2) ? cnt+1 : 0;
+  } while (rv.cross(normal).norm() < 1e-8);
+
+  Point<3, Scalar> e1 = project_vector(rv);
   e1.normalize();
 
   Point<3,Scalar> e2 = normal.cross(e1);
   e2.normalize();
 
-  basis[0] = e1;
-  basis[1] = e2;
-  basis[2] = normal;
+  _basis[0] = e1;
+  _basis[1] = e2;
+  _basis[2] = normal;
 }
 
 
@@ -315,8 +325,8 @@ inline
 Point<3, Scalar>
 Plane<Scalar>::project_vector(const Point<3,Scalar> & p) const
 {
-  Scalar p_n = p.dot(basis(2));
-  return p - p_n * basis(2);
+  Scalar p_n = p.dot(_basis(2));
+  return p - p_n * _basis(2);
 }
 
 
@@ -355,7 +365,7 @@ Plane<Scalar>::local_coordinates(const Point<3,Scalar> & p) const
   // translate
   Point<3,Scalar> p_prime = p - point;
   // project on basis vectors
-  return basis.transform(p_prime);
+  return _basis.transform(p_prime);
 }
 
 
@@ -372,7 +382,7 @@ template <typename Scalar>
 Scalar
 Plane<Scalar>::dip_angle() const
 {
-  Scalar rdip = static_cast<Scalar>(acos(basis(2)[2]));
+  Scalar rdip = static_cast<Scalar>(acos(_basis(2)[2]));
   double dip = 180. * rdip / M_PI;
   if (dip > 90.0)
     dip = 180. - dip;
@@ -384,13 +394,13 @@ template <typename Scalar>
 Scalar
 Plane<Scalar>::strike_angle() const
 {
-  Scalar rdip = static_cast<Scalar>(acos(basis(2)[2]));
+  Scalar rdip = static_cast<Scalar>(acos(_basis(2)[2]));
 
   // avoid taking acos(+- 1) -- causes errors due to roundoff
-  // const double v1 = std::clamp( basis(2)[0] / sin(rdip), -1.0, 1.0);
-  // const double v2 = std::clamp( basis(2)[1] / sin(rdip), -1.0, 1.0);
-  const double v1 = std::min(std::max(-1.0, basis(2)[0]), 1.0);
-  const double v2 = std::min(std::max(-1.0, basis(2)[1]), 1.0);
+  // const double v1 = std::clamp( _basis(2)[0] / sin(rdip), -1.0, 1.0);
+  // const double v2 = std::clamp( _basis(2)[1] / sin(rdip), -1.0, 1.0);
+  const double v1 = std::min(std::max(-1.0, _basis(2)[0]), 1.0);
+  const double v2 = std::min(std::max(-1.0, _basis(2)[1]), 1.0);
 
   Scalar rstrike_from_cos = acos(v1) - M_PI / 2.;
   Scalar rstrike_from_sin = asin(v2) - M_PI / 2.;

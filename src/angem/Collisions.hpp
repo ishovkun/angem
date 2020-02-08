@@ -290,8 +290,10 @@ void split(const Polygon<Scalar> & poly,
   }
 }
 
-// marks polygons above fracture as 1
-// polygons below fracture as 0
+/* splits a polyhedron by plane
+ *  marks polygons above fracture as marker_above
+ * polygons below fracture as marker_below
+ *  marks fracture polygon as marker_split */
 template <typename Scalar>
 void split(const Polyhedron<Scalar> & polyhedron,
            const Plane<Scalar>      & plane,

@@ -144,8 +144,9 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
 
   // this is a version of Graham Scan but without enforcing convexity
   // Just sort vertices by the polar angle with respect to the first point
-  // select the first point as the support in the polygon direction
-  Scalar max_dist = - std::numeric_limits<Scalar>::max();
+  // select the first point as the support in the polygon first tangent vector direction
+  // Scalar max_dist = -std::numeric_limits<Scalar>::max();
+  Scalar max_dist = std::numeric_limits<Scalar>::lowest();
   std::size_t first = points.size();
   const auto & x_direction = plane.get_basis()[0];
   for (std::size_t i=0; i<points.size(); ++i)
@@ -157,11 +158,10 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
       first = i;
     }
   }
-
   // select a perpendicular y-direction
   // comput the cosine of the p1-p angle and the y direction
   // since angle ϵ [0, 2·π], and cosine is monotonically decreasing,
-  // we can sort point by ther ange
+  // we can sort point by ther angle
   const auto & y_direction = plane.get_basis()[1];
   std::vector<double>  cosines(points.size(), 0.0);
   for (std::size_t i=0; i<points.size(); ++i)
@@ -179,8 +179,61 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
   // initialize original index locations
   std::vector<size_t> idx(n_points);
   iota(idx.begin(), idx.end(), 0);
+  // first sort by cosine
   std::sort(idx.begin(), idx.end(), [&cosines](size_t i1, size_t i2)
                                     {return cosines[i1] > cosines[i2];});
+
+  /* Support for hanging nodes
+   * If there are several vertices with the same value of cos,
+   * we additionally sort them by distance
+   * Note that we need to sort only vertices with cos = min(cosines), and
+   * cos = max(cosines), since  we do not fully support non-convex polygons */
+  // find lowest and highest values skipping -1.1
+  Scalar lowest = std::numeric_limits<Scalar>::max(),
+         highest = std::numeric_limits<Scalar>::lowest();
+  for ( auto & val : cosines )
+  {
+    if (val != -1.1 && val < lowest)
+      lowest = val;
+    if (val > highest)
+      highest = val;
+  }
+
+  // sort vertices with cos = lowest
+  size_t ibegin = idx.size(), iend = idx.size();
+  for (std::size_t i=0; i<idx.size(); ++i)
+    if (std::fabs(cosines[idx[i]] - lowest) < 1e-6)
+    {
+      if (ibegin == idx.size())
+        ibegin = i;
+      iend = i;
+    }
+
+  if (ibegin  != iend)
+    std::sort(idx.begin() + ibegin, idx.begin() + iend,
+              [&points, first](size_t i1, size_t i2)
+              {
+                return (points[first].distance(points[i1]) > points[first].distance(points[i2]));
+              });
+
+  // sort vertices with cos = highest
+  ibegin = idx.size(), iend = idx.size();
+  for (std::size_t i=0; i<idx.size(); ++i)
+    if (std::fabs(cosines[idx[i]] - highest) < 1e-6)
+    {
+      if (ibegin == idx.size())
+        ibegin = i;
+      iend = i;
+    }
+
+  if (ibegin != iend)
+    std::sort(idx.begin()+ibegin, idx.begin() + iend + 1,
+              [&points, first](size_t i1, size_t i2)
+              {
+                return (points[first].distance(points[i1]) < points[first].distance(points[i2]));
+              });
+
+
   const auto tmp = points;
   for (std::size_t i=0; i<n_points; ++i)
     points[i] = tmp[idx[i]];
@@ -192,6 +245,8 @@ void
 Polygon<Scalar>::reorder_indices(const std::vector<Point<3, Scalar>> &verts,
                                  std::vector<std::size_t>            &indices)
 {
+  if (indices.size() < 3)
+    throw std::invalid_argument("Polygon cannot have less than 3 vertices");
   std::vector<Point<3, Scalar>> points(indices.size());
   for (std::size_t i=0; i<indices.size(); ++i)
     points[i] = verts[indices[i]];

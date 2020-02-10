@@ -245,7 +245,6 @@ void split(const Polygon<Scalar> & poly,
       if (plane.above(p))  // technically need to check only one
         above = true;
     }
-
     result.polygons.push_back(indices);
 
     // assign markers
@@ -262,9 +261,10 @@ void split(const Polygon<Scalar> & poly,
   for (const auto p : poly.get_points())
   {
     const std::size_t ind = result.vertices.insert(p);
-    if (plane.above(p))
+    const Scalar signed_dist = plane.signed_distance(p);
+    if (signed_dist > -tolerance)
       set_above.insert(ind);
-    else
+    if (signed_dist < +tolerance)
       set_below.insert(ind);
   }
 
@@ -276,7 +276,7 @@ void split(const Polygon<Scalar> & poly,
   }
 
   std::vector<std::size_t> above(set_above.begin(), set_above.end()),
-      below(set_below.begin(), set_below.end());
+                           below(set_below.begin(), set_below.end());
 
   if (above.size() > 2)
   {
@@ -329,7 +329,6 @@ void split(const Polyhedron<Scalar> & polyhedron,
   std::vector<size_t> section_poly_verts;
   // vertices of the polyhedron
   const std::vector<Point<3,double>> & poly_vertices = polyhedron.get_points();
-  assert( poly_vertices.size() > 2 );
   // number of points in intersecting polygon is equal to the total number of points
   // in the split minus the number of vertices in the polyhedron
   section_poly_verts.reserve(result.vertices.size() - poly_vertices.size());
@@ -337,18 +336,20 @@ void split(const Polyhedron<Scalar> & polyhedron,
   const double h = poly_vertices[1].distance(poly_vertices[0]);
   // figure out which points lie on the plane
   for (size_t i = 0; i < result.vertices.size(); i++)
-    if (std::fabs(plane.signed_distance(result.vertices[i])) < 1e-4 * h)
+    if (std::fabs(plane.signed_distance(result.vertices[i])) < tolerance * h)
       section_poly_verts.push_back(i);
   // postprocessing: create a polygon from the points
   if (!section_poly_verts.empty())
   {
+    if (section_poly_verts.size() < 3)
+      throw std::runtime_error("something wrong with the splitting");
+
     // sort vertices so they form a polygon
     Polygon<Scalar>::reorder_indices(result.vertices.points, section_poly_verts);
     result.polygons.push_back(std::move(section_poly_verts));
     parent_face_indices.push_back(result.polygons.size());
     result.markers.push_back(marker_split);
   }
-
 }
 
 // Compute the intersection  of a line and a plane

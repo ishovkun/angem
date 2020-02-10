@@ -194,9 +194,15 @@ Point<3,Scalar> Polyhedron<Scalar>::center() const
 
   const auto faces = get_face_polygons();
   Point<3,Scalar> face_center_mass;
+  double total_face_area = 0;
   for (const auto & face : faces)
-    face_center_mass += face.center();
-  face_center_mass /= faces.size();
+  {
+    Scalar face_area = face.area();
+    face_center_mass += face.center() * face_area;
+    total_face_area += face_area;
+  }
+
+  face_center_mass /= ( total_face_area );
 
   Point<3,Scalar> c;  // polyhedron center mass
   Scalar vol = 0;

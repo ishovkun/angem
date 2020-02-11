@@ -210,7 +210,7 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
     }
 
   if (ibegin  != iend)
-    std::sort(idx.begin() + ibegin, idx.begin() + iend,
+    std::sort(idx.begin() + ibegin, idx.begin() + iend + 1,
               [&points, first](size_t i1, size_t i2)
               {
                 return (points[first].distance(points[i1]) > points[first].distance(points[i2]));

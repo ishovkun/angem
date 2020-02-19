@@ -26,9 +26,11 @@ class Polygon: public Shape<Scalar>
   // Vertices are ordered in a clock-wise manner upon creation.
   Polygon(const std::vector<Point<3,Scalar>> & points_list);
   // Helper constructor. Construct a polygon (face) from some mesh vertices.
-  // Vertices are ordered in a clock-wise manner upon creation.
+  // Vertices are ordered in a clock-wise manner upon creation if reorder_vertices == true.
+  // Otherwise the vertices are in the assigned order.
   Polygon(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
-          const std::vector<std::size_t>     & indices);
+          const std::vector<std::size_t>     & indices,
+          const bool                           reorder_vertices = true);
   // Helper constructor. Construct a polygon (face) from some mesh vertices.
   // Vertices are ordered in a clock-wise manner upon creation.
   Polygon(const PointSet<3,Scalar>           & all_mesh_vertices,
@@ -52,7 +54,8 @@ class Polygon: public Shape<Scalar>
   std::vector<Edge> get_edges() const;
 
   // setter
-  virtual void set_data(const std::vector<Point<3,Scalar>> & point_list) override;
+  void set_data(const std::vector<Point<3,Scalar>> & point_list,
+                const bool                           reorder_vertices = true);
   // shift all points in direction p
   virtual void move(const Point<3,Scalar> & p) override;
   // order vertices in a clockwise fashion
@@ -87,13 +90,14 @@ Polygon<Scalar>::Polygon(const std::vector<Point<3,Scalar>> & point_list)
 
 template<typename Scalar>
 Polygon<Scalar>::Polygon(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
-                         const std::vector<std::size_t>     & indices)
+                         const std::vector<std::size_t>     & indices,
+                         const bool                           reorder_vertices)
 {
   assert(indices.size() > 2);
   std::vector<Point<3,Scalar>> point_list;
   for (const std::size_t & i : indices)
     point_list.push_back(all_mesh_vertices[i]);
-  set_data(point_list);
+  set_data(point_list, reorder_vertices);
 }
 
 
@@ -111,11 +115,13 @@ Polygon<Scalar>::Polygon(const PointSet<3,Scalar>           & all_mesh_vertices,
 
 template<typename Scalar>
 void
-Polygon<Scalar>::set_data(const std::vector<Point<3,Scalar>> & point_list)
+Polygon<Scalar>::set_data(const std::vector<Point<3,Scalar>> & point_list,
+                          const bool                           reorder_vertices)
 {
   assert(point_list.size() >= 3);
   this->points = point_list;
-  reorder(this->points);
+  if (reorder_vertices)
+    reorder(this->points);
   const Point<3, Scalar> cm = compute_center_mass(point_list);
   m_plane = Plane<Scalar>(point_list);
   m_plane.set_point( cm );

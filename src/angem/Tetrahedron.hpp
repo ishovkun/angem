@@ -39,7 +39,7 @@ class Tetrahedron: public Polyhedron<Scalar>
   Tetrahedron(const std::vector<Point<3,Scalar>> & vertices,
               const std::vector<std::size_t>     & indices);
   // SETTERS
-  virtual void set_data(const std::vector<Point<3,Scalar>> & vertices) override;
+  void set_data(const std::vector<Point<3,Scalar>> & vertices);
   void set_data(const std::vector<Point<3,Scalar>> & vertices,
                 const std::vector<std::size_t>     & indices);
   // GETTERS

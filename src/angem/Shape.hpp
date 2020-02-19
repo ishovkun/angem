@@ -18,8 +18,6 @@ class Shape
     Shape(const std::vector<Point<3,Scalar>> & point_list);
     Shape(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
           const std::vector<std::size_t>     & indices);
-    // setters
-    virtual void set_data(const std::vector<Point<3,Scalar>> & point_list);
 
     // getter
     std::vector<Point<3,Scalar>> & get_points();
@@ -42,21 +40,10 @@ template<typename Scalar>
 Shape<Scalar>::Shape()
 {}
 
-
 template<typename Scalar>
 Shape<Scalar>::Shape(const std::vector<Point<3,Scalar>> & point_list)
-    :
-    points(point_list)
+    : points(point_list)
 {}
-
-
-template<typename Scalar>
-void
-Shape<Scalar>::set_data(const std::vector<Point<3,Scalar>> & point_list)
-{
-  points = point_list;
-}
-
 
 template<typename Scalar>
 Shape<Scalar>::Shape(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
@@ -65,8 +52,6 @@ Shape<Scalar>::Shape(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
   for (const std::size_t i : indices)
     points.push_back(all_mesh_vertices[i]);
 }
-
-
 
 template<typename Scalar>
 bool
@@ -77,7 +62,6 @@ Shape<Scalar>::empty() const
   else
     return true;
 }
-
 
 template<typename Scalar>
 Point<3,Scalar>
@@ -102,7 +86,6 @@ Shape<Scalar>::support(const Point<3,Scalar> & direction) const
   assert( ind < points.size() );
   return points[ind];
 }
-
 
 template<typename Scalar>
 std::vector<Point<3,Scalar>> &

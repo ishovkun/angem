@@ -174,10 +174,7 @@ std::vector<Polygon<Scalar>> Polyhedron<Scalar>::get_face_polygons() const
   std::vector<Polygon<Scalar>> polys;
   for (const auto & face_indices : get_faces())
   {
-    // for (auto i : face_indices)
-    //   std::cout << this->points[i] << "\t|\t";
-    // std::cout << std::endl;
-    polys.emplace_back(this->points, face_indices);
+    polys.emplace_back(this->points, face_indices, /*reorder_vertices = */ false);
   }
 
   return polys;

@@ -81,25 +81,20 @@ Polyhedron<Scalar>::set_data(const std::vector<Point<3,Scalar>>          & verti
   m_faces.resize(faces.size());
 
   std::map<size_t,size_t> global_to_local;  // vertex indices, retains order
+  for (const auto & face : faces)
+    for (const size_t v : face)
+      global_to_local.insert( {v , 0} );
   size_t n_local = 0;                        // number of local vertices
+  for (auto & it : global_to_local)
+    it.second = n_local++;
+
   for (size_t iface=0; iface<faces.size(); ++iface)
   {
     const auto & face = faces[iface];
     m_faces[iface].reserve(face.size());
     for(const size_t vert_global : face)
     {
-      // determine vertex local index
-      const auto it = global_to_local.find(vert_global);
-      size_t local;
-      // compute local vertex index
-      if (it == global_to_local.end())
-      {
-        global_to_local[vert_global] = n_local;
-        local = n_local;
-        n_local++;
-      }
-      else local = it->second;
-      // add local vertex to face
+      const size_t local = global_to_local[vert_global];
       m_faces[iface].push_back(local);
     }
   }

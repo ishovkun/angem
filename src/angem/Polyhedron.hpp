@@ -27,13 +27,20 @@ class Polyhedron: public Shape<Scalar>
   void set_data(const std::vector<Point<3,Scalar>>          & vertices,
                 const std::vector<std::vector<std::size_t>> & faces);
   // getters
+  // get vtk id of the polyhedron
   int id() const {return vtk_id;}
+  // compute the volume of the polyhedron
   virtual Scalar volume() const;
+  // compute the center of mass of the polyhedron
   virtual Point<3,Scalar> center() const override;
+  // check whether the point is inside the polyhedron
   bool point_inside(const Point<3,Scalar> & p) const;
+  // check whether the point resides on one of the boundaries
+  // using the provided tolerance
   bool point_on_boundary(const Point<3,Scalar> & p,
                          const double tolerance = 1e-4) const;
 
+  // get vector of vectors that contain the vertex indices of each polyhedron face
   const std::vector<std::vector<std::size_t>> & get_faces() const;
   std::vector<std::vector<std::size_t>> & get_faces();
   std::vector<Polygon<Scalar>> get_face_polygons() const;
@@ -73,22 +80,38 @@ Polyhedron<Scalar>::set_data(const std::vector<Point<3,Scalar>>          & verti
   assert(vertices.size() > 3);
   m_faces.resize(faces.size());
 
-  PointSet<3,Scalar> pset;
-  std::size_t iface = 0;
-  for (const auto & face : faces)
+  std::map<size_t,size_t> global_to_local;  // vertex indices, retains order
+  size_t n_local = 0;                        // number of local vertices
+  for (size_t iface=0; iface<faces.size(); ++iface)
   {
+    const auto & face = faces[iface];
     m_faces[iface].reserve(face.size());
-    for(const auto ivert : face)
+    for(const size_t vert_global : face)
     {
-      const Point<3,Scalar> p = vertices[ivert];
-      m_faces[iface].push_back(pset.insert(p));
+      // determine vertex local index
+      const auto it = global_to_local.find(vert_global);
+      size_t local;
+      // compute local vertex index
+      if (it == global_to_local.end())
+      {
+        global_to_local[vert_global] = n_local;
+        local = n_local;
+        n_local++;
+      }
+      else local = it->second;
+      // add local vertex to face
+      m_faces[iface].push_back(local);
     }
-    iface++;
   }
 
-  this->points.reserve(pset.size());
-  for (const auto & p : pset.points)
-    this->points.push_back(p);
+  this->points.reserve(global_to_local.size());
+  // invert the map
+  std::vector<size_t> inv(global_to_local.size());
+  for (const auto & it : global_to_local)
+    inv[it.second] = it.first;
+
+  for (const size_t vglob: inv )
+    this->points.push_back( vertices[ vglob ] );
 }
 
 
@@ -174,7 +197,8 @@ std::vector<Polygon<Scalar>> Polyhedron<Scalar>::get_face_polygons() const
   std::vector<Polygon<Scalar>> polys;
   for (const auto & face_indices : get_faces())
   {
-    polys.emplace_back(this->points, face_indices, /*reorder_vertices = */ false);
+    polys.emplace_back(this->points, face_indices,
+                       /*reorder_vertices = */ false);
   }
 
   return polys;
@@ -240,7 +264,6 @@ std::vector<Edge> Polyhedron<Scalar>::get_edges() const
         i2 = face[0];
       }
       auto edge = std::minmax(i1, i2);
-      auto it_edge = edges.begin();
       if (std::find_if( edges.begin(), edges.end(),
                      [&edge](const Edge & it)->bool
                      {

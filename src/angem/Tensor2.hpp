@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Point.hpp"
+#include "Exceptions.hpp"
 
 #include <array>
 #include <vector>
@@ -65,6 +66,18 @@ class Tensor2
   template <int d, typename S>
   friend std::ostream &operator<<(std::ostream     & os,
                                   const Point<d,S> & p);
+
+  // invert tensor for dim = 1
+  template<typename S>
+  friend Tensor2<1,S> invert(const Tensor2<1,S> & tens);
+
+  // invert tensor for dim = 2
+  template<typename S>
+  friend Tensor2<2,S> invert(const Tensor2<2,S> & tens);
+
+  // determinant of jacobian 3x3
+  // template<typename S>
+  // friend Tensor2<3,S> det(const Tensor2<3,S> & tens);
 
  private:
   // storage 2d array (2nd order tensor)
@@ -191,6 +204,48 @@ void Tensor2<dim,T>::operator/=(const T & x)
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
       storage[i][j] /= x;
+}
+
+template <typename T>
+Tensor2<1,T> invert(const Tensor2<1,T> & tens)
+{
+  Tensor2<1,T> result;
+  result(0, 0) = static_cast<T>(1.0) / tens(0,0);
+  return result;
+}
+
+template <typename T>
+Tensor2<2,T> invert(const Tensor2<2,T> & tens)
+{
+  Tensor2<2,T> result;
+  throw NotImplemented("inverting 2x2 tensor not implemented");
+  return result;
+}
+
+template <typename T>
+inline T det(const Tensor2<3,T> & a)
+{
+  return a(0,0) * (a(1,1) * a(2,2) - a(1,2) * a(2,1)) -
+         a(0,1) * (a(1,0) * a(2,2) - a(1,2) * a(2,0)) +
+         a(0,2) * (a(1,0) * a(2,1) - a(1,1) * a(2,0));
+}
+
+template <typename T>
+Tensor2<3,T> invert(const Tensor2<3,T> & a)
+{
+  Tensor2<3,T> result;
+  const T deta = det<T>(a);
+  assert( !std::isnan(1.0/deta));
+  result(0,0) =   ( a(1,1) * a(2,2) - a(1,2) * a(2,1) ) / deta;
+  result(0,1) = - ( a(0,1) * a(2,2) - a(0,2) * a(2,1) ) / deta;
+  result(0,2) =   ( a(0,1) * a(1,2) - a(0,2) * a(1,1) ) / deta;
+  result(1,0) = - ( a(1,0) * a(2,2) - a(1,2) * a(2,0) ) / deta;
+  result(1,1) =   ( a(0,0) * a(2,2) - a(0,2) * a(2,0) ) / deta;
+  result(1,2) = - ( a(0,0) * a(1,2) - a(0,2) * a(1,0) ) / deta;
+  result(2,0) =   ( a(1,0) * a(2,1) - a(1,1) * a(2,0) ) / deta;
+  result(2,1) = - ( a(0,0) * a(2,1) - a(0,1) * a(2,0) ) / deta;
+  result(2,2) =   ( a(0,0) * a(1,1) - a(0,1) * a(1,0) ) / deta;
+  return result;
 }
 
 //    left dot product

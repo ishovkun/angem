@@ -5,6 +5,7 @@
 
 #include <array>
 #include <vector>
+#include <initializer_list>
 
 namespace angem
 {
@@ -14,8 +15,10 @@ template <int dim, typename T>
 class Tensor2
 {
  public:
-  // default constructor
+  // default constructor. Initializes a tensor filled with zeros.
   Tensor2();
+  // construct a tensor from an initializer list
+  Tensor2(std::initializer_list<T> l);
   // create point from std::vector
   Tensor2(const std::vector<T> & v);
   // returns dim * dim
@@ -96,6 +99,18 @@ Tensor2<dim,T>::Tensor2()
       item = 0.0;
 }
 
+template <int dim, typename T>
+Tensor2<dim,T>::Tensor2(std::initializer_list<T> l)
+{
+  assert( l.size() == dim*dim );
+  auto it = l.begin();
+  for (int i = 0; i < dim; i++)
+    for (int j = 0; j < dim; j++)
+    {
+      storage[i][j] = *it; ++it;
+    }
+
+}
 
 template <int dim, typename T>
 Tensor2<dim,T>::Tensor2(const std::vector<T> & v)

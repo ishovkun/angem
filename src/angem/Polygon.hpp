@@ -356,7 +356,7 @@ Point<3,Scalar> Polygon<Scalar>::center() const
   Point<3,Scalar> u, v, n, c;
   Scalar poly_area = 0;
 
-  /* This essentially breaks the poly into triangles with
+  /* Break the poly into triangles with
    * vertices in points[0], points[j], points[j+1] */
   for (std::size_t j=1; j<this->points.size()-1; j++)
   {

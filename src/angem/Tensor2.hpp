@@ -38,6 +38,9 @@ class Tensor2
   // inline component divide by a scalar
   void operator/=(const T & x);
 
+  // matrix (dot) product with another tensor2
+  Tensor2<dim,T> operator*(const Tensor2<dim,T> & other) const;
+
   //  FRIEND FUNCTIONS
   // left dot product
   template<int d, typename Scalar>
@@ -166,6 +169,18 @@ const T & Tensor2<dim,T>::operator()(const std::size_t i, const std::size_t j) c
 {
   assert(i < dim); assert(j < dim);
   return storage[i][j];
+}
+
+
+template <int dim, typename T>
+Tensor2<dim,T> Tensor2<dim,T>::operator*(const Tensor2<dim,T> & other) const
+{
+  Tensor2<dim,T> result;
+  for (size_t i=0; i<dim; ++i)
+    for (size_t j=0; j<dim; ++j)
+      for (size_t k=0; k<dim; ++k)
+        result(i, j) += this->operator()(i, k)  * other(k, j);
+  return result;
 }
 
 

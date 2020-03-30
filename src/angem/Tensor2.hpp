@@ -78,9 +78,13 @@ class Tensor2
   template<typename S>
   friend Tensor2<2,S> invert(const Tensor2<2,S> & tens);
 
-  // determinant of jacobian 3x3
+  // determinant of matrix 3x3
   // template<typename S>
   // friend Tensor2<3,S> det(const Tensor2<3,S> & tens);
+
+  // determinant of matrix 2x2
+  // template<typename S>
+  // friend double det(const Tensor2<2,S> & tens);
 
  private:
   // storage 2d array (2nd order tensor)
@@ -230,11 +234,21 @@ Tensor2<1,T> invert(const Tensor2<1,T> & tens)
 }
 
 template <typename T>
-Tensor2<2,T> invert(const Tensor2<2,T> & tens)
+Tensor2<2,T> invert(const Tensor2<2,T> & a)
 {
-  Tensor2<2,T> result;
-  throw NotImplemented("inverting 2x2 tensor not implemented");
-  return result;
+  Tensor2<2,T> ainv = {
+     a(1,1), -a(0,1),
+    -a(1,0),  a(0,0)
+  };
+  const T deta = det(a);
+  ainv /= deta;
+  return ainv;
+}
+
+template <typename T>
+inline T det(const Tensor2<2,T> & a)
+{
+  return a(0,0) * a(1,1) - a(0,1) * a(1,0);
 }
 
 template <typename T>

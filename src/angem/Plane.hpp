@@ -74,6 +74,9 @@ class Plane
   Point<3,Scalar> project_point(const Point<3,Scalar> & p) const;
   // get points projection on the plane. convenient wrapper around previous method
   std::vector<Point<3,Scalar>> project_points(const std::vector<Point<3,Scalar>> & points) const;
+  /**
+   * Get the coordinates of the points in the basis
+   */
   Point<3,Scalar> local_coordinates(const Point<3,Scalar> & p) const;
   // project vector (no account for plane location)
   Point<3,Scalar> project_vector(const Point<3,Scalar> & p) const;

@@ -101,10 +101,10 @@ Basis<dim,Scalar>::is_empty() const
   Scalar sum = static_cast<Scalar>(0);
   for (int i=0; i<dim; ++i)
     sum += vectors[i].norm();
-  if (fabs(sum - static_cast<Scalar>(3)) < 1e-16)
-    return true;
-  else
+  if (fabs(sum - static_cast<Scalar>(3)) < 1e-8)
     return false;
-
+  else
+    return true;
 }
+
 }  // end namespace

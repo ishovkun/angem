@@ -301,7 +301,7 @@ void Plane<Scalar>::compute_basis(const Point<3,Scalar> & normal)
    * project it on the plane - first tangent basis vector e1
    * complete the basis with e2 = n x e1
    */
-  // const Point<3,Scalar> rv = {normal.x() + 1, normal.y(), normal.z()};
+  _basis[2] = normal;
   Point<3,Scalar> rv = normal;
   size_t cnt = 0;
   do
@@ -318,7 +318,6 @@ void Plane<Scalar>::compute_basis(const Point<3,Scalar> & normal)
 
   _basis[0] = e1;
   _basis[1] = e2;
-  _basis[2] = normal;
 }
 
 

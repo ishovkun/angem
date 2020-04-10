@@ -32,6 +32,11 @@ class Basis
   // probably do not need this any more since i changed the default constructor
   bool is_empty() const;
 
+  // printout
+  template <int d, typename S>
+  friend std::ostream &operator<<(std::ostream     & os,
+                                  const Basis<d,S> & p);
+
  private:
   std::vector<Point<dim,Scalar>> vectors;
 };
@@ -105,6 +110,13 @@ Basis<dim,Scalar>::is_empty() const
     return false;
   else
     return true;
+}
+
+template <int d, typename S>
+std::ostream &operator<<(std::ostream & os, const Basis<d,S> & basis)
+{
+  os << "(" << basis(0) << ",\n " << basis(1) << ",\n " << basis(2) << ")";
+  return os;
 }
 
 }  // end namespace

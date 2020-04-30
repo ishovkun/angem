@@ -21,6 +21,8 @@ class Tensor2
   Tensor2(std::initializer_list<T> l);
   // create point from std::vector
   Tensor2(const std::vector<T> & v);
+  // set all components to zero
+  void set_zero();
   // returns dim * dim
   static size_t size() { return dim*dim; }
   // create a unit tensor
@@ -30,6 +32,8 @@ class Tensor2
   inline const T & operator()(const int i, const int j) const;
   inline T & operator()(const std::size_t i, const std::size_t j);
   inline const T & operator()(const std::size_t i, const std::size_t j) const;
+  inline T & get(const int i, const int j);
+  inline const T & get(const int i, const int j) const;
 
   // dot product with a vector
   Point<dim,T> operator*(const Point<dim,T>   & p) const;
@@ -90,17 +94,17 @@ class Tensor2
   // friend double det(const Tensor2<2,S> & tens);
 
  private:
-  // storage 2d array (2nd order tensor)
-  std::array<std::array<T, dim>, dim> storage;
+  // // storage 2d array (2nd order tensor)
+  // std::array<std::array<T, dim>, dim> storage;
+  // storage 1d array
+  std::array<T, dim*dim> _storage;
 };
 
 
 template <int dim, typename T>
 Tensor2<dim,T>::Tensor2()
 {
-  for (auto & row : storage)
-    for (auto & item : row)
-      item = 0.0;
+  std::fill(_storage.begin(), _storage.end(), 0);
 }
 
 template <int dim, typename T>
@@ -111,9 +115,8 @@ Tensor2<dim,T>::Tensor2(std::initializer_list<T> l)
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
     {
-      storage[i][j] = *it; ++it;
+      get(i, j) = *it; ++it;
     }
-
 }
 
 template <int dim, typename T>
@@ -122,7 +125,7 @@ Tensor2<dim,T>::Tensor2(const std::vector<T> & v)
   assert(v.size() == dim*dim);
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
-      storage[i][j] = v[dim*i + j];
+      get(i, j) = v[dim*i + j];
 }
 
 
@@ -136,41 +139,49 @@ Tensor2<dim,T>::make_unit_tensor()
   return ut;
 }
 
+template <int dim, typename T>
+T & Tensor2<dim,T>::get(const int i, const int j)
+{
+  assert(i >= 0); assert(j >= 0);
+  assert(i < dim); assert(j < dim);
+  return _storage[i*dim + j];
+}
 
+template <int dim, typename T>
+const T & Tensor2<dim,T>::get(const int i, const int j) const
+{
+  return const_cast<Tensor2<dim,T>*>(this)->get(i, j);
+}
 
 template <int dim, typename T>
 T & Tensor2<dim,T>::operator()(const int i, const int j)
 {
-  assert(i >= 0); assert(j >= 0);
-  assert(i < dim); assert(j < dim);
-  return storage[i][j];
+  return get(i, j);
 }
 
+template <int dim, typename T>
+void Tensor2<dim,T>::set_zero()
+{
+  std::fill( _storage.begin(), _storage.end(), 0 );
+}
 
 template <int dim, typename T>
 T & Tensor2<dim,T>::operator()(const std::size_t i, const std::size_t j)
 {
-  assert(i < dim); assert(j < dim);
-  return storage[i][j];
+  return get(static_cast<int>(i), static_cast<int>(j));
 }
-
 
 template <int dim, typename T>
 const T & Tensor2<dim,T>::operator()(const int i, const int j) const
 {
-  assert(i >= 0); assert(j >= 0);
-  assert(i < dim); assert(j < dim);
-  return storage[i][j];
+  return const_cast<Tensor2<dim,T>*>(this)->get(i, j);
 }
-
 
 template <int dim, typename T>
 const T & Tensor2<dim,T>::operator()(const std::size_t i, const std::size_t j) const
 {
-  assert(i < dim); assert(j < dim);
-  return storage[i][j];
+  return const_cast<Tensor2<dim,T>*>(this)->get(static_cast<int>(i), static_cast<int>(j));
 }
-
 
 template <int dim, typename T>
 Tensor2<dim,T> Tensor2<dim,T>::operator*(const Tensor2<dim,T> & other) const
@@ -182,7 +193,6 @@ Tensor2<dim,T> Tensor2<dim,T>::operator*(const Tensor2<dim,T> & other) const
         result(i, j) += this->operator()(i, k)  * other(k, j);
   return result;
 }
-
 
 // fuctions
 template<int d, typename Scalar>
@@ -215,10 +225,9 @@ template <int dim, typename T>
 Point<dim,T> Tensor2<dim,T>::operator*(const Point<dim,T>   & p) const
 {
   Point<dim,T> result;
-
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
-      result[i] += storage[i][j] * p(j);
+      result[i] += get(i, j) * p(j);
   return result;
 }
 
@@ -228,7 +237,7 @@ void Tensor2<dim,T>::operator*=(const T & x)
 {
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
-      storage[i][j] *= x;
+      get(i, j) *= x;
 }
 
 
@@ -237,7 +246,7 @@ void Tensor2<dim,T>::operator/=(const T & x)
 {
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
-      storage[i][j] /= x;
+      get(i, j) /= x;
 }
 
 template <typename T>
@@ -301,11 +310,10 @@ Point<dim,T> operator*(const Point<dim,T>   & p,
 
   for (int i = 0; i < dim; i++)
     for (int j = 0; j < dim; j++)
-      result[j] += p(i) * t.storage[i][j];
+      result[j] += p(i) * t(i, j);
   return result;
 
 }
-
 
 template<int d, typename Scalar>
 Tensor2<d,Scalar> operator*(const Tensor2<d,Scalar> & t,
@@ -314,7 +322,7 @@ Tensor2<d,Scalar> operator*(const Tensor2<d,Scalar> & t,
   auto result = t;
   for (int i = 0; i < d; i++)
     for (int j = 0; j < d; j++)
-      result *= x;
+      result(i, j) *= x;
   return result;
 }
 

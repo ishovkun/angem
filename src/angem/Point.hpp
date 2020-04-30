@@ -33,7 +33,7 @@ class Point
   // assignment operator
   void operator=(std::vector<Scalar> & v);
   // set all component to zero
-  void clear();
+  void set_zero();
 
   // getters (non-const)
   // Get a non-const reference to x component
@@ -193,7 +193,7 @@ void Point<dim,Scalar>::operator=(std::vector<Scalar> & v)
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::clear()
+void Point<dim,Scalar>::set_zero()
 {
   for (int i=0; i<dim; ++i)
     _storage[i] = 0;

@@ -135,7 +135,7 @@ Scalar Polyhedron<Scalar>::volume() const
   {
     const auto face_poly = Polygon<Scalar>(this->points, face_indices);
     const Scalar face_area = face_poly.area();
-    const Scalar h = c.distance(face_poly.plane().project_point(c));
+    const Scalar h = std::fabs(face_poly.plane().signed_distance(c));
     vol += 1./3. * h * face_area;
   }
   return vol;

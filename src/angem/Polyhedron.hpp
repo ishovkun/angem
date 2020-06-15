@@ -1,13 +1,14 @@
 #pragma once
 
-#include "Shape.hpp"
-#include "Plane.hpp"
-#include "PointSet.hpp"
-#include "Polygon.hpp"
-#include "PolyGroup.hpp"
-#include "VTK_ID.hpp"
+#include "Shape.hpp"  // provides Shape<Scalar>
+#include "Plane.hpp"  // provides Plane<Scalar>
+#include "PointSet.hpp"  // provides PointSet<dim,Scalar>
+#include "Polygon.hpp"   // provides Polygon<Scalar>
+#include "PolyGroup.hpp" // provides Polygroup
+#include "VTK_ID.hpp"    // provides VTK_ID
 #include <typeinfo>
 #include <exception>
+#include <map>
 
 namespace angem
 {

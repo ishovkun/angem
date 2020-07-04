@@ -124,7 +124,7 @@ Polygon<Scalar>::set_data(const std::vector<Point<3,Scalar>> & point_list,
     reorder(this->points);
   const Point<3, Scalar> cm = compute_center_mass(point_list);
   m_plane = Plane<Scalar>(point_list);
-  m_plane.set_point( cm );
+  m_plane.set_origin( cm );
 }
 
 

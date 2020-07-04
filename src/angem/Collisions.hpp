@@ -213,7 +213,7 @@ bool collision(const Point<3,Scalar>        & l0,
 
   // compute intersection point
   const Point<3,Scalar> l = l1 - l0;
-  const Scalar d = (plane.point - l0).dot(plane.normal()) /
+  const Scalar d = (plane.origin() - l0).dot(plane.normal()) /
                     l.dot(plane.normal());
   intersection.push_back(l0 + d * l);
   return true;

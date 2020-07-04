@@ -53,17 +53,17 @@ class Plane
                 const Point<3,Scalar> & p2,
                 const Point<3,Scalar> & p3);
   // If you need some custom vectors in basis, you can specify them
-  void set_basis(const Basis<3,Scalar> & basis);
-
+  inline void set_basis(const Basis<3,Scalar> & basis) noexcept {_basis = basis;}
   // shift support point in direction p
-  void move(const Point<3,Scalar> & p);
-
+  void move(const Point<3,Scalar> & p) noexcept;
   // get const reference to the plane normal vector
-  const Point<3,Scalar> & normal() const {return _basis(2);}
+  const Point<3,Scalar> & normal() const noexcept {return _basis(2);}
   // get non-const reference to the basis object
-  Basis<3,Scalar> & get_basis() {return _basis;}
+  Basis<3,Scalar> & get_basis() noexcept {return _basis;}
   // get const reference to the basis object
-  const Basis<3,Scalar> & get_basis() const {return _basis;}
+  const Basis<3,Scalar> & get_basis() const noexcept {return _basis;}
+  // return point that is in the plane
+  const Point<3,Scalar> & origin() const noexcept {return _origin;}
 
   // compute strike angle (degrees) from normal
   Scalar strike_angle() const;
@@ -85,22 +85,20 @@ class Plane
 
   // true if point is above the plane
   bool above(const Point<3,Scalar> & p) const;
-
-  void set_point(const Point<3,Scalar> & p) {this->point = p;}
+  // set point located in the plane
+  inline void set_origin(const Point<3,Scalar> & p) {this->_origin = p;}
+  // get d coefficient in plane equation ax + by + cz = d
+  inline Scalar get_zero_intercept() const noexcept;
+  // change basis that the normal is pointing in the opposite direction
+  const angem::Point<3,Scalar> & invert_normal() noexcept;
 
   // ATTRIBUTES
-  // point on the plane
-  Point<3,Scalar> point;
-  // algebraic coefficient in ax + by + cz = d
-  Scalar d;
-
  protected:
-  // compute algebraic coefficient d in ax + by + cz = d
-  void compute_algebraic_coeff();
   // return two orthogonal vectors within the plane
   void compute_basis(const Point<3,Scalar> & normal);
 
-  Basis<3,Scalar> _basis;
+  Point<3,Scalar> _origin; // point on the plane
+  Basis<3,Scalar> _basis;  // tangent and normal vectors
 };
 
 
@@ -112,11 +110,9 @@ Plane<Scalar>::Plane()
 template <typename Scalar>
 Plane<Scalar>::Plane(const Point<3,Scalar> & point,
                      const Point<3,Scalar> & normal)
-    :
-    point(point)
+    : _origin(point)
 {
   compute_basis(normal);
-  compute_algebraic_coeff();
 }
 
 template <typename Scalar>
@@ -177,7 +173,7 @@ template <typename Scalar>
 Plane<Scalar>::Plane(const Point<3,Scalar> & point,
                      const Scalar          & dip_angle,
                      const Scalar          & strike_angle)
-    : point(point)
+    : _origin(point)
 {
   assert(dip_angle >= - 90 and dip_angle <= 90);
 
@@ -191,7 +187,6 @@ Plane<Scalar>::Plane(const Point<3,Scalar> & point,
   normal[2] = cos(rdip);
 
   compute_basis(normal);
-  compute_algebraic_coeff();
 }
 
 
@@ -216,7 +211,7 @@ void Plane<Scalar>::set_data(const Point<3,Scalar> & p1,
     throw std::invalid_argument("Initializing plane with colinear vectors");
 #endif
 
-  point = p1;
+  _origin = p1;
   // define two tangent vectors
   const Point<3,Scalar> t1 = p1 - p2;
   const Point<3,Scalar> t2 = p1 - p3;
@@ -224,26 +219,12 @@ void Plane<Scalar>::set_data(const Point<3,Scalar> & p1,
   normal.normalize();
 
   compute_basis(normal);
-  compute_algebraic_coeff();
 }
 
-
 template <typename Scalar>
-void Plane<Scalar>::set_basis(const Basis<3,Scalar> & basis)
+Scalar Plane<Scalar>::get_zero_intercept() const noexcept
 {
-  this->_basis = basis;
-  compute_algebraic_coeff();
-}
-
-
-
-template <typename Scalar>
-void Plane<Scalar>::compute_algebraic_coeff()
-{
-  const auto & normal = _basis[2];
-  d = normal(0)*point(0) +
-      normal(1)*point(1) +
-      normal(2)*point(2);
+  return normal().dot(_origin);
 }
 
 
@@ -258,7 +239,7 @@ Scalar Plane<Scalar>::signed_distance(const Point<3,Scalar> & p) const
    * d = (p - x0) · n
    * if d<0, point below the plane
    */
-  return (p - point).dot(normal());
+  return (p - _origin).dot(normal());
 }
 
 
@@ -341,9 +322,9 @@ Plane<Scalar>::project_point(const Point<3,Scalar> & p) const
   // 1: translate p' = p - s  (s - plane support point)
   // 2. project on normal p'n = p' · n
   // 3. Translate back j = s + j'
-  Point<3,Scalar> p_prime = p - point;
+  Point<3,Scalar> p_prime = p - _origin;
   Point<3,Scalar> j_prime = project_vector(p_prime);
-  return point + j_prime;
+  return _origin + j_prime;
 }
 
 
@@ -365,7 +346,7 @@ Point<3,Scalar>
 Plane<Scalar>::local_coordinates(const Point<3,Scalar> & p) const
 {
   // translate
-  Point<3,Scalar> p_prime = p - point;
+  Point<3,Scalar> p_prime = p - _origin;
   // project on basis vectors
   return _basis.transform(p_prime);
 }
@@ -373,10 +354,9 @@ Plane<Scalar>::local_coordinates(const Point<3,Scalar> & p) const
 
 template <typename Scalar>
 void
-Plane<Scalar>::move(const Point<3,Scalar> & p)
+Plane<Scalar>::move(const Point<3,Scalar> & p) noexcept
 {
-  point += p;
-  compute_algebraic_coeff();
+  _origin += p;
 }
 
 
@@ -433,4 +413,15 @@ Plane<Scalar>::strike_angle() const
 
   return strike;
 }
+
+template <typename Scalar>
+const angem::Point<3,Scalar> & Plane<Scalar>::invert_normal() noexcept
+{
+  _basis[2] *= -1;
+  const auto tmp = _basis[1];
+  _basis[1] = _basis[0];
+  _basis[0] = tmp;
+  return normal();
+}
+
 }  // end namespace

@@ -121,12 +121,25 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
   if ( cloud.size() < 3 )
     throw std::invalid_argument("Cannot create a plane from two points only");
 
-  const Point<3,Scalar> p1 = cloud[0], p2 = cloud[1];
-  assert( p1.distance(p2) > 1e-8 );
+  const Point<3,Scalar> p1 = cloud[0];
+  size_t v2 = 1;
+  for (; v2 < cloud.size(); ++v2)
+    if (p1.distance(cloud[v2]) > 1e-8)
+      break;
+  if ( v2 >= cloud.size() - 1 )
+  {
+    std::cout << "cloud:" << std::endl;
+    for (auto & p : cloud)
+      std::cout << p << " (dist " << p1.distance(p) << ")"<< std::endl;
+    throw std::invalid_argument("Cannot initialize a plane from a point cloud. "
+                                "All vertices are within 1e-8 to each other");
+  }
+  const auto p2 = cloud[v2];
+
   Point<3,Scalar> p3;
   bool found = false;
   const Line<3, Scalar> line(p1, p2 - p1);
-  for (std::size_t i=2; i < cloud.size(); ++i)
+  for (std::size_t i=v2+1; i < cloud.size(); ++i)
   {
     if (line.distance(cloud[i]) < 1e-6)
       continue;

@@ -8,6 +8,7 @@
 #include "angem/utils.hpp"
 // #include "PolyGroup.hpp"
 #include "CollisionGJK.hpp"
+#include "Tensor2.hpp"
 #include "utils.hpp"
 #include <set>
 
@@ -94,7 +95,47 @@ bool collision(const Polygon<Scalar>        & poly,
   return result;
 }
 
-
+/*  Intersetion of two lines in 3D */
+template <typename Scalar>
+bool collision(const Line<3,Scalar>        & l1,
+               const Line<3,Scalar>        & l2,
+               std::vector<Point<3,Scalar>> & intersection,
+               const double                   tol = 1e-10)
+{
+  /*
+  **    Line1                         Line2
+  **    -----                         -----
+  ** x = a11 * t1 + b11            x = a21 * t2 + b21
+  ** y = a12 * t1 + b21            y = a22 * t2 + b22
+  ** z = a13 * t1 + b31            z = a23 * t2 + b23
+  ** Assuming that these lines actually have an intersection, we need to solve the following
+  ** system:
+  ** a₁₁ t₁ - a₂₁ t₂ = b₂₁ - b₁₁
+  ** a₁₂ t₁ - a₂₂ t₂ = b₂₂ - b₁₂
+  ** Since there are actually three equations, and some lines can be aligned with axes,
+  ** the determinant
+  **     | a₁₁   -a₂₁ |
+  ** det | a₁₂   -a₂₂ | must be non-zero.
+  ** We must handle such cases carefully.
+   */
+  using pair = std::pair<size_t, size_t>;
+  for (const pair ij : std::vector<pair>{pair(0,1),pair(0,2),pair(1,2)})
+  {
+    const size_t i = ij.first;
+    const size_t j = ij.second;
+    const Tensor2<2,Scalar> mat = {l1.direction()[i], -l2.direction()[i],
+                                   l1.direction()[j], -l2.direction()[j],};
+    if (det(mat) > tol)
+    {
+      const Point<2,Scalar> rhs = { l2.point()[i] - l1.point()[i] ,
+                                    l2.point()[j] - l1.point()[j] ,};
+      const Point<2,Scalar> solution = invert(mat) * rhs;
+      intersection.push_back(l1.point() + l1.direction() * solution(0));
+      return true;
+    }
+  }
+  return false;
+}
 
 // collision of two polygons
 template <typename Scalar>
@@ -352,6 +393,15 @@ void split(const Polyhedron<Scalar> & polyhedron,
   }
 }
 
+template <typename Scalar>
+bool coincide(const Line<3,Scalar> & line, const Plane<Scalar> & plane, const double tol = 1e-10)
+{
+  if (std::fabs(line.direction().dot(plane.normal())) < tol)
+    if (std::fabs(plane.signed_distance(line.point())) < tol)
+      return true;
+  return false;
+}
+
 // Compute the intersection  of a line and a plane
 //  throws std::runtime_error
 template <typename Scalar>
@@ -364,41 +414,65 @@ bool collision(const Line<3,Scalar> & line,
   // line p = d l + l0
   // intersection: d = (p0 - l0) · n / (l · n)
   // Note: if (l · n) == 0 then line is parallel to the plane
-  if (std::fabs(line.direction.dot(plane.normal())) < tol)
+  if (std::fabs(line.direction().dot(plane.normal())) < tol)
   {
-    if (plane.distance(line.point) < tol)
+    if (coincide(line, plane, tol))
       throw std::runtime_error("line and plane coinside.");
     return false;
   }
 
-  const Scalar d = (plane.point - line.point).dot(plane.normal()) /
-      line.direction.dot(plane.normal());
-  intersection = line.point + d*line.direction;
+  const Scalar d = (plane.origin() - line.point()).dot(plane.normal()) /
+      line.direction().dot(plane.normal());
+  intersection = line.point() + d*line.direction();
   return true;
 }
 
 
-// section is a vector cause line can reside on polygon
+// find intersection between a polygon and a line
+//  section is a vector cause line can reside on polygon
 // appends to vector intersection
 // note: polygon should have sorted points
 template <typename Scalar>
 bool collision(const Line<3,Scalar>         & line,
                const Polygon<Scalar>        & poly,
-               std::vector<Point<3,Scalar>> & intersection)
+               std::vector<Point<3,Scalar>> & intersection,
+               const double tol = 1e-10)
 {
   // find intersection between polygon plane and line
   Point<3,Scalar> p;
-  const bool colinear = collision(line, poly.plane, p);
-  if (colinear)
-    return false;
-
-  if (poly.point_inside(p), 1e-4)
+  if (coincide(line, poly.plane()))
   {
-    intersection.push_back(p);
+    const auto & vertices = poly.get_points();
+    for (size_t i = 0; i < vertices.size(); ++i)
+    {
+      const size_t j = (i < vertices.size() - 1) ? (i+1) : 0;
+      Line<3,Scalar> edge(vertices[i], vertices[j]-vertices[i]);
+      std::vector<Point<3,Scalar>> sec;
+      if (collision(line, edge, sec))
+      {
+        // if between edge vertices
+        const auto & p = sec.front();
+        // if (p.dot(vertices[i]) * p.dot(vertices[j]) < 0)
+        if ((p - vertices[i]).dot(p-vertices[j]) < 0)
+          intersection.push_back(p);
+      }
+    }
+    assert(intersection.size() == 2);
     return true;
   }
-  else
+  else if (collision(line, poly.plane(), p))  // case colinear
+  {
     return false;
+  }
+  else
+  {
+    if (poly.point_inside(p), 1e-4)
+    {
+      intersection.push_back(p);
+      return true;
+    }
+    else return false;
+  }
 }
 
 

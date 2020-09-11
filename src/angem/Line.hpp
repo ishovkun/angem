@@ -19,6 +19,9 @@ class Line
   Line(const Point<dim,Scalar> & point,
        const Point<dim,Scalar> & direction);
 
+  Point<dim,Scalar> point() const noexcept {return _point;}
+  Point<dim,Scalar> direction() const noexcept {return _direction;}
+
   // distance between a line and a point
   Scalar distance(const Point<dim,Scalar> & p) const;
 
@@ -33,7 +36,9 @@ Line<dim,Scalar>::Line(const Point<dim,Scalar> & point,
     :
     _point(point),
     _direction(direction)
-{}
+{
+  _direction.normalize();
+}
 
 template <int dim, typename Scalar>
 Scalar Line<dim,Scalar>::distance(const Point<dim,Scalar> & p) const

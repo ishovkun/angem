@@ -125,7 +125,7 @@ bool collision(const Line<3,Scalar>        & l1,
     const size_t j = ij.second;
     const Tensor2<2,Scalar> mat = {l1.direction()[i], -l2.direction()[i],
                                    l1.direction()[j], -l2.direction()[j],};
-    if (det(mat) > tol)
+    if (std::fabs(det(mat)) > tol)
     {
       const Point<2,Scalar> rhs = { l2.point()[i] - l1.point()[i] ,
                                     l2.point()[j] - l1.point()[j] ,};
@@ -448,11 +448,10 @@ bool collision(const Line<3,Scalar>         & line,
       const size_t j = (i < vertices.size() - 1) ? (i+1) : 0;
       Line<3,Scalar> edge(vertices[i], vertices[j]-vertices[i]);
       std::vector<Point<3,Scalar>> sec;
-      if (collision(line, edge, sec))
+      if (collision(line, edge, sec, tol))
       {
         // if between edge vertices
         const auto & p = sec.front();
-        // if (p.dot(vertices[i]) * p.dot(vertices[j]) < 0)
         if ((p - vertices[i]).dot(p-vertices[j]) < 0)
           intersection.push_back(p);
       }

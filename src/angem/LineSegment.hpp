@@ -9,30 +9,30 @@ template<typename Scalar>
 class LineSegment : public Shape<Scalar>
 {
  public:
-  LineSegment(const angem::Point<3,Scalar> & p1, const ange::Point<3,Scalar> & p2);
-  const angem::Point & first() const noexcept;
-  const angem::Point & second() const noexcept;
+  LineSegment(const angem::Point<3,Scalar> & p1, const angem::Point<3,Scalar> & p2);
+  const angem::Point<3,Scalar> & first() const noexcept;
+  const angem::Point<3,Scalar> & second() const noexcept;
 };
 
 template<typename Scalar>
-LineSegment<Scalar>::LineSegment(const angem::Point<3,Scalar> & p1, const ange::Point<3,Scalar> & p2)
+LineSegment<Scalar>::LineSegment(const angem::Point<3,Scalar> & p1, const angem::Point<3,Scalar> & p2)
 {
  this->points.push_back(p1);
  this->points.push_back(p2);
 }
 
 template<typename Scalar>
-const angem::Point & LineSegment<Scalar>::first() const noexcept
+const angem::Point<3,Scalar> & LineSegment<Scalar>::first() const noexcept
 {
-  assert( get_points().size() == 2 );
-  return get_points().front();
+  assert( this->get_points().size() == 2 );
+  return this->get_points().front();
 }
 
 template<typename Scalar>
-const angem::Point & LineSegment<Scalar>::second() const noexcept
+const angem::Point<3,Scalar> & LineSegment<Scalar>::second() const noexcept
 {
-  assert( get_points().size() == 2 );
-  return get_points().back();
+  assert( this->get_points().size() == 2 );
+  return this->get_points().back();
 }
 
 

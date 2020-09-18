@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Point.hpp"
+#include "LineSegment.hpp"
 #include "Plane.hpp"
 #include "Polygon.hpp"
 #include "Polyhedron.hpp"
@@ -219,7 +220,6 @@ bool collision(const Polygon<Scalar>        & poly1,
     return result;
   }
 
-
   return true;
 }
 
@@ -336,7 +336,7 @@ void split(const Polygon<Scalar> & poly,
  * polygons below fracture as marker_below
  *  marks fracture polygon as marker_split */
 template <typename Scalar>
-void split(const Polyhedron<Scalar> & polyhedron,
+bool split(const Polyhedron<Scalar> & polyhedron,
            const Plane<Scalar>      & plane,
            PolyGroup<Scalar>        & result,
            std::vector<size_t>      & parent_face_indices,
@@ -382,15 +382,28 @@ void split(const Polyhedron<Scalar> & polyhedron,
   // postprocessing: create a polygon from the points
   if (!section_poly_verts.empty())
   {
-    if (section_poly_verts.size() < 3)
-      throw std::runtime_error("something wrong with the splitting");
+    if (section_poly_verts.size() < 3) // split nothing
+    {
+      section_poly_verts.clear();
+      assert( result.vertices.size() - poly_vertices.size() < 2 );
+      return false;
+      // std::cout << "original points:" << std::endl;
+      // for (auto p : polyhedron.get_points())
+      //   std::cout << p << std::endl;
+      // std::cout << "split points:" << std::endl;
+      // for (size_t i : section_poly_verts)
+      //   std::cout << result.vertices[i] << std::endl;
+      // throw std::runtime_error("something wrong with the splitting");
+    }
 
     // sort vertices so they form a polygon
     Polygon<Scalar>::reorder_indices(result.vertices.points, section_poly_verts);
     result.polygons.push_back(std::move(section_poly_verts));
     parent_face_indices.push_back(result.polygons.size());
     result.markers.push_back(marker_split);
+    return true;
   }
+  else return false;
 }
 
 template <typename Scalar>
@@ -513,13 +526,14 @@ bool collision(const Point<3,Scalar>        & p0,
 // the points l0 and l1 define a line segment
 // the output is saved into intersecion
 template <typename Scalar>
-bool collision(const Point<3,Scalar>        & l0,
-               const Point<3,Scalar>        & l1,
+bool collision(const LineSegment<Scalar>    & segment,
                const Polyhedron<Scalar>     & poly,
                std::vector<Point<3,Scalar>> & intersection,
                const double                   tol = 1e-10)
 {
   std::vector<Point<3,Scalar>> new_section;
+  const auto l0 = segment.first();
+  const auto l1 = segment.second();
 
   // points that are inside poly
   if (poly.point_inside(l0))

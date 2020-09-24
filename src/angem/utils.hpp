@@ -51,7 +51,7 @@ remove_duplicates_slow(const std::vector<Point<dim,Scalar>> & points,
   // two points are considered duplicate if the distance between them is
   // less than tolerance
 
-  if (result.size() != 0)
+  if (result.empty())
     result.clear();
 
   for (const auto & p : points)

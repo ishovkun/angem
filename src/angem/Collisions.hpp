@@ -82,7 +82,7 @@ bool collision(const Polygon<Scalar>        & poly,
   // call collision of all edges
   bool result = false;
   const auto & pts = poly.get_points();
-  for (std::size_t i=0; i<pts.size(); ++i)
+  for (size_t i=0; i<pts.size(); ++i)
   {
     bool loc_collision = false;
     if (i < pts.size() - 1)
@@ -93,6 +93,7 @@ bool collision(const Polygon<Scalar>        & poly,
       result = true;
   }
 
+  intersection = remove_duplicates_slow(intersection, tol);
   return result;
 }
 

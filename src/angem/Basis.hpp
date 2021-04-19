@@ -32,6 +32,8 @@ class Basis
   // probably do not need this any more since i changed the default constructor
   bool is_empty() const;
 
+  Basis<dim,Scalar> & invert();
+
   // printout
   template <int d, typename S>
   friend std::ostream &operator<<(std::ostream     & os,
@@ -111,6 +113,17 @@ Basis<dim,Scalar>::is_empty() const
   else
     return true;
 }
+
+template <int dim, typename Scalar>
+Basis<dim,Scalar> &
+Basis<dim,Scalar>::invert()
+{
+  for (auto & v : vectors)
+    v *= -1;
+  std::swap( vectors[1] , vectors[0] );  // preserve right orientation
+  return *this;
+}
+
 
 template <int d, typename S>
 std::ostream &operator<<(std::ostream & os, const Basis<d,S> & basis)

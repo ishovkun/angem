@@ -175,4 +175,34 @@ find_closest_vertex(const Point<dim,Scalar>              & point,
   return closest_index;
 }
 
+// sort an array according to given indexes
+// Function to in-place reorder elements of vector according to index
+// Complexity: A O(n) time and O(1) extra space
+template<typename Scalar, typename IdxType>
+void reorder(std::vector<Scalar> &arr, std::vector<IdxType> & index)
+{
+  assert( arr.size() == index.size() );
+  // Fix all elements one by one
+  for (int i = 0; i < arr.size(); i++) {
+    // While index[i] and arr[i] are not fixed
+    while (index[i] != i) {
+      // Store values of the target (or correct)
+      // position before placing arr[i] there
+      IdxType oldTargetI = index[index[i]];
+      Scalar oldTargetE = arr[index[i]];
+
+      // Place arr[i] at its target (or correct)
+      // position. Also copy corrected index for
+      // new position
+      arr[index[i]] = arr[i];
+      index[index[i]] = index[i];
+
+      // Copy old target values to arr[i] and
+      // index[i]
+      index[i] = oldTargetI;
+      arr[i] = oldTargetE;
+    }
+  }
+}
+
 }

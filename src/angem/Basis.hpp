@@ -32,6 +32,8 @@ class Basis
   // probably do not need this any more since i changed the default constructor
   bool is_empty() const;
 
+  // invert basis (the direction) while preserving right-handness
+  // returns reference to this
   Basis<dim,Scalar> & invert();
 
   // printout

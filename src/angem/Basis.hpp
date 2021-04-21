@@ -1,6 +1,6 @@
 #pragma once
-
 #include "Point.hpp"
+#include <array>
 
 namespace angem
 {
@@ -17,6 +17,10 @@ class Basis
   // create basis from vector of points
   // checks that vecs.size() == dim
   Basis(const std::vector<Point<dim,Scalar>> & vecs);
+  // create basis from three vectors
+  Basis(Point<dim,Scalar> const & v1,
+        Point<dim,Scalar> const & v2,
+        Point<dim,Scalar> const & v3);
 
   // setters
   // assign basis components from the vector of points
@@ -30,7 +34,7 @@ class Basis
   // get coordinates of a point in this basis
   Point<dim,Scalar> transform(const Point<dim,Scalar> & p) const;
   // probably do not need this any more since i changed the default constructor
-  bool is_empty() const;
+  // bool is_empty() const;
 
   // invert basis (the direction) while preserving right-handness
   // returns reference to this
@@ -42,25 +46,35 @@ class Basis
                                   const Basis<d,S> & p);
 
  private:
-  std::vector<Point<dim,Scalar>> vectors;
+  std::array<Point<dim,Scalar>, dim> _vectors;
 };
 
 
 template <int dim, typename Scalar>
+Basis<dim,Scalar>::Basis(Point<dim,Scalar> const & v1,
+                         Point<dim,Scalar> const & v2,
+                         Point<dim,Scalar> const & v3)
+{
+  _vectors[0] = v1;
+  _vectors[1] = v2;
+  if (dim > 2) _vectors[2] = v3;
+  for (size_t i = 0; i < dim; ++i)
+    _vectors[i].normalize();
+}
+
+template <int dim, typename Scalar>
 Basis<dim,Scalar>::Basis()
 {
-  vectors.resize(dim);
   for (int i=0; i<dim; ++i)
-    vectors[i][i] = static_cast<Scalar>(1);
+    _vectors[i][i] = static_cast<Scalar>(1);
 }
 
 
 template <int dim, typename Scalar>
 Basis<dim,Scalar>::Basis(const std::vector<Point<dim,Scalar>> & vecs)
-    :
-    vectors(vecs)
 {
   assert(vecs.size() == dim);
+  std::copy(vecs.begin(), vecs.begin() + dim, _vectors.begin());
 }
 
 
@@ -69,7 +83,8 @@ void
 Basis<dim,Scalar>::set_data(const std::vector<Point<dim,Scalar>> & vecs)
 {
   assert(vecs.size() == dim);
-  vectors = vecs;
+  // vectors = vecs;
+  std::copy(vecs.begin(), vecs.begin() + dim, _vectors.begin());
 }
 
 
@@ -78,7 +93,7 @@ Point<dim,Scalar> &
 Basis<dim,Scalar>::operator[](int i)
 {
   assert(i < dim);
-  return vectors[i];
+  return _vectors[i];
 }
 
 
@@ -87,7 +102,7 @@ const Point<dim,Scalar> &
 Basis<dim,Scalar>::operator()(int i) const
 {
   assert(i < dim);
-  return vectors[i];
+  return _vectors[i];
 }
 
 
@@ -95,34 +110,34 @@ template <int dim, typename Scalar>
 Point<dim,Scalar>
 Basis<dim,Scalar>::transform(const Point<dim,Scalar> & p) const
 {
-  assert(!is_empty());
+  // assert(!is_empty());
   Point<dim,Scalar> result;
   for (int i=0; i<dim; ++i)
-    result[i] = p.dot(vectors[i]);
+    result[i] = p.dot(_vectors[i]);
   return result;
 }
 
 
-template <int dim, typename Scalar>
-bool
-Basis<dim,Scalar>::is_empty() const
-{
-  Scalar sum = static_cast<Scalar>(0);
-  for (int i=0; i<dim; ++i)
-    sum += vectors[i].norm();
-  if (fabs(sum - static_cast<Scalar>(3)) < 1e-8)
-    return false;
-  else
-    return true;
-}
+// template <int dim, typename Scalar>
+// bool
+// Basis<dim,Scalar>::is_empty() const
+// {
+//   Scalar sum = static_cast<Scalar>(0);
+//   for (int i=0; i<dim; ++i)
+//     sum += _vectors[i].norm();
+//   if (fabs(sum - static_cast<Scalar>(3)) < 1e-8)
+//     return false;
+//   else
+//     return true;
+// }
 
 template <int dim, typename Scalar>
 Basis<dim,Scalar> &
 Basis<dim,Scalar>::invert()
 {
-  for (auto & v : vectors)
+  for (auto & v : _vectors)
     v *= -1;
-  std::swap( vectors[1] , vectors[0] );  // preserve right orientation
+  std::swap( _vectors[1] , _vectors[0] );  // preserve right orientation
   return *this;
 }
 

@@ -54,7 +54,7 @@ Rectangle<Scalar>::Rectangle(Point<3,Scalar> center,
 
   Polygon<Scalar>::set_data(v_points);
 
-  Basis<3,Scalar> basis({-t2, t1, cross(t1, t2)});
+  Basis<3,Scalar> basis(-t2, t1, cross(t1, t2));
   this->plane().set_basis(basis);
 }
 

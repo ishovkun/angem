@@ -176,34 +176,69 @@ find_closest_vertex(const Point<dim,Scalar>              & point,
   return closest_index;
 }
 
-// sort an array according to given indexes
-// Function to in-place reorder elements of vector according to index
-// Complexity: A O(n) time and O(1) extra space
+/* Reorder array so that elements are placed in index location
+ * Input:
+ * \param[in,out] arr : array to be reordered
+ * \param[in,out] idx : array of target (not source) indices
+ *
+ * Caution: after reordering, the array of indices becomes range(0, n)
+ * Complexity: A O(n) time and O(1) extra space
+*/
+template<typename Scalar, typename IdxType>
+void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index)
+{
+  assert( arr.size() == index.size() );
+  for (IdxType i = 0; i < arr.size(); i++)
+  {
+    IdxType src = i;
+    IdxType dst = index[i];
+    Scalar pending = arr[src];
+
+    while (src != dst) {
+      Scalar const tmp = arr[dst];
+      arr[dst] = pending;
+      src = dst;
+      dst = index[dst];
+      pending = tmp;
+      index[src] = src;
+    }
+  }
+}
+
+/* Reorder array so that elements are taken from index location
+ * Input:
+ * \param[in,out] arr : array to be reordered
+ * \param[in,out] idx : array of source (not target) indices
+ *
+ * Caution: after reordering, the array of indices becomes range(0, n)
+ * Complexity: A O(n) time and O(1) extra space
+*/
+template<typename Scalar, typename IdxType>
+void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index)
+{
+  assert( arr.size() == index.size() );
+  for (int i = 0; i < arr.size(); i++)
+  {
+    Scalar tmp = arr[i];
+    IdxType src = index[i];
+    IdxType dst = i;
+    while (src != i)
+    {
+      arr[dst] = arr[src];
+      index[dst] = dst;
+      dst = src;
+      src = index[src];
+    }
+    arr[dst] = tmp;
+    index[dst] = dst;
+  }
+}
+
+// Same as reorder_from
 template<typename Scalar, typename IdxType>
 void reorder(std::vector<Scalar> &arr, std::vector<IdxType> & index)
 {
-  assert( arr.size() == index.size() );
-  // Fix all elements one by one
-  for (int i = 0; i < arr.size(); i++) {
-    // While index[i] and arr[i] are not fixed
-    while (index[i] != i) {
-      // Store values of the target (or correct)
-      // position before placing arr[i] there
-      IdxType oldTargetI = index[index[i]];
-      Scalar oldTargetE = arr[index[i]];
-
-      // Place arr[i] at its target (or correct)
-      // position. Also copy corrected index for
-      // new position
-      arr[index[i]] = arr[i];
-      index[index[i]] = index[i];
-
-      // Copy old target values to arr[i] and
-      // index[i]
-      index[i] = oldTargetI;
-      arr[i] = oldTargetE;
-    }
-  }
+  reorder_from(arr, index);
 }
 
 }

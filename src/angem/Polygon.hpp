@@ -9,6 +9,7 @@
 #include <numeric>      // std::iota
 #include <algorithm>    // std::sort
 #include <cassert>
+#include <cmath>
 
 namespace angem
 {
@@ -391,7 +392,7 @@ order_ccw(std::vector<Point<3,Scalar>> const & points,
           Plane<Scalar> const & plane, double eps)
 {
   size_t const np = points.size();
-  std::vector<Point<3,double>> local(np);
+  std::vector<Point<3,Scalar>> local(np);
   for (size_t i = 0; i < np; ++i)
     local[i] = plane.local_coordinates(points[i]);
 
@@ -400,6 +401,8 @@ order_ccw(std::vector<Point<3,Scalar>> const & points,
     angles[i] = static_cast<Scalar>(std::atan2(local[i][1], local[i][0]));
     if (angles[i] < 0 && angles[i] > -eps)
       angles[i] = static_cast<Scalar>(0);
+    if (angles[i] < 0)
+      angles[i] = 2*M_PI - std::fabs(angles[i]);
   }
 
   std::vector<size_t> idx(np);

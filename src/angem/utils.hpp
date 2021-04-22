@@ -176,13 +176,19 @@ find_closest_vertex(const Point<dim,Scalar>              & point,
   return closest_index;
 }
 
-/* Reorder array so that elements are placed in index location
+/* Reorder array so that elements are placed in index location.
+ * Value from arr[i] will be placed into arr[index[i]].
  * Input:
  * \param[in,out] arr : array to be reordered
- * \param[in,out] idx : array of target (not source) indices
+ * \param[in,out] idx : mapping
  *
  * Caution: after reordering, the array of indices becomes range(0, n)
+ * NOTE: reorder_to(reorder_from(arr, idx), idx) = arr
  * Complexity: A O(n) time and O(1) extra space
+ *
+ * Example:
+ * Input: arr=[0 1 2 3 4 5], idx=[3 2 1 4 5 0]
+ * Result: arr=[0 2 1 0 3 4], idx=[0 1 2 3 4 5]
 */
 template<typename Scalar, typename IdxType>
 void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index)
@@ -205,13 +211,20 @@ void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index)
   }
 }
 
-/* Reorder array so that elements are taken from index location
+/* Reorder array so that elements are taken from index location.
+ * Value from arr[index[i]] will be placed into arr[i].
  * Input:
  * \param[in,out] arr : array to be reordered
- * \param[in,out] idx : array of source (not target) indices
+ * \param[in,out] idx : mapping
  *
  * Caution: after reordering, the array of indices becomes range(0, n)
+ * NOTE: reorder_to(reorder_from(arr, idx), idx) = arr
  * Complexity: A O(n) time and O(1) extra space
+ *
+ * Example:
+ * Input: arr=[0 1 2 3 4 5], idx=[3 2 1 4 5 0]
+ * Result: arr=[3 2 1 4 5 0], idx=[0 1 2 3 4 5]
+ *
 */
 template<typename Scalar, typename IdxType>
 void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index)
@@ -234,11 +247,11 @@ void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index)
   }
 }
 
-// Same as reorder_from
-template<typename Scalar, typename IdxType>
-void reorder(std::vector<Scalar> &arr, std::vector<IdxType> & index)
-{
-  reorder_from(arr, index);
-}
+// // Same as reorder_from
+// template<typename Scalar, typename IdxType>
+// void reorder(std::vector<Scalar> &arr, std::vector<IdxType> & index)
+// {
+//   reorder_from(arr, index);
+// }
 
 }

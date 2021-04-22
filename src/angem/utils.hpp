@@ -1,7 +1,8 @@
 #pragma once
 
-#include <limits>  // std::numeric_limits
 #include "Point.hpp"
+#include <algorithm>
+#include <limits>  // std::numeric_limits
 
 namespace angem
 {

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <numeric>      // std::iota
 #include <algorithm>    // std::sort
+#include <cassert>
 
 namespace angem
 {
@@ -63,6 +64,15 @@ class Polygon: public Shape<Scalar>
   // order indices vector so that the corresponding points are in a clockwise fashiok
   static  void reorder_indices(const std::vector<Point<3, Scalar>> &verts,
                                std::vector<std::size_t>            &indices);
+  /*
+  ** @brief Assuming that points are located in the plane,
+  ** return the order in which points appear in counter-clockwise
+  ** direction starting from the plane tangent vector basis[0] around basis[2]
+  */
+  static std::vector<size_t> order_ccw(std::vector<Point<3,Scalar>> const & points,
+                                       Plane<Scalar> const & plane,
+                                       double eps = 1e-8);
+
   angem::Point<3,double> normal() const { return plane().normal(); }
   inline const Plane<Scalar> & plane() const { return m_plane; }
   inline Plane<Scalar> & plane() { return m_plane; }
@@ -251,8 +261,8 @@ void
 Polygon<Scalar>::reorder_indices(const std::vector<Point<3, Scalar>> &verts,
                                  std::vector<std::size_t>            &indices)
 {
-  if (indices.size() < 3)
-    throw std::invalid_argument("Polygon cannot have less than 3 vertices");
+  assert( indices.size() >= 3 && "Polygon cannot have less than 3 vertices" );
+
   std::vector<Point<3, Scalar>> points(indices.size());
   for (std::size_t i=0; i<indices.size(); ++i)
     points[i] = verts[indices[i]];
@@ -375,4 +385,28 @@ Point<3,Scalar> Polygon<Scalar>::center() const
   return c;
 }
 
+template<typename Scalar>
+std::vector<size_t> Polygon<Scalar>::
+order_ccw(std::vector<Point<3,Scalar>> const & points,
+          Plane<Scalar> const & plane, double eps)
+{
+  size_t const np = points.size();
+  std::vector<Point<3,double>> local(np);
+  for (size_t i = 0; i < np; ++i)
+    local[i] = plane.local_coordinates(points[i]);
+
+  std::vector<Scalar> angles(np, 0);
+  for (size_t i = 0; i < np; ++i) {
+    angles[i] = static_cast<Scalar>(std::atan2(local[i][1], local[i][0]));
+    if (angles[i] < 0 && angles[i] > -eps)
+      angles[i] = static_cast<Scalar>(0);
+  }
+
+  std::vector<size_t> idx(np);
+  std::iota(idx.begin(), idx.end(), 0);
+  std::sort(idx.begin(), idx.end(), [&angles](size_t i1, size_t i2)
+                                    {return angles[i1] < angles[i2];});
+  return idx;
 }
+
+}  // end namespace angem

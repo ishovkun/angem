@@ -41,6 +41,8 @@ class Tensor2
   void operator*=(const T & x);
   // inline component divide by a scalar
   void operator/=(const T & x);
+  // inline component-wise sum of two tensors
+  void operator+=(Tensor2<dim,T> const & other);
 
   // matrix (dot) product with another tensor2
   Tensor2<dim,T> operator*(const Tensor2<dim,T> & other) const;
@@ -248,6 +250,15 @@ void Tensor2<dim,T>::operator/=(const T & x)
     for (int j = 0; j < dim; j++)
       get(i, j) /= x;
 }
+
+template <int dim, typename T>
+void Tensor2<dim,T>::operator+=(Tensor2<dim,T> const & other)
+{
+  for (int i = 0; i < dim; i++)
+    for (int j = 0; j < dim; j++)
+      get(i, j) += other.get(i, j);
+}
+
 
 template <typename T>
 Tensor2<1,T> invert(const Tensor2<1,T> & tens)

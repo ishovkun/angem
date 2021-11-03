@@ -21,6 +21,8 @@ class Tensor2
   Tensor2(std::initializer_list<T> l);
   // create point from std::vector
   Tensor2(const std::vector<T> & v);
+  // copy assignment
+  Tensor2<dim,T> & operator=( Tensor2<dim,T> const & other ) = default;
   // set all components to zero
   void set_zero();
   // returns dim * dim

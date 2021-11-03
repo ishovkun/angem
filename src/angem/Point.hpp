@@ -20,6 +20,8 @@ class Point
   Point();
   // Copy constructor
   Point(const Point<dim,Scalar> & p);
+  // copy assignment
+  Point<dim,Scalar> & operator=(const Point<dim,Scalar> & other) = default;
   // Convenience constructor.
   // Creates a point from std::vector. Asserts that vector.size() == dim
   Point(const std::vector<Scalar> & v);

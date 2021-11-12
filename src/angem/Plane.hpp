@@ -82,7 +82,8 @@ class Plane
   Point<3,Scalar> project_vector(const Point<3,Scalar> & p) const;
   // signed distance from point to plane (> 0 if point is above plane)
   Scalar signed_distance(const Point<3,Scalar> & p) const;
-
+  // unsigned distance from point to plane
+  inline Scalar distance(const Point<3, Scalar> & p) const {return std::fabs(signed_distance(p));}
   // true if point is above the plane
   bool above(const Point<3,Scalar> & p) const;
   // set point located in the plane

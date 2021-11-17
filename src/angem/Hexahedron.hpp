@@ -28,9 +28,11 @@ template<typename Scalar>
 class Hexahedron: public Polyhedron<Scalar>
 {
   public:
-  // CONSTRICTORS
+  // constructor
   Hexahedron(const std::vector<Point<3,Scalar>> & vertices,
              const std::vector<std::size_t>     & indices);
+  // copy assignment
+  Hexahedron<Scalar> & operator=(Hexahedron<Scalar> const & other);
   // SETTERS
   void set_data(const std::vector<Point<3,Scalar>> & vertices);
   void set_data(const std::vector<Point<3,Scalar>> & vertices,
@@ -53,13 +55,20 @@ Hexahedron<Scalar>::Hexahedron(const std::vector<Point<3,Scalar>> & vertices,
   set_data(vertices, indices);
 }
 
+template<typename Scalar>
+Hexahedron<Scalar> & Hexahedron<Scalar>::operator=(Hexahedron<Scalar> const & other)
+{
+  set_data( other.get_points() );
+  return *this;
+}
 
 template<typename Scalar>
 void
 Hexahedron<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)
 {
   if (vertices.size() == 20 or vertices.size() == 27)
-    throw NotImplemented("Only first order Hexas implemented");
+    throw NotImplemented("Only first order Hexes implemented");
+
   assert(vertices.size() == 8);
 
   this->points = vertices;

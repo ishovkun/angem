@@ -161,8 +161,7 @@ template<typename Scalar>
 bool Polyhedron<Scalar>::point_on_boundary(const Point<3,Scalar> & p,
                                            const double tolerance) const
 {
-  const Point<3,Scalar> c = this->center();
-  Scalar const h = this->points[0].distance(c);  // characteristic length
+  Scalar const h = this->radius();  // characteristic length
   for (const auto & face : m_faces)
   {
     Plane<Scalar> plane(this->points[face[0]], this->points[face[1]], this->points[face[2]]);

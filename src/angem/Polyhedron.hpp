@@ -40,6 +40,8 @@ class Polyhedron: public Shape<Scalar>
   // using the provided tolerance
   bool point_on_boundary(const Point<3,Scalar> & p,
                          const double tolerance = 1e-4) const;
+  // returns the average distance from center to vertices
+  Scalar radius() const;
 
   // get vector of vectors that contain the vertex indices of each polyhedron face
   const std::vector<std::vector<std::size_t>> & get_faces() const;
@@ -271,6 +273,17 @@ std::vector<Edge> Polyhedron<Scalar>::get_edges() const
         edges.push_back( std::move(edge) );
     }
   return edges;
+}
+
+template<typename Scalar>
+Scalar Polyhedron<Scalar>::radius() const
+{
+  auto const c = center();
+  Scalar avg = static_cast<Scalar>(0.f);
+  for (auto const & v : this->get_points())
+    avg += c.distance(v);
+  avg /= this->get_points().size();
+  return avg;
 }
 
 

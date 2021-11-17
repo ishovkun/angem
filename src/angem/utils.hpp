@@ -52,17 +52,16 @@ remove_duplicates_slow(const std::vector<Point<dim,Scalar>> & points,
   // two points are considered duplicate if the distance between them is
   // less than tolerance
 
-  if (result.empty())
+  if ( !result.empty() )
     result.clear();
 
   for (const auto & p : points)
-    if (find(p, result, tolerance) == result.size())
+    if ( find(p, result, tolerance) == result.size() )
       result.push_back(p);
 }
 
-
 template<int dim, typename Scalar>
-std::vector<Point<dim,Scalar>>
+[[nodiscard]] std::vector<Point<dim,Scalar>>
 remove_duplicates_slow(const std::vector<Point<dim,Scalar>> & points,
                        const double                           tolerance = 0)
 {

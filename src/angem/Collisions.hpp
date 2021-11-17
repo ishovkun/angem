@@ -530,11 +530,12 @@ template <typename Scalar>
 bool collision(const LineSegment<Scalar>    & segment,
                const Polyhedron<Scalar>     & poly,
                std::vector<Point<3,Scalar>> & intersection,
-               const double                   tol = 1e-10)
+               double                   tol = 1e-10)
 {
   std::vector<Point<3,Scalar>> new_section;
   const auto l0 = segment.first();
   const auto l1 = segment.second();
+  tol *= poly.radius();
 
   // points that are inside poly
   if (poly.point_inside(l0))
@@ -556,12 +557,9 @@ bool collision(const LineSegment<Scalar>    & segment,
           new_section.erase(new_section.begin() + i);
         else i++;
     }
-
-    angem::remove_duplicates_slow(new_section, tol);
   }
 
-  for (const auto & p : new_section)
-    intersection.push_back(p);
+  angem::remove_duplicates_slow(new_section, intersection, tol);
 
   if (new_section.empty())
     return false;

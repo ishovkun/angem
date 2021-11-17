@@ -659,7 +659,7 @@ find(const Point<dim,Scalar>              & p,
   std::size_t counter = 0;
   for (const auto & point : points)
   {
-    if (p.distance(point) < tol)
+    if ( p.distance(point) < tol )
       return counter;
     counter++;
   }

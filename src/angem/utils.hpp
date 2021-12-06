@@ -40,6 +40,17 @@ compute_center_mass(const std::vector<Point<dim,Scalar> *> & points)
   return center;
 }
 
+template<int dim, typename Scalar>
+Scalar
+compute_average_distance(Point<dim,Scalar> const & c, const std::vector<Point<dim,Scalar>> & points)
+{
+  Scalar dist{0};
+  for (auto const & p : points)
+    dist += c.distance(p);
+  if (!points.empty())
+    dist /= points.size();
+  return dist;
+}
 
 // this function is O(n²)
 template<int dim, typename Scalar>

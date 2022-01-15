@@ -7,6 +7,7 @@
 #include <cmath>
 #include <vector>
 #include <cassert>
+#include <cstdlib>
 
 namespace angem
 {
@@ -142,11 +143,14 @@ class Point
   template <int d, typename S>
   friend S norm(const Point<d,S> & p1);
 
+  // Generate random that is orthogonal to this vector
+  template <typename S>
+  friend Point<3,S> generate_orthogonal(Point<3,S> p);
+
   // printout
   template <int d, typename S>
   friend std::ostream &operator<<(std::ostream     & os,
                                   const Point<d,S> & p);
-
 
  protected:
   Scalar _storage[dim];  // array of coordinate components
@@ -679,6 +683,18 @@ std::size_t insert(const Point<dim,Scalar>        & point,
   return ind;
 }
 
+template <typename S>
+inline Point<3,S> generate_orthogonal(Point<3,S> p)
+{
+  p = p.normalize();
+  Point<3,S> o{0, 0, 1};
+  while ( o.cross( p ).norm() == 0 )
+    for (size_t i = 0; i < 3; ++i)
+      o[i] += std::rand();
+  o = o.normalize();
+  o = o - o.dot( p ) * p;
+  return o.normalize();
+}
 
 
 }  // end namespace

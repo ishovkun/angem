@@ -164,9 +164,9 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
   // select the first point as the support in the polygon first tangent vector direction
   // Scalar max_dist = -std::numeric_limits<Scalar>::max();
   Scalar max_dist = std::numeric_limits<Scalar>::lowest();
-  std::size_t first = points.size();
+  size_t first = points.size();
   const auto & x_direction = plane.get_basis()[0];
-  for (std::size_t i=0; i<points.size(); ++i)
+  for (size_t i = 0; i < points.size(); ++i)
   {
     const Scalar dist = points[i].dot(x_direction);
     if (dist > max_dist)

@@ -123,9 +123,10 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
     throw std::invalid_argument("Cannot create a plane from two points only");
 
   const Point<3,Scalar> p1 = cloud[0];
+  // find second point that farther than tolerance from p1
   size_t v2 = 1;
   for (; v2 < cloud.size(); ++v2)
-    if (p1.distance(cloud[v2]) > 1e-8)
+    if (p1.distance(cloud[v2]) > 1e-10)
       break;
   if ( v2 >= cloud.size() - 1 )
   {
@@ -137,6 +138,7 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
   }
   const auto p2 = cloud[v2];
 
+  // find third point that is not on the line p1-p2
   Point<3,Scalar> p3;
   bool found = false;
   const Line<3, Scalar> line(p1, p2 - p1);
@@ -219,10 +221,13 @@ void Plane<Scalar>::set_data(const Point<3,Scalar> & p1,
                              const Point<3,Scalar> & p3)
 {
 #ifndef NDEBUG
-  if (p1 == p2 || p2 == p3 || p1 == p3)
-    throw std::invalid_argument("Duplicated points while initializing plane");
-  if ( (( p2 - p1 ).cross(p3 - p2)).norm() < 1e-6 )
-    throw std::invalid_argument("Initializing plane with colinear vectors");
+  {
+    if (p1 == p2 || p2 == p3 || p1 == p3)
+      throw std::invalid_argument("Duplicated points while initializing plane");
+    Scalar const d = (p1 - p2).norm() + (p2 - p3).norm();
+    if (((p2 - p1).cross(p3 - p2)).norm() < 1e-10 * d)
+      throw std::invalid_argument("Initializing plane with colinear vectors");
+  }
 #endif
 
   _origin = p1;

@@ -1,4 +1,5 @@
 # angem_root/CMakeLists.txt
+project(angem)
 
 # boost is optional for 256-bit integers (for PointSet)
 # but it works muuuch faster with it

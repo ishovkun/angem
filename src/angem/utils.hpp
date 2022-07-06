@@ -18,6 +18,20 @@ compute_center_mass(const std::vector<Point<dim,Scalar>> & points)
   return center;
 }
 
+/* Compute the center of points specified by indices within all_points */
+template<int dim, typename Scalar>
+Point<dim,Scalar>
+compute_center_mass(std::vector<Point<dim,Scalar>> const &all_points,
+                    std::vector<size_t> const & indices)
+{
+  assert( !indices.empty() );
+  Point<dim, Scalar> center = {0, 0, 0};
+  for (size_t const i : indices)
+    center += all_points[i];
+  center /= static_cast<Scalar>( indices.size() );
+  return center;
+}
+
 template<int dim, typename Scalar, typename Iterable>
 Point<dim,Scalar> compute_center_mass(const Iterable & points)
 {

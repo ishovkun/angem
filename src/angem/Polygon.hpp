@@ -62,9 +62,10 @@ class Polygon: public Shape<Scalar>
   virtual void move(const Point<3,Scalar> & p) override;
   // order vertices in a clockwise fashion
   static  void reorder(std::vector<Point<3,Scalar>> & points);
-  // order indices vector so that the corresponding points are in a clockwise fashiok
+  // in-place order indices vector so that the corresponding points are in a clockwise fashiok
   static  void reorder_indices(const std::vector<Point<3, Scalar>> &verts,
-                               std::vector<std::size_t>            &indices);
+                               std::vector<std::size_t>            &indices,
+                               double eps = 1e-8);
   /*
   ** @brief Assuming that points are located in the plane,
   ** return the order in which points appear in counter-clockwise
@@ -259,23 +260,33 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
 
 template<typename Scalar>
 void
-Polygon<Scalar>::reorder_indices(const std::vector<Point<3, Scalar>> &verts,
-                                 std::vector<std::size_t>            &indices)
+Polygon<Scalar>::reorder_indices(std::vector<Point<3, Scalar>> const &vertices,
+                                 std::vector<std::size_t> &indices,
+                                 double                    eps)
 {
-  assert( indices.size() >= 3 && "Polygon cannot have less than 3 vertices" );
+  Plane<Scalar> plane(vertices, indices);
+  plane.set_origin( compute_center_mass(vertices, indices) );
 
-  std::vector<Point<3, Scalar>> points(indices.size());
-  for (std::size_t i=0; i<indices.size(); ++i)
-    points[i] = verts[indices[i]];
+  size_t const np = indices.size();
+  std::vector<Point<3,Scalar>> local(np);
+  for (size_t i = 0; i < np; ++i)
+    local[i] = plane.local_coordinates(vertices[indices[i]]);
 
-  reorder(points);
-
-  for (std::size_t i=0; i<points.size(); ++i)
-  {
-    std::size_t ind = find(points[i], verts, 1e-6);
-    indices[i] = ind;
+  std::vector<Scalar> angles(np, 0);
+  for (size_t i = 0; i < np; ++i) {
+    angles[i] = static_cast<Scalar>(std::atan2(local[i][1], local[i][0]));
+    if (angles[i] < 0 && angles[i] > -eps)
+      angles[i] = static_cast<Scalar>(0);
+    if (angles[i] < 0)
+      angles[i] = 2*M_PI - std::fabs(angles[i]);
   }
+  std::vector<size_t> order(np);
+  std::iota(order.begin(), order.end(), 0);
+  std::sort(order.begin(), order.end(), [&angles](size_t i1, size_t i2)
+                                    {return angles[i1] < angles[i2];});
+  reorder_from( indices, order );
 }
+
 
 template<typename Scalar>
 Scalar Polygon<Scalar>::area() const
@@ -405,11 +416,11 @@ order_ccw(std::vector<Point<3,Scalar>> const & points,
       angles[i] = 2*M_PI - std::fabs(angles[i]);
   }
 
-  std::vector<size_t> idx(np);
-  std::iota(idx.begin(), idx.end(), 0);
-  std::sort(idx.begin(), idx.end(), [&angles](size_t i1, size_t i2)
+  std::vector<size_t> order(np);
+  std::iota(order.begin(), order.end(), 0);
+  std::sort(order.begin(), order.end(), [&angles](size_t i1, size_t i2)
                                     {return angles[i1] < angles[i2];});
-  return idx;
+  return order;
 }
 
 }  // end namespace angem

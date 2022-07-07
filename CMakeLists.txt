@@ -12,7 +12,6 @@ if(NOT Boost_FOUND)
 ENDIF()
 
 if(Boost_FOUND)
-  INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
   add_definitions(-DUSE_BOOST)
 ENDIF()
 

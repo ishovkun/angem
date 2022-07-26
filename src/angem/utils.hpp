@@ -203,21 +203,29 @@ find_closest_vertex(const Point<dim,Scalar>              & point,
 /* Reorder array so that elements are placed in index location.
  * Value from arr[i] will be placed into arr[index[i]].
  * Input:
- * \param[in,out] arr : array to be reordered
- * \param[in,out] idx : mapping
+ * \param[in,out] arr        : array to be reordered
+ * \param[in,out] idx        : mapping
+ * \param[in] preserve_index : if true, preserves index array
  *
  * Caution: after reordering, the array of indices becomes range(0, n)
  * NOTE: reorder_to(reorder_from(arr, idx), idx) = arr
- * Complexity: A O(n) time and O(1) extra space
+ * Complexity:
+ * - A O(n) time
+ * - O(1) extra space (O(n) space if preserve_index = true)
  *
- * Example:
- * Input: arr=[0 1 2 3 4 5], idx=[3 2 1 4 5 0]
+ * Examples:
+ * 1. Input: arr=[0 1 2 3 4 5], idx=[3 2 1 4 5 0]
  * Result: arr=[0 2 1 0 3 4], idx=[0 1 2 3 4 5]
+ * 2. Input: arr=[0 1 2 3 4 5], idx=[3 2 1 4 5 0], preserve_index = true
+ * Result: arr=[0 2 1 0 3 4], idx=[3 2 1 4 5 0]
 */
 template<typename Scalar, typename IdxType>
-void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index)
+void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool preserve_index = false)
 {
   assert( arr.size() == index.size() );
+  std::vector<IdxType> idx_copy;
+  if ( preserve_index ) idx_copy = index;
+
   for (IdxType i = 0; i < arr.size(); i++)
   {
     IdxType src = i;
@@ -233,6 +241,7 @@ void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index)
       index[src] = src;
     }
   }
+  if ( preserve_index ) index = idx_copy;
 }
 
 /* Reorder array so that elements are taken from index location.

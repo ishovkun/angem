@@ -33,6 +33,7 @@ class Plane
   Plane(const Point<3,Scalar> & p1,
         const Point<3,Scalar> & p2,
         const Point<3,Scalar> & p3);
+  Plane(Point<3,Scalar> const & p, Basis<3,Scalar> const & basis);
 
   // pick some three points from the cloud to initialize a plane
   // convenient when have colinear edges in a polygon but want to initialize
@@ -114,6 +115,13 @@ Plane<Scalar>::Plane(const Point<3,Scalar> & point,
     : _origin(point)
 {
   compute_basis(normal);
+}
+
+template <typename Scalar>
+Plane<Scalar>::Plane(Point<3,Scalar> const & p, Basis<3,Scalar> const & basis)
+    : _origin(p)
+{
+  set_basis(basis);
 }
 
 template <typename Scalar>

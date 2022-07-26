@@ -48,6 +48,8 @@ class Tensor2
 
   // matrix (dot) product with another tensor2
   Tensor2<dim,T> operator*(const Tensor2<dim,T> & other) const;
+  // transpose tensor
+  Tensor2<dim,T> transpose() const;
 
   //  FRIEND FUNCTIONS
   // left dot product
@@ -261,6 +263,15 @@ void Tensor2<dim,T>::operator+=(Tensor2<dim,T> const & other)
       get(i, j) += other.get(i, j);
 }
 
+template<int dim, typename T>
+Tensor2<dim,T> Tensor2<dim,T>::transpose() const
+{
+  Tensor2<dim,T> ans;
+  for (int i = 0; i < dim; i++)
+    for (int j = 0; j < dim; j++)
+      ans(i, j) = get(j, i);
+  return ans;
+}
 
 template <typename T>
 Tensor2<1,T> invert(const Tensor2<1,T> & tens)
@@ -301,7 +312,7 @@ Tensor2<3,T> invert(const Tensor2<3,T> & a)
 {
   Tensor2<3,T> result;
   const T deta = det<T>(a);
-  assert( !std::isnan(1.0/deta));
+  assert( std::isnormal(deta) );
   result(0,0) =   ( a(1,1) * a(2,2) - a(1,2) * a(2,1) ) / deta;
   result(0,1) = - ( a(0,1) * a(2,2) - a(0,2) * a(2,1) ) / deta;
   result(0,2) =   ( a(0,1) * a(1,2) - a(0,2) * a(1,1) ) / deta;
@@ -379,6 +390,5 @@ std::ostream &operator<<(std::ostream            & os,
   os << ")";
   return os;
 }
-
 
 }  // end namespace

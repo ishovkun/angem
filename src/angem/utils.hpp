@@ -249,10 +249,15 @@ void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool pre
  * Input:
  * \param[in,out] arr : array to be reordered
  * \param[in,out] idx : mapping
+ * \param[in] preserve_index : if true, preserves index array
  *
  * Caution: after reordering, the array of indices becomes range(0, n)
+ * unless preserve_index is specified
+ *
  * NOTE: reorder_to(reorder_from(arr, idx), idx) = arr
- * Complexity: A O(n) time and O(1) extra space
+ * Complexity:
+ * - A O(n) time and O(1) extra space if preserve_index == false
+ * - A O(n) time and O(n) extra space if preserve_index == true
  *
  * Example:
  * Input: arr=[0 1 2 3 4 5], idx=[3 2 1 4 5 0]
@@ -260,9 +265,11 @@ void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool pre
  *
 */
 template<typename Scalar, typename IdxType>
-void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index)
+void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool preserve_index = false)
 {
   assert( arr.size() == index.size() );
+  std::vector<IdxType> idx_copy;
+  if ( preserve_index ) idx_copy = index;
   for (int i = 0; i < arr.size(); i++)
   {
     Scalar tmp = arr[i];
@@ -278,6 +285,7 @@ void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index)
     arr[dst] = tmp;
     index[dst] = dst;
   }
+  if ( preserve_index ) index = idx_copy;
 }
 
 // // Same as reorder_from

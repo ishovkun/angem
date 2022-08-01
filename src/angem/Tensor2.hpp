@@ -36,6 +36,8 @@ class Tensor2
   inline const T & operator()(const std::size_t i, const std::size_t j) const;
   inline T & get(const int i, const int j);
   inline const T & get(const int i, const int j) const;
+  Point<dim,T> get_row(int i) const;
+  Point<dim,T> get_col(int i) const;
 
   // dot product with a vector
   Point<dim,T> operator*(const Point<dim,T>   & p) const;
@@ -45,6 +47,9 @@ class Tensor2
   void operator/=(const T & x);
   // inline component-wise sum of two tensors
   void operator+=(Tensor2<dim,T> const & other);
+
+  void set_row(int row, Point<dim,T> const & value);
+  void set_col(int col, Point<dim,T> const & value);
 
   // matrix (dot) product with another tensor2
   Tensor2<dim,T> operator*(const Tensor2<dim,T> & other) const;
@@ -163,6 +168,35 @@ template <int dim, typename T>
 T & Tensor2<dim,T>::operator()(const int i, const int j)
 {
   return get(i, j);
+}
+
+template <int dim, typename T>
+Point<dim,T> Tensor2<dim,T>::get_row(int i) const
+{
+  return Point<dim,T>( std::vector<T>( _storage.begin() + i*dim, _storage.begin() + (i+1)*dim ) );
+}
+
+template <int dim, typename T>
+Point<dim,T> Tensor2<dim,T>::get_col(int i) const
+{
+  Point<dim,T> ans;
+  for (size_t j = 0; j < dim; ++j)
+    ans[j] = get(j, i);
+  return ans;
+}
+
+template <int dim, typename T>
+void Tensor2<dim,T>::set_row(int row, Point<dim,T> const & value)
+{
+  for (size_t j = 0; j < dim; ++j)
+    get(row, j) = value[j];
+}
+
+template <int dim, typename T>
+void Tensor2<dim,T>::set_col(int col, Point<dim,T> const & value)
+{
+  for (size_t j = 0; j < dim; ++j)
+    get(j, col) = value[j];
 }
 
 template <int dim, typename T>

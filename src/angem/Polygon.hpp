@@ -26,13 +26,14 @@ class Polygon: public Shape<Scalar>
 	Polygon();
   // Create a polygon from a vector of points.
   // Vertices are ordered in a clock-wise manner upon creation.
-  Polygon(const std::vector<Point<3,Scalar>> & points_list);
+  Polygon(const std::vector<Point<3,Scalar>> & points_list,
+          bool                           reorder_vertices = true);
   // Helper constructor. Construct a polygon (face) from some mesh vertices.
   // Vertices are ordered in a clock-wise manner upon creation if reorder_vertices == true.
   // Otherwise the vertices are in the assigned order.
   Polygon(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
           const std::vector<std::size_t>     & indices,
-          const bool                           reorder_vertices = true);
+          bool                           reorder_vertices = true);
   // Helper constructor. Construct a polygon (face) from some mesh vertices.
   // Vertices are ordered in a clock-wise manner upon creation.
   Polygon(const PointSet<3,Scalar>           & all_mesh_vertices,
@@ -93,10 +94,11 @@ Polygon<Scalar>::Polygon()
 
 
 template<typename Scalar>
-Polygon<Scalar>::Polygon(const std::vector<Point<3,Scalar>> & point_list)
+Polygon<Scalar>::Polygon(const std::vector<Point<3,Scalar>> & points,
+                         bool                                 reorder_vertices)
 {
   assert(point_list.size() > 2);
-  set_data(point_list);
+  set_data(points, reorder_vertices);
 }
 
 

@@ -346,11 +346,14 @@ bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
     return false;
 
   const Point<3,Scalar> cm = this->center();
+  Point<3,Scalar> ps  = p - cm;
+  Point<3,Scalar> zero;
   for (const auto & edge : get_edges())
   {
-    const Plane<Scalar> side = get_side(edge);
-    if (std::fabs( side.signed_distance(p) ) > tol)
-      if (side.above(p) != side.above(cm))
+    Plane<Scalar> side = get_side(edge);
+    side.set_origin(side.origin() - cm);
+    if (std::fabs( side.signed_distance(ps) ) > tol)
+      if (side.above(ps) != side.above(zero))
         return false;
   }
 

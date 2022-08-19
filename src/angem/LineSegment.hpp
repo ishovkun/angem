@@ -12,12 +12,15 @@ class LineSegment : public Shape<Scalar>
   LineSegment(const angem::Point<3,Scalar> & p1, const angem::Point<3,Scalar> & p2);
   inline angem::Point<3,Scalar> const & first() const noexcept;
   inline angem::Point<3,Scalar> const & second() const noexcept;
+  inline angem::Point<3,Scalar> & first()  noexcept { return this->points[0]; }
+  inline angem::Point<3,Scalar> & second() noexcept { return this->points[1]; }
   angem::Line<3,Scalar> line() const noexcept;
   Scalar length() const noexcept;
   // check whether point is within line segment
   bool contains(angem::Point<3,Scalar> const &p, Scalar tol = 1e-8) const noexcept;
   // distance between line segment and point
   Scalar distance(angem::Point<3,Scalar> const &p) const noexcept;
+  inline angem::Point<3,Scalar> direction() const noexcept;
 };
 
 template<typename Scalar>
@@ -31,14 +34,12 @@ LineSegment<Scalar>::LineSegment(const angem::Point<3,Scalar> & p1, const angem:
 template<typename Scalar>
 const angem::Point<3,Scalar> & LineSegment<Scalar>::first() const noexcept
 {
-  assert( this->get_points().size() == 2 );
   return this->get_points().front();
 }
 
 template<typename Scalar>
 const angem::Point<3,Scalar> & LineSegment<Scalar>::second() const noexcept
 {
-  assert( this->get_points().size() == 2 );
   return this->get_points().back();
 }
 
@@ -79,5 +80,12 @@ Scalar LineSegment<Scalar>::distance(angem::Point<3,Scalar> const &p) const noex
   else if ( proj_length > l_ab ) return second().distance(p);
   else return line().distance( p );
 }
+
+template<typename Scalar>
+angem::Point<3,Scalar> LineSegment<Scalar>::direction() const noexcept
+{
+  return (this->points[1] - this->points[0]).normalize();
+}
+
 
 }  // end namespace angem

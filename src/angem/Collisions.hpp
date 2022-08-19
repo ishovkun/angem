@@ -489,25 +489,30 @@ bool collision(const Line<3,Scalar>         & line,
 }
 
 
+// bool collision(const Point<3,Scalar>        & p0,
+//                const Point<3,Scalar>        & p1,
+//                const Polygon<Scalar>        & poly,
+//                std::vector<Point<3,Scalar>> & intersection,
+//                const double                   tol = 1e-10)
+
 // collision of a line segment with a polygon
 template <typename Scalar>
-bool collision(const Point<3,Scalar>        & p0,
-               const Point<3,Scalar>        & p1,
-               const Polygon<Scalar>        & poly,
-               std::vector<Point<3,Scalar>> & intersection,
-               const double                   tol = 1e-10)
+size_t collision(LineSegment<Scalar> const & seg,
+                 Polygon<Scalar> const & poly,
+                 std::vector<Point<3,Scalar>> & intersection,
+                 double                   tol = 1e-10)
 {
   std::vector<Point<3,Scalar>> new_section;
-  if (poly.point_inside(p0, tol) && fabs(poly.plane().signed_distance(p0)) < tol)
-    new_section.push_back(p0);
-  if (poly.point_inside(p1, tol) && fabs(poly.plane().signed_distance(p1)) < tol)
-    new_section.push_back(p1);
+  if (poly.point_inside(seg.first(), tol) && fabs(poly.plane().signed_distance(seg.first())) < tol)
+    new_section.push_back(seg.first());
+  if (poly.point_inside(seg.second(), tol) && fabs(poly.plane().signed_distance(seg.second())) < tol)
+    new_section.push_back(seg.second());
 
   if (new_section.empty())
   {
     const std::size_t ibegin = new_section.size();
 
-    collision(p0, p1,  poly.plane(), new_section, tol);
+    collision(seg.first(), seg.second(),  poly.plane(), new_section, tol);
     for (std::size_t i=ibegin; i<new_section.size(); ++i)
       if (!poly.point_inside(new_section[i], tol))
         new_section.erase(new_section.begin() + i);
@@ -516,10 +521,7 @@ bool collision(const Point<3,Scalar>        & p0,
   for (const auto & p : new_section)
     intersection.push_back(p);
 
-  if (new_section.empty())
-    return false;
-  else
-    return true;
+  return new_section.size();
 }
 
 
@@ -533,8 +535,12 @@ bool collision(const LineSegment<Scalar>    & segment,
                double                   tol = 1e-10)
 {
   std::vector<Point<3,Scalar>> new_section;
-  const auto l0 = segment.first();
-  const auto l1 = segment.second();
+  auto & points = const_cast<Polyhedron<Scalar>&>(poly).get_points();
+  auto const o = points[0];
+  std::transform( points.begin(), points.end(), points.begin(), [&o]( auto & p ) { return p - o;} );
+  const auto l0 = segment.first() - o;
+  const auto l1 = segment.second() - o;
+
   tol *= poly.radius();
 
   // points that are inside poly
@@ -560,6 +566,8 @@ bool collision(const LineSegment<Scalar>    & segment,
   }
 
   angem::remove_duplicates_slow(new_section, intersection, tol);
+  std::transform( points.begin(), points.end(), points.begin(), [&o] (auto & p) { return p+o;} );
+  std::transform( intersection.begin(), intersection.end(), intersection.begin(), [&o] (auto & p) { return p+o;} );
 
   if (new_section.empty())
     return false;
@@ -585,7 +593,7 @@ bool point_inside_surface(const Point<3,Scalar>                       & point,  
   for (const std::vector<std::size_t> & face_vertices : surface_elements)
   {
     const angem::Polygon<double> tria(surface_vertices,  face_vertices);
-    angem::collision(point, external, tria, section_points);
+    angem::collision(LineSegment<Scalar>( point, external ), tria, section_points);
   }
 
   angem::PointSet<3, double> unique_points(tol);

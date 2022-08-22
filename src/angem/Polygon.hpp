@@ -97,7 +97,7 @@ template<typename Scalar>
 Polygon<Scalar>::Polygon(const std::vector<Point<3,Scalar>> & points,
                          bool                                 reorder_vertices)
 {
-  assert(point_list.size() > 2);
+  assert(points.size() > 2);
   set_data(points, reorder_vertices);
 }
 

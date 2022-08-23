@@ -159,7 +159,6 @@ Polygon<Scalar>::reorder(std::vector<Point<3, Scalar> > & points)
   assert(n_points > 2);
   if (n_points == 3) return;  // no need to sort a triangle
 
-  const Point<3,Scalar> cm = compute_center_mass(points);
   Plane<Scalar> plane = Plane<Scalar>(points);
 
   // this is a version of Graham Scan but without enforcing convexity

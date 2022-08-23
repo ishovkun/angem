@@ -403,8 +403,6 @@ template <typename Scalar>
 Scalar
 Plane<Scalar>::strike_angle() const
 {
-  Scalar rdip = static_cast<Scalar>(acos(_basis(2)[2]));
-
   // avoid taking acos(+- 1) -- causes errors due to roundoff
   // const double v1 = std::clamp( _basis(2)[0] / sin(rdip), -1.0, 1.0);
   // const double v2 = std::clamp( _basis(2)[1] / sin(rdip), -1.0, 1.0);

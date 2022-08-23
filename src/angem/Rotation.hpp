@@ -51,7 +51,6 @@ template<typename T>
 template<typename IteratorType>
 void Rotation<T>::apply(IteratorType begin, IteratorType const end) const
 {
-  auto it = begin;
   for (auto it = begin; it != end; ++it) {
     auto v = *it - _origin;
     v = _matrix * v;

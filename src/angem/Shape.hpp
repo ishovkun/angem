@@ -18,6 +18,7 @@ class Shape
     Shape(const std::vector<Point<3,Scalar>> & point_list);
     Shape(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
           const std::vector<std::size_t>     & indices);
+    virtual ~Shape() = default;
 
     // getter
     std::vector<Point<3,Scalar>> & get_points();

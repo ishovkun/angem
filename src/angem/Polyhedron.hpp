@@ -38,8 +38,7 @@ class Polyhedron: public Shape<Scalar>
   bool point_inside(const Point<3,Scalar> & p) const;
   // check whether the point resides on one of the boundaries
   // using the provided tolerance
-  bool point_on_boundary(const Point<3,Scalar> & p,
-                         const double tolerance = 1e-4) const;
+  bool point_on_boundary(const Point<3,Scalar> & p, double tolerance = 1e-4) const;
   // returns the average distance from center to vertices
   Scalar radius() const;
 
@@ -51,6 +50,8 @@ class Polyhedron: public Shape<Scalar>
   // return vector of ordered pairs of vertex indices
   // (ordering by index comparison)
   std::vector<Edge> get_edges() const;
+
+  virtual ~Polyhedron() = default;
 
  protected:
   std::vector<std::vector<std::size_t>> m_faces;
@@ -159,9 +160,9 @@ bool Polyhedron<Scalar>::point_inside(const Point<3,Scalar> & p) const
 
 template<typename Scalar>
 bool Polyhedron<Scalar>::point_on_boundary(const Point<3,Scalar> & p,
-                                           const double tolerance) const
+                                           double tolerance) const
 {
-  Scalar const h = this->radius();  // characteristic length
+  tolerance *= this->radius();  // characteristic length
   for (const auto & face : m_faces)
   {
     Plane<Scalar> plane(this->points[face[0]], this->points[face[1]], this->points[face[2]]);

@@ -121,7 +121,7 @@ bool collision(const Line<3,Scalar>        & l1,
   ** We must handle such cases carefully.
    */
   using pair = std::pair<size_t, size_t>;
-  for (const pair ij : std::vector<pair>{pair(0,1),pair(0,2),pair(1,2)})
+  for (const pair & ij : std::vector<pair>{pair(0,1),pair(0,2),pair(1,2)})
   {
     const size_t i = ij.first;
     const size_t j = ij.second;

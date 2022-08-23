@@ -295,4 +295,20 @@ void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool p
 //   reorder_from(arr, index);
 // }
 
+template<typename Scalar>
+Scalar polygon_area(std::vector<Point<3,Scalar>> const & coord,
+                    std::vector<size_t> const & vertices)
+{
+  auto const cm = compute_center_mass(coord, vertices);
+  size_t const nv = vertices.size();
+  Scalar ans = 0;
+  for (size_t i = 0; i < nv; ++i) {
+    auto const & v1 = coord[ vertices[i] ];
+    auto const & v2 = coord[ vertices[ (i+1) % nv ] ];
+    ans += triangle_area(v1, v2, cm);
+  }
+  return ans;
+}
+
+
 }

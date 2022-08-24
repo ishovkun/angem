@@ -301,7 +301,7 @@ void split(const Polygon<Scalar> & poly,
 
   // if split happened figure outpu which parts are above/below
   std::set<size_t> set_above, set_below;
-  for (const auto p : poly.get_points())
+  for (const auto & p : poly.get_points())
   {
     const std::size_t ind = result.vertices.insert(p);
     const Scalar signed_dist = plane.signed_distance(p);

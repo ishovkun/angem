@@ -355,7 +355,7 @@ Plane<Scalar>::project_points(const std::vector<Point<3,Scalar>> & points) const
 {
   std::vector<Point<3,Scalar>> result;
   result.reserve(points.size());
-  for (const auto p : points)
+  for (const auto & p : points)
     result.push_back(project_point(p));
   return result;
 }

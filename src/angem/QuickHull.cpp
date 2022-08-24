@@ -51,7 +51,7 @@ namespace angem {
     }
 
     template<typename T>
-    void QuickHull<T>::buildMesh(const VertexDataSource<T>& pointCloud, bool CCW, bool useOriginalIndices, T epsilon) {
+    void QuickHull<T>::buildMesh(const VertexDataSource<T>& pointCloud, bool, bool, T epsilon) {
         if (pointCloud.size()==0) {
             m_mesh = MeshBuilder<T>();
             return;

@@ -138,9 +138,9 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
       break;
   if ( v2 >= cloud.size() - 1 )
   {
-    std::cout << "cloud:" << std::endl;
-    for (auto & p : cloud)
-      std::cout << p << " (dist " << p1.distance(p) << ")"<< std::endl;
+    // std::cout << "cloud:" << std::endl;
+    // for (auto & p : cloud)
+    //   std::cout << p << " (dist " << p1.distance(p) << ")"<< std::endl;
     throw std::invalid_argument("Cannot initialize a plane from a point cloud. "
                                 "All vertices are within 1e-8 to each other");
   }
@@ -185,8 +185,8 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud,
   }
   if (!found)
   {
-    for (const size_t i : specific_indices)
-      std::cout << cloud[specific_indices[i]] << std::endl;
+    // for (const size_t i : specific_indices)
+    //   std::cout << cloud[specific_indices[i]] << std::endl;
     throw std::invalid_argument("Cannot initialize a plane from a point cloud");
   }
 

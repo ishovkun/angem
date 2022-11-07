@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>  // size_t
 
 namespace angem {
 
@@ -39,5 +40,21 @@ enum VTK_ID : int
   GeneralPolyhedronID = 42,
   InvalidElementID = -1
 };
+
+inline VTK_ID polygon_vtk_id(size_t n_vertices)
+{
+  switch (n_vertices) {
+  case 1:
+    return InvalidElementID;
+  case 2:
+    return InvalidElementID;
+  case 3:
+    return TriangleID; //  triangle
+  case 4:
+    return QuadrangleID; //  vtk_quad
+  default:
+    return GeneralPolygonID; //  vtk_polygon
+  }
+}
 
 }  // end namespace angem

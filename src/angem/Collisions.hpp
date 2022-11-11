@@ -453,7 +453,7 @@ bool collision(const Line<3,Scalar>         & line,
                const double tol = 1e-10)
 {
   // find intersection between polygon plane and line
-  Point<3,Scalar> p;
+  Point<3,Scalar> p(1e100, 1e100, 1e100);
   if (coincide(line, poly.plane()))
   {
     const auto & vertices = poly.get_points();
@@ -473,27 +473,21 @@ bool collision(const Line<3,Scalar>         & line,
     assert(intersection.size() == 2);
     return true;
   }
-  else if (collision(line, poly.plane(), p))  // case colinear
+  else if (collision(line, poly.plane(), p, tol))
   {
-    return false;
-  }
-  else
-  {
-    if (poly.point_inside(p), 1e-4)
+    if (poly.point_inside(p, tol))
     {
       intersection.push_back(p);
       return true;
     }
-    else return false;
+    else {
+      return false;
+    }
   }
+  else return false;
 }
 
 
-// bool collision(const Point<3,Scalar>        & p0,
-//                const Point<3,Scalar>        & p1,
-//                const Polygon<Scalar>        & poly,
-//                std::vector<Point<3,Scalar>> & intersection,
-//                const double                   tol = 1e-10)
 
 // collision of a line segment with a polygon
 template <typename Scalar>

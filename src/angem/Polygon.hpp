@@ -348,7 +348,7 @@ bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
 
   const Point<3,Scalar> cm = this->center();
   Point<3,Scalar> ps  = p - cm;
-  Point<3,Scalar> zero;
+  Point<3,Scalar> zero{0,0,0};
   for (const auto & edge : get_edges())
   {
     Plane<Scalar> side = get_side(edge);
@@ -384,7 +384,7 @@ Point<3,Scalar> Polygon<Scalar>::center() const
 
   /* Break the poly into triangles with
    * vertices in points[0], points[j], points[j+1] */
-  for (std::size_t j=1; j<this->points.size()-1; j++)
+  for (size_t j=1; j<this->points.size()-1; j++)
   {
     /* compute normal and offset w from first 3 vertices */
     // u and v are tangent vectors

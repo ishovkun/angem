@@ -150,7 +150,7 @@ bool collision(const Polygon<Scalar>        & poly1,
   {
     // 1. find vertices of each poly inside another
     // 2. find intersection of edges if any points inside
-    PointSet<3,Scalar> pset(tol * 1.5);
+    PointSet pset(tol * 1.5);
     // 1.
     const auto & pts1 = poly1.get_points();
     const auto & pts2 = poly2.get_points();
@@ -169,13 +169,13 @@ bool collision(const Polygon<Scalar>        & poly1,
 
     if (all_inside1)
     {
-      pset.points.clear();
-      pset.points = pts2;
+      pset.points().clear();
+      pset.points() = pts2;
     }
     if (all_inside2)
     {
-      pset.points.clear();
-      pset.points = pts1;
+      pset.points().clear();
+      pset.points() = pts1;
     }
     if (all_inside1 && all_inside2)
     {
@@ -199,7 +199,7 @@ bool collision(const Polygon<Scalar>        & poly1,
         }
       }
 
-    for (const auto & p: pset.points)
+    for (const auto & p: pset.points())
       intersection.push_back(p);
 
     if (!pset.empty())
@@ -365,7 +365,7 @@ bool split(const Polyhedron<Scalar> & polyhedron,
 
   // sort face vertices so they form polygons
   for (auto & face : result.polygons)
-    Polygon<Scalar>::reorder_indices(result.vertices.points, face);
+    Polygon<Scalar>::reorder_indices(result.vertices.points(), face);
 
   // add a polygon that represents the intersection
   std::vector<size_t> section_poly_verts;
@@ -398,7 +398,7 @@ bool split(const Polyhedron<Scalar> & polyhedron,
     }
 
     // sort vertices so they form a polygon
-    Polygon<Scalar>::reorder_indices(result.vertices.points, section_poly_verts);
+    Polygon<Scalar>::reorder_indices(result.vertices.points(), section_poly_verts);
     result.polygons.push_back(std::move(section_poly_verts));
     parent_face_indices.push_back(result.polygons.size());
     result.markers.push_back(marker_split);
@@ -590,7 +590,7 @@ bool point_inside_surface(const Point<3,Scalar>                       & point,  
     angem::collision(LineSegment<Scalar>( point, external ), tria, section_points);
   }
 
-  angem::PointSet<3, double> unique_points(tol);
+  angem::PointSet unique_points(tol);
   for (const auto & p : section_points)
     unique_points.insert(p);
 

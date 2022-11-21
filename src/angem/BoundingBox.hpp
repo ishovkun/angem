@@ -17,6 +17,15 @@ class BoundingBox {
 
   operator Hexahedron<Scalar>() const { return _box; }
 
+  angem::Point<3, Scalar> dimensions() const {
+    angem::Point<3, Scalar> ans;
+    auto const & points = _box.get_points();
+    ans[0] = points[0].distance(points[1]);
+    ans[1] = points[0].distance(points[3]);
+    ans[2] = points[0].distance(points[4]);
+    return ans;
+  }
+
  private:
   angem::Hexahedron<Scalar> compute_(std::vector<Point<3,Scalar>> const & cloud)
   {

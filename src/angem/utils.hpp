@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 
 #include "Point.hpp"
 #include <algorithm>
@@ -310,5 +311,13 @@ Scalar polygon_area(std::vector<Point<3,Scalar>> const & coord,
   return ans;
 }
 
-
+template<typename Scalar>
+Scalar angle( Point<3,Scalar> const & v1, Point<3,Scalar> const & v2 )
+{
+  Scalar cos_alpha =  v1.dot(v2) / v1.norm() / v2.norm();
+  cos_alpha = std::clamp(cos_alpha, (Scalar)-1, (Scalar)1);
+  Scalar const alpha = std::acos(cos_alpha);
+  return alpha;
 }
+
+}  // end namspace angem

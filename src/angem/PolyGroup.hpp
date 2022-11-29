@@ -36,7 +36,7 @@ void PolyGroup<Scalar>::add(const PolyGroup<Scalar> & other)
 
   // map vertices in other to new vertices in this
   std::vector<std::size_t> indices;
-  for (const auto & p : other.vertices)
+  for (const auto & p : other.vertices())
   {
     const std::size_t ind = vertices.insert(p);
     indices.push_back(ind);

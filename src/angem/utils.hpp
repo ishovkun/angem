@@ -4,6 +4,7 @@
 #include "Point.hpp"
 #include <algorithm>
 #include <limits>  // std::numeric_limits
+#include <cmath>
 
 namespace angem
 {

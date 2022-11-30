@@ -442,6 +442,48 @@ bool collision(const Line<3,Scalar> & line,
 }
 
 
+template<typename Scalar>
+bool point_inside(Polygon<Scalar> const & poly, Point<3,Scalar> const & x)
+{
+  auto verts = poly.get_points();
+  std::vector<size_t> indices(verts.size());
+  auto offset = poly.center();
+  std::transform(verts.begin(), verts.end(), verts.begin(), [&offset](auto const &p ){
+    return p - offset;
+  });
+  Point<3,Scalar> c; c.set_zero();
+
+  std::iota( indices.begin(), indices.end(), 0 );
+  angem::Plane<Scalar> plane( c, angem::polygon_average_normal(verts, indices) );
+  std::vector<angem::Point<2, Scalar>> verts2d( verts.size() );
+
+  auto local_coord = [&plane] (auto const & p3d){
+    auto loc = plane.local_coordinates(p3d);
+    return angem::Point<2,Scalar>( loc[0], loc[1] );
+  };
+  std::transform(verts.begin(), verts.end(), verts2d.begin(), local_coord);
+  auto x2d = local_coord(x-offset);
+  auto c2d = local_coord(c);
+
+  for (size_t i = 0; i < indices.size(); ++i) {
+    size_t const j = (i+1) % indices.size();
+    Scalar dx = (verts2d[j][0] - verts2d[i][0]);
+    if ( !std::isnan(1./dx) )
+    {
+      Scalar dy = (verts2d[j][1] - verts2d[i][1]);
+      Scalar y1 = verts2d[i][1] + (dy/dx) * (x2d[0] - verts2d[i][0]);
+      Scalar y2 = verts2d[i][1] + (dy/dx) * (c2d[0] - verts2d[i][0]);
+      if ( (x2d[1] - y1) * (c2d[1] - y2) < 0 )
+        return false;
+    }
+    else {
+      if ( (x2d[0] - verts2d[j][0]) * ( c2d[0] - verts2d[j][0]) < 0 )
+        return false;
+    }
+  }
+  return true;
+}
+
 // find intersection between a polygon and a line
 //  section is a vector cause line can reside on polygon
 // appends to vector intersection
@@ -459,7 +501,7 @@ bool collision(const Line<3,Scalar>         & line,
     const auto & vertices = poly.get_points();
     for (size_t i = 0; i < vertices.size(); ++i)
     {
-      const size_t j = (i < vertices.size() - 1) ? (i+1) : 0;
+      const size_t j = (i+1) % vertices.size();
       Line<3,Scalar> edge(vertices[i], vertices[j]-vertices[i]);
       std::vector<Point<3,Scalar>> sec;
       if (collision(line, edge, sec, tol))
@@ -476,6 +518,7 @@ bool collision(const Line<3,Scalar>         & line,
   else if (collision(line, poly.plane(), p, tol))
   {
     if (poly.point_inside(p, tol))
+    // if (point_inside(poly, p))
     {
       intersection.push_back(p);
       return true;
@@ -597,5 +640,6 @@ bool point_inside_surface(const Point<3,Scalar>                       & point,  
   // if odd return true
   return (unique_points.size() % 2 == 1);
 }
+
 
 }  // end namespace

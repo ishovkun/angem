@@ -368,14 +368,12 @@ Plane<Scalar> Polygon<Scalar>::get_side(const Edge & edge) const
   if (edge.first >= this->points.size() or edge.second >= this->points.size())
     throw std::out_of_range("Edge does not exist");
 
-  auto const & p1 = this->points[edge.first];
-  auto const & p2 = this->points[edge.second];
-  auto const edge_center = 0.5*(p1+p2);
-  auto const poly_center = this->center();
-  Plane<Scalar> side(edge_center, (edge_center - poly_center).normalize());
+  const Point<3,Scalar> point3 = this->points[edge.first] +
+                                 m_plane.normal() * (this->points[edge.first] -
+                                                     this->points[edge.second]).norm();
+  Plane<Scalar> side(this->points[edge.first], this->points[edge.second], point3);
   return side;
 }
-
 
 template<typename Scalar>
 Point<3,Scalar> Polygon<Scalar>::center() const

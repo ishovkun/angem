@@ -21,6 +21,7 @@ class Line
 
   Point<dim,Scalar> point() const noexcept {return _point;}
   Point<dim,Scalar> direction() const noexcept {return _direction;}
+  Scalar parametric_coordinate(Point<dim,Scalar> const & p) const noexcept;
 
   // distance between a line and a point
   Scalar distance(const Point<dim,Scalar> & p) const;
@@ -49,5 +50,19 @@ Scalar Line<dim,Scalar>::distance(const Point<dim,Scalar> & p) const
   const Scalar cd = area / ab.norm();
   return cd;
 }
+
+template <int dim, typename Scalar>
+Scalar Line<dim,Scalar>::parametric_coordinate(Point<dim,Scalar> const & p) const noexcept
+{
+  auto const diff = p - _point;
+  size_t idx_max{0};
+  for (size_t i = 0; i < dim; ++i)
+    if ( std::fabs(_direction[i]) > std::fabs(_direction[idx_max]) )
+      idx_max = i;
+  if ( !std::isnan(1./_direction[idx_max]) )
+      return diff[idx_max] / _direction[idx_max];
+  return 0;
+}
+
 
 }  // end namespace

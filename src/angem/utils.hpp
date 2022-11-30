@@ -1,6 +1,4 @@
 #pragma once
-#include <algorithm>
-
 #include "Point.hpp"
 #include <algorithm>
 #include <limits>  // std::numeric_limits
@@ -319,6 +317,26 @@ Scalar angle( Point<3,Scalar> const & v1, Point<3,Scalar> const & v2 )
   cos_alpha = std::clamp(cos_alpha, (Scalar)-1, (Scalar)1);
   Scalar const alpha = std::acos(cos_alpha);
   return alpha;
+}
+
+template<typename Scalar>
+Point<3,Scalar> polygon_average_normal(std::vector<Point<3,Scalar>> const & coord,
+                              std::vector<size_t> const & indices)
+{
+  Point<3,Scalar> ans;
+  auto const & v1 = coord[indices[0]];
+  auto const & v2 = coord[indices[1]];
+  Scalar sum_area = 0;
+  for (size_t i = 2; i < indices.size(); ++i)
+  {
+    auto const & v3 = coord[indices[i]];
+    auto normal = angem::cross(v1 - v3, v2 - v3);
+    if ( std::isnormal( normal.norm() ) )
+      ans += normal.normalize();
+    sum_area += angem::triangle_area(v1, v2, v3);
+  }
+  ans /= sum_area;
+  return ans;
 }
 
 }  // end namspace angem

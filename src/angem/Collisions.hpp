@@ -82,18 +82,17 @@ bool collision(const Polygon<Scalar>        & poly,
   // call collision of all edges
   bool result = false;
   const auto & pts = poly.get_points();
-  for (size_t i=0; i<pts.size(); ++i)
+  size_t const n = pts.size();
+  for (size_t i = 0; i < n; ++i)
   {
     bool loc_collision = false;
-    if (i < pts.size() - 1)
-      loc_collision = collision(pts[i], pts[i+1], plane, intersection, tol);
-    else
-      loc_collision = collision(pts[i], pts[0], plane, intersection, tol);
+    loc_collision = collision(LineSegment(pts[i], pts[(i+1)%n]), plane, intersection, tol);
     if (loc_collision)
       result = true;
   }
 
-  intersection = remove_duplicates_slow(intersection, tol);
+  if ( tol > 0 )
+    intersection = remove_duplicates_slow(intersection, tol);
   return result;
 }
 
@@ -192,7 +191,8 @@ bool collision(const Polygon<Scalar>        & poly1,
         Plane<Scalar> side = poly1.get_side(edge1);
         for (const auto & edge2 : poly2.get_edges())
         {
-          collision(pts2[edge2.first], pts2[edge2.second], side, v_points, tol);
+          collision(angem::LineSegment(pts2[edge2.first], pts2[edge2.second]),
+                    side, v_points, tol);
           for (const auto & p : v_points)
             if (poly1.point_inside(p))
               pset.insert(p);
@@ -224,12 +224,16 @@ bool collision(const Polygon<Scalar>        & poly1,
   return true;
 }
 
-
 // intersection of a segment with plane
 // intersection is appended to!
+// template <typename Scalar>
+// bool collision(const Point<3,Scalar>        & l0,
+//                const Point<3,Scalar>        & l1,
+//                const Plane<Scalar>          & plane,
+//                std::vector<Point<3,Scalar>> & intersection,
+//                const double                   tol = 1e-10)
 template <typename Scalar>
-bool collision(const Point<3,Scalar>        & l0,
-               const Point<3,Scalar>        & l1,
+bool collision(const LineSegment<Scalar>    & line,
                const Plane<Scalar>          & plane,
                std::vector<Point<3,Scalar>> & intersection,
                const double                   tol = 1e-10)
@@ -239,6 +243,8 @@ bool collision(const Point<3,Scalar>        & l0,
   // segment : l0, l1
   // intersection: d = (p0 - l0) · n / (l · n)
   // call collision of all edges
+  auto const & l0 = line.first();
+  auto const & l1 = line.second();
   const Scalar d1 = plane.signed_distance(l0);
   const Scalar d2 = plane.signed_distance(l1);
 
@@ -260,7 +266,6 @@ bool collision(const Point<3,Scalar>        & l0,
   intersection.push_back(l0 + d * l);
   return true;
 }
-
 
 // marks polygons above fracture as 1
 // polygons below fracture as 0
@@ -549,7 +554,7 @@ size_t collision(LineSegment<Scalar> const & seg,
   {
     const std::size_t ibegin = new_section.size();
 
-    collision(seg.first(), seg.second(),  poly.plane(), new_section, tol);
+    collision(seg,  poly.plane(), new_section, tol);
     for (std::size_t i=ibegin; i<new_section.size(); ++i)
       if (!poly.point_inside(new_section[i], tol))
         new_section.erase(new_section.begin() + i);
@@ -593,7 +598,7 @@ bool collision(const LineSegment<Scalar>    & segment,
     {
       const size_t ibegin = new_section.size();
       Polygon<Scalar> poly_face(points, face);
-      collision(l0, l1,  poly_face.plane(), new_section, tol);
+      collision(LineSegment(l0, l1),  poly_face.plane(), new_section, tol);
 
       for (size_t i = ibegin; i < new_section.size();)
         if (!poly_face.point_inside(new_section[i], tol))

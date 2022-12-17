@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Point.hpp"
+#include "Line.hpp"
 #include "LineSegment.hpp"
 #include "Plane.hpp"
 #include "Polygon.hpp"
@@ -233,7 +234,7 @@ bool collision(const Polygon<Scalar>        & poly1,
 //                std::vector<Point<3,Scalar>> & intersection,
 //                const double                   tol = 1e-10)
 template <typename Scalar>
-bool collision(const LineSegment<Scalar>    & line,
+bool collision(const LineSegment<Scalar>    & segment,
                const Plane<Scalar>          & plane,
                std::vector<Point<3,Scalar>> & intersection,
                const double                   tol = 1e-10)
@@ -243,8 +244,8 @@ bool collision(const LineSegment<Scalar>    & line,
   // segment : l0, l1
   // intersection: d = (p0 - l0) · n / (l · n)
   // call collision of all edges
-  auto const & l0 = line.first();
-  auto const & l1 = line.second();
+  auto const & l0 = segment.first();
+  auto const & l1 = segment.second();
   const Scalar d1 = plane.signed_distance(l0);
   const Scalar d2 = plane.signed_distance(l1);
 

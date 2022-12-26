@@ -6,6 +6,7 @@
 #include <ostream>
 #include <cmath>
 #include <vector>
+#include <array>
 #include <cassert>
 #include <cstdlib>
 
@@ -59,6 +60,14 @@ class Point
   Scalar operator() (int i) const;
   // Get a const reference to  i-th coordinate. checks that i < dim
   const Scalar & operator[] (int i) const;
+
+  // iterators
+  auto begin() { return _storage.begin(); }
+  auto end() { return _storage.end(); }
+  auto begin() const { return _storage.cbegin(); }
+  auto end() const { return _storage.cend(); }
+  auto cbegin() const {return _storage.cbegin(); }
+  auto cend() const {return _storage.cend(); }
 
   // operations
   // comparison
@@ -153,7 +162,7 @@ class Point
                                   const Point<d,S> & p);
 
  protected:
-  Scalar _storage[dim];  // array of coordinate components
+  std::array<Scalar,dim> _storage;  // array of coordinate components
 };
 
 

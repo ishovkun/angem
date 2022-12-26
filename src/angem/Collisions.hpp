@@ -170,13 +170,13 @@ bool collision(const Polygon<Scalar>        & poly1,
 
     if (all_inside1)
     {
-      pset.points().clear();
-      pset.points() = pts2;
+      pset.clear();
+      const_cast<std::vector<Point<3,Scalar>>&>(pset.points()) = pts2;
     }
     if (all_inside2)
     {
-      pset.points().clear();
-      pset.points() = pts1;
+      pset.clear();
+      const_cast<std::vector<Point<3,Scalar>>&>(pset.points()) = pts1;
     }
     if (all_inside1 && all_inside2)
     {

@@ -19,72 +19,53 @@ constexpr size_t num_digits(size_t x)
 }
 
 class PointSet {
-
  public:
-  PointSet(double tol = 1e-6)
-      : _tol(tol)
-      , _upper(_tol*_dmax / 2)
-      , _lower(- _upper)
+  PointSet(double tol = 1e-10,
+            Point<3,long double> min = Point<3,long double>(std::numeric_limits<double>::max(),
+                                                            std::numeric_limits<double>::max(),
+                                                            std::numeric_limits<double>::max()))
+            : _tol(tol), _min(min)
   {
-    assert( tol > 0 );
-    assert( (_upper - _lower) / _tol > _dmax );
-    // std::cout << "_lower = " << _lower << std::endl;
+    assert( _tol > 0 );
+#ifndef NDEBUG
+    _max = Point<3,long double>(std::numeric_limits<double>::lowest(),
+                                std::numeric_limits<double>::lowest(),
+                                std::numeric_limits<double>::lowest());
+#endif
   }
 
-  PointSet & operator=(PointSet const & other)
-  {
-    _storage = other._storage;
-    _mapping = other._mapping;
-    _tol = other._tol;
-    _upper = other._upper;
-    _lower = other._lower;
-    return std::ref(*this);
+  angem::Point<3,double> const & operator[](size_t i) const { return _storage[i]; }
+
+  std::vector<angem::Point<3,double>> const & points() const { return _storage; }
+
+  void clear() {
+    _storage.clear();
+    _mapping.clear();
   }
 
-  PointSet & operator=(PointSet & other)
+  // if found, returns the index of point in storage
+  // else returns the size of the set
+  size_t find(Point<3,double> const & p) const
   {
-    _storage.swap(other._storage);
-    _mapping.swap(other._mapping);
-    _tol = other._tol;
-    _upper = other._upper;
-    _lower = other._lower;
-    return std::ref(*this);
-  }
+    for (size_t i = 0; i < 3; ++i)
+      if ( _min[i] > p[i] )
+        return false;
 
-  inline Point<3,double> & operator[](size_t i) { return _storage[i]; }
-  inline Point<3,double> const & operator[](size_t i) const { return _storage[i]; }
-  inline std::vector<Point<3,double>> & points() noexcept { return _storage; }
-  inline std::vector<Point<3,double>> const & points() const noexcept { return _storage; }
-
-
-  size_t insert(Point<3,double> const & p)
-  {
-    size_t idx = find(p);
-    if ( idx == this->size() )
-    {
-      _storage.push_back(p);
-      auto key = compute_key(compute_idx_(p));
-      _mapping[key] = idx;
-    }
-    return idx;
-  }
-
-  size_t find(Point<3,double> const & p) const noexcept
-  {
-    auto idx = compute_idx_(p);
-    auto key = compute_key(idx);
+    auto idx = cartesian_indices_(p);
+    auto key = compute_key_(idx);
     size_t id = find_(key, p);
     if ( id < size() ) return id;
 
+    // lookup neighbor cells
     for (size_t i = 0; i < 3; ++i)
     {
       idx[i] = idx[i] + 1;
-      key = compute_key(idx);
+      key = compute_key_(idx);
       id = find_(key, p);
       if ( id < size() ) return id;
 
       idx[i] = idx[i] - 2;
-      key = compute_key(idx);
+      key = compute_key_(idx);
       id = find_(key, p);
       if ( id < size() ) return id;
 
@@ -94,65 +75,97 @@ class PointSet {
     return size();
   }
 
-  std::string compute_key(std::array<size_t,3> const & idx) const noexcept
+  size_t insert(Point<3,double> const & p)
   {
-    std::string ans(_hash_len, '0');
-    // std::cout << "idx = ";
-    // for (size_t i = 0; i < 3; ++i)
-    //   std::cout << idx[i] << " ";
-    // std::cout << std::endl;
-
+    // need to adjust the limit somehow
     for (size_t i = 0; i < 3; ++i)
-    {
-      size_t offset = _dlength*(i+1) - 1;
-      size_t x = idx[i];
-      while(x > 0) {
-        char c = '0' + (x % 10);
-        x /= 10;
-        ans[offset] = c;
-        offset--;
-      }
+      if ( _min[i] > p[i] )
+        {
+          update_limit_(p);
+          update_mapping_();
+        }
+
+    auto idx = cartesian_indices_(p);
+    auto key = compute_key_(idx);
+    size_t id = find_(key, p);
+    if ( id == size() )  {
+      _storage.push_back(p);
+      _mapping[key] = id;
     }
-    return ans;
+
+    return id;
   }
 
-  size_t find_by_hash(std::string const & key);
+  inline size_t size() const noexcept { return _storage.size(); }
 
-  size_t size() const noexcept {return _storage.size();}
-  bool empty() const noexcept { return _storage.empty(); }
+  inline bool empty() const noexcept { return _storage.empty(); }
 
  private:
-  size_t find_(std::string const & key, Point<3,double> const & p) const noexcept
+
+  void update_mapping_()
   {
-      auto it = _mapping.find(key);
-      if (it != _mapping.end())
-      {
-        auto const & candidate = _storage[it->second];
-        if ( candidate.distance(p) < _tol )
-          return it->second;
-        else return size();
-      }
-      else return size();
+    _mapping.clear();
+    for (size_t i = 0; i < _storage.size(); ++i) {
+      auto idx = cartesian_indices_( _storage[i] );
+      auto key = compute_key_(idx);
+      assert( find_(key, _storage[i]) == size() );
+      _mapping[key] = i;
+    }
   }
 
-  std::array<size_t,3> compute_idx_(Point<3,double> const & p) const
+  void update_limit_(Point<3,double> const &p)
+  {
+    for (size_t i = 0; i < 3; ++i) {
+      if ( _min[i] > p[i]) {
+        _min[i] = ( p[i] >= 0 ) ? 0.5*p[i] : 2*p[i];
+      }
+#ifndef NDEBUG
+      _max[i] = std::max((double)_max[i], p[i]);
+      if ((_max[i] - _min[i]) * std::numeric_limits<long double>::epsilon() > _tol) {
+        throw std::runtime_error("Cannot resolve this set with such tolerance. " "Use higher precision");
+      }
+#endif
+    }
+  }
+
+  std::string compute_key_(std::array<size_t,3> const & idx) const noexcept
+  {
+    std::string s;
+    for (size_t i = 0; i < 3; ++i) {
+      s += std::to_string(idx[i]);
+      if ( i < 2 ) s += ",";
+    }
+    return s;
+  }
+
+  std::array<size_t,3> cartesian_indices_(Point<3,double> const & p) const
   {
     std::array<size_t,3> idx;
     for (size_t i = 0; i < 3; ++i)
-      idx[i] = static_cast<size_t>( ((long double)(p[i]) - _lower) /_tol );
+      idx[i] = static_cast<size_t>( ((long double)p[i] - _min[i]) /(long double)_tol );
     return idx;
   }
 
+  size_t find_(std::string const & key, Point<3,double> const & p) const noexcept
+  {
+    auto it = _mapping.find(key);
+    if (it != _mapping.end())
+    {
+      auto const & candidate = _storage[it->second];
+      if ( candidate.distance(p) < _tol )
+        return it->second;
+      else return size();
+    }
+    else return size();
+  }
 
-
-  std::vector< angem::Point<3,double> > _storage;
-  std::unordered_map<std::string, size_t> _mapping;
-  long double _tol;
-
-  static constexpr size_t _dmax {std::numeric_limits<size_t>::max()};
-  static constexpr size_t _dlength {num_digits(_dmax)};
-  static constexpr size_t _hash_len{3*_dlength};
-  double _upper, _lower;
+  Point<3,long double> _min;
+  double _tol;
+  std::vector<Point<3,double>> _storage;
+  std::unordered_map<std::string,size_t> _mapping;
+#ifndef NDEBUG
+  Point<3,long double> _max;
+#endif
 };
 
 }  // end namespace aaa

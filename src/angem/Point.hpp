@@ -109,21 +109,21 @@ class Point
   friend Point<d, S> operator-(const Point<d,S> & p1,
                                const Point<d,S> & p2);
   // multiplication by number
-  template <int d, typename S>
-  friend Point<d, S> operator*(const Point<d,S> & p1,
-                               const double       x);
+  // template <int d, typename S>
+  // friend Point<d, S> operator*(const Point<d,S> & p1,
+  //                              const double       x);
   // multiplication by number
-  template <int d, typename S>
-  friend Point<d, S> operator*(const double       x,
-                               const Point<d,S> & p1);
+  // template <int d, typename S>
+  // friend Point<d, S> operator*(const double       x,
+  //                              const Point<d,S> & p1);
   // multiplication by number
-  template <int d, typename S>
-  friend Point<d, S> operator*(const Point<d,S> & p1,
-                               const int       x);
+  // template <int d, typename S>
+  // friend Point<d, S> operator*(const Point<d,S> & p1,
+  //                              const int       x);
   // multiplication by number
-  template <int d, typename S>
-  friend Point<d, S> operator*(const int       x,
-                               const Point<d,S> & p1);
+  // template <int d, typename S>
+  // friend Point<d, S> operator*(const int       x,
+  //                              const Point<d,S> & p1);
 
   // division by number
   template <int d, typename S1, typename S2>
@@ -505,19 +505,19 @@ Point<dim, Scalar> operator-(const Point<dim, Scalar> & p1,
 }
 
 
-template<int dim, typename Scalar>
-Point<dim, Scalar> operator*(const Point<dim, Scalar> & p1,
-                             const double               x)
+template<int dim, typename Scalar1, typename Scalar2>
+Point<dim, Scalar1> operator*(const Point<dim, Scalar1> & p1,
+                              const Scalar2              x)
 {
-  Point<dim, Scalar> result;
+  Point<dim, Scalar1> result;
   for (int i=0; i<dim; ++i)
-    result[i] = p1._storage[i] * x;
+    result[i] = p1(i) * x;
   return result;
 }
 
 
-template<int dim, typename Scalar>
-Point<dim, Scalar> operator*(const double               x,
+template<int dim, typename Scalar, typename Scalar2>
+Point<dim, Scalar> operator*(const Scalar2               x,
                              const Point<dim, Scalar> & p1)
 {
   return p1 * x;

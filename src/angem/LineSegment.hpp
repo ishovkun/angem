@@ -20,6 +20,7 @@ class LineSegment : public Shape<Scalar>
   bool contains(angem::Point<3,Scalar> const &p, Scalar tol = 1e-8) const noexcept;
   // distance between line segment and point
   Scalar distance(angem::Point<3,Scalar> const &p) const noexcept;
+  // normalized direction vector
   inline angem::Point<3,Scalar> direction() const noexcept;
 };
 

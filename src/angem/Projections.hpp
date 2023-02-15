@@ -2,8 +2,9 @@
 #include "Polygon.hpp"
 #include "Collisions.hpp"
 
-namespace angem
+namespace angem::projections
 {
+
 
 /* Project polygon 1 onto polygon 2 and points within intersection.
  * These points might form a polygon, if the projection area is not zero.
@@ -27,4 +28,5 @@ std::vector<Point<3,Scalar>> project(const Polygon<Scalar> & poly1,
   return intersection;
 }
 
-}  // end namespace angem
+
+}  // end namespace angem::projections

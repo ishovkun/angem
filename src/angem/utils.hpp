@@ -339,7 +339,7 @@ Scalar angle( Point<3,Scalar> const & v1, Point<3,Scalar> const & v2 )
 
 template<typename Scalar>
 Point<3,Scalar> polygon_average_normal(std::vector<Point<3,Scalar>> const & coord,
-                              std::vector<size_t> const & indices)
+                                       std::vector<size_t> const & indices)
 {
   Point<3,Scalar> ans;
   auto const & v1 = coord[indices[0]];
@@ -349,12 +349,40 @@ Point<3,Scalar> polygon_average_normal(std::vector<Point<3,Scalar>> const & coor
   {
     auto const & v3 = coord[indices[i]];
     auto normal = angem::cross(v1 - v3, v2 - v3);
-    if ( std::isnormal( normal.norm() ) )
-      ans += normal.normalize();
-    sum_area += angem::triangle_area(v1, v2, v3);
+    double const area = angem::triangle_area(v1, v2, v3);
+    if (std::isnormal(normal.norm())) {
+      ans += area * normal.normalize();
+      sum_area += area;
+    }
+
   }
-  ans /= sum_area;
+  if ( std::isnormal(sum_area) )
+    ans /= sum_area;
   return ans;
 }
+
+template<typename Scalar>
+Point<3,Scalar> polygon_average_normal(std::vector<Point<3,Scalar>> const & coord)
+{
+  Point<3,Scalar> ans;
+  auto const & v1 = coord[0];
+  auto const & v2 = coord[1];
+  Scalar sum_area = 0;
+  for (size_t i = 2; i < coord.size(); ++i)
+  {
+    auto const & v3 = coord[i];
+    auto normal = angem::cross(v1 - v3, v2 - v3);
+    double const area = angem::triangle_area(v1, v2, v3);
+    if (std::isnormal(normal.norm())) {
+      ans += area * normal.normalize();
+      sum_area += area;
+    }
+
+  }
+  if ( std::isnormal(sum_area) )
+    ans /= sum_area;
+  return ans;
+}
+
 
 }  // end namspace angem

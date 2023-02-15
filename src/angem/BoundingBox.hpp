@@ -26,6 +26,23 @@ class BoundingBox {
     return ans;
   }
 
+  std::array<angem::Point<3,Scalar>, 3> principal_components() const {
+    std::array<angem::Point<3,Scalar>, 3> ans;
+    auto const & points = _box.get_points();
+    ans[0] = points[1] - points[0];
+    ans[1] = points[3] - points[0];
+    ans[2] = points[4] - points[0];
+    return ans;
+  }
+
+  bool is_valid() const {
+    auto dims = dimensions();
+    for (size_t i = 0; i < 3; ++i)
+      if ( std::isnan(dims[i]) )
+        return false;
+    return true;
+  }
+
  private:
   angem::Hexahedron<Scalar> compute_(std::vector<Point<3,Scalar>> const & cloud)
   {

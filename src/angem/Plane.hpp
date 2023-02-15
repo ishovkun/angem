@@ -23,16 +23,13 @@ class Plane
   // use it only if set data after.
   Plane();
   // create plane from a point on the plane and a normal vector
-  Plane(const Point<3,Scalar> & point,
-        const Point<3,Scalar> & normal);
+  Plane(const Point<3,Scalar> & point, const Point<3,Scalar> & normal);
   // strike and dip in degrees
   Plane(const Point<3,Scalar> & point,
         const Scalar          & dip_angle,      // -90 <= dip <= 90
         const Scalar          & strike_angle);
   // create plane from 3 points
-  Plane(const Point<3,Scalar> & p1,
-        const Point<3,Scalar> & p2,
-        const Point<3,Scalar> & p3);
+  Plane(const Point<3,Scalar> & p1, const Point<3,Scalar> & p2, const Point<3,Scalar> & p3);
   Plane(Point<3,Scalar> const & p, Basis<3,Scalar> const & basis);
 
   // pick some three points from the cloud to initialize a plane
@@ -46,13 +43,9 @@ class Plane
   // a plane
   // Be very careful with this method sine it does not check whether
   // all points belong to the same plane
-  Plane(const std::vector<Point<3,Scalar>> & cloud,
-        const std::vector<size_t> & specific_indices);
-
+  Plane(const std::vector<Point<3,Scalar>> & cloud, const std::vector<size_t> & indices);
   // setter
-  void set_data(const Point<3,Scalar> & p1,
-                const Point<3,Scalar> & p2,
-                const Point<3,Scalar> & p3);
+  void set_data(const Point<3,Scalar> & p1, const Point<3,Scalar> & p2, const Point<3,Scalar> & p3);
   // If you need some custom vectors in basis, you can specify them
   inline void set_basis(const Basis<3,Scalar> & basis) noexcept {_basis = basis;}
   // shift support point in direction p
@@ -79,6 +72,8 @@ class Plane
    * Get the coordinates of the points in the basis
    */
   Point<3,Scalar> local_coordinates(const Point<3,Scalar> & p) const;
+  // Get the coordinates of the points in the basis
+  std::vector<Point<2,Scalar>> get_planar_coordinates(std::vector<Point<3,Scalar>> const & verts) const;
   // project vector (no account for plane location)
   Point<3,Scalar> project_vector(const Point<3,Scalar> & p) const;
   // signed distance from point to plane (> 0 if point is above plane)
@@ -159,8 +154,6 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
   }
   if (!found)
   {
-    for (auto & p : cloud)
-      std::cout << p << std::endl;
     throw std::invalid_argument("Cannot initialize a plane from a point cloud");
   }
   set_data(p1, p2, p3);
@@ -438,6 +431,20 @@ Plane<Scalar>::strike_angle() const
 
   return strike;
 }
+
+template<typename Scalar>
+std::vector<Point<2,Scalar>>
+Plane<Scalar>::get_planar_coordinates(std::vector<Point<3,Scalar>> const & verts) const
+{
+  std::vector<angem::Point<2, Scalar>> verts2d( verts.size() );
+  auto local_coord = [this] (auto const & p3d){
+    auto loc = this->local_coordinates(p3d);
+    return angem::Point<2,Scalar>( loc[0], loc[1] );
+  };
+  std::transform(verts.begin(), verts.end(), verts2d.begin(), local_coord);
+  return verts2d;
+}
+
 
 template <typename Scalar>
 const angem::Point<3,Scalar> & Plane<Scalar>::invert_normal() noexcept

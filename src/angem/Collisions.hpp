@@ -10,6 +10,7 @@
 #include "angem/utils.hpp"
 // #include "PolyGroup.hpp"
 #include "CollisionGJK.hpp"
+#include "Projections.hpp"
 #include "Tensor2.hpp"
 #include "utils.hpp"
 #include <set>
@@ -226,13 +227,6 @@ bool collision(const Polygon<Scalar>        & poly1,
 }
 
 // intersection of a segment with plane
-// intersection is appended to!
-// template <typename Scalar>
-// bool collision(const Point<3,Scalar>        & l0,
-//                const Point<3,Scalar>        & l1,
-//                const Plane<Scalar>          & plane,
-//                std::vector<Point<3,Scalar>> & intersection,
-//                const double                   tol = 1e-10)
 template <typename Scalar>
 bool collision(const LineSegment<Scalar>    & segment,
                const Plane<Scalar>          & plane,
@@ -243,27 +237,28 @@ bool collision(const LineSegment<Scalar>    & segment,
   // line p = d l + l0
   // segment : l0, l1
   // intersection: d = (p0 - l0) · n / (l · n)
-  // call collision of all edges
+  // ref: wiki line-plane intersection
   auto const & l0 = segment.first();
   auto const & l1 = segment.second();
   const Scalar d1 = plane.signed_distance(l0);
   const Scalar d2 = plane.signed_distance(l1);
 
   // both points are on the plane
-  if (fabs(d1) + fabs(d2) < tol)
+  if (fabs(d1) + fabs(d2) <= tol)
   {
     intersection.push_back(l0);
     intersection.push_back(l1);
     return true;
   }
 
-  if (d1*d2 > 0)  // both points on one side of plane
-    return false;
+  // both points on one side of plane
+  if (d1*d2 > 0) return false;
 
   // compute intersection point
   const Point<3,Scalar> l = l1 - l0;
-  const Scalar d = (plane.origin() - l0).dot(plane.normal()) /
-                    l.dot(plane.normal());
+  auto const & p0 = plane.origin();
+  auto const & n = plane.normal();
+  Scalar const d = dot(p0 - l0, n) / dot(l, n);
   intersection.push_back(l0 + d * l);
   return true;
 }
@@ -436,8 +431,10 @@ bool collision(const Line<3,Scalar> & line,
   // Note: if (l · n) == 0 then line is parallel to the plane
   if (std::fabs(line.direction().dot(plane.normal())) < tol)
   {
-    if (coincide(line, plane, tol))
-      throw std::runtime_error("line and plane coinside.");
+    if (coincide(line, plane, tol)) {
+      intersection = line.point();
+      return true;
+    }
     return false;
   }
 
@@ -452,27 +449,20 @@ template<typename Scalar>
 bool point_inside(Polygon<Scalar> const & poly, Point<3,Scalar> const & x)
 {
   auto verts = poly.get_points();
-  std::vector<size_t> indices(verts.size());
   auto offset = poly.center();
   std::transform(verts.begin(), verts.end(), verts.begin(), [&offset](auto const &p ){
     return p - offset;
   });
   Point<3,Scalar> c; c.set_zero();
 
-  std::iota( indices.begin(), indices.end(), 0 );
-  angem::Plane<Scalar> plane( c, angem::polygon_average_normal(verts, indices) );
-  std::vector<angem::Point<2, Scalar>> verts2d( verts.size() );
+  angem::Plane<Scalar> plane( c, angem::polygon_average_normal(verts) );
+  auto verts2d = plane.get_planar_coordinates(verts);
 
-  auto local_coord = [&plane] (auto const & p3d){
-    auto loc = plane.local_coordinates(p3d);
-    return angem::Point<2,Scalar>( loc[0], loc[1] );
-  };
-  std::transform(verts.begin(), verts.end(), verts2d.begin(), local_coord);
   auto x2d = local_coord(x-offset);
   auto c2d = local_coord(c);
 
-  for (size_t i = 0; i < indices.size(); ++i) {
-    size_t const j = (i+1) % indices.size();
+  for (size_t i = 0; i < verts.size(); ++i) {
+    size_t const j = (i+1) % verts.size();
     Scalar dx = (verts2d[j][0] - verts2d[i][0]);
     if ( !std::isnan(1./dx) )
     {

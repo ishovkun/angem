@@ -31,8 +31,8 @@ class Polylabel {
         : center(center),
           half_size(half_size),
           distance(point_to_polygon_dist(center, pts)),
-          potential(distance + half_size * std::sqrt(2))
-        {}
+          potential(distance + half_size * std::sqrt(2.))
+    {}
 
     Point<2,T> center; // cell center
     T half_size; // half the cell size
@@ -51,9 +51,7 @@ Point<3,T> Polylabel<T>::get(Polygon<T> const & poly) const
   auto verts = poly.get_points();
 
   auto const offset = verts.front();
-  std::for_each(verts.begin(), verts.end(), [&offset](auto & p){
-     p -= offset;
-  });
+  std::for_each(verts.begin(), verts.end(), [&offset](auto & p){p -= offset;});
 
   angem::Plane<T> plane( verts[0], angem::polygon_average_normal(verts) );
   auto verts2d = plane.get_planar_coordinates(verts);
@@ -66,15 +64,9 @@ Point<3,T> Polylabel<T>::get(Polygon<T> const & poly) const
 template <typename T>
 Point<2,T> Polylabel<T>::get_polylabel_(std::vector<Point<2,T>> const & pts) const
 {
-  // std::cout << "input points:" << std::endl;
-  // for ( auto & p : pts ) {
-  //   std::cout << p << std::endl;
-  // }
   Envelope<2,T> env(pts);
   T const cell_size = std::min( env.size()[0], env.size()[1] );
   if ( std::isnan(1./cell_size) ) return env.min();
-
-  T h = 0.5 * cell_size;
 
   // a priority queue of cells in order of their "potential" (max distance to polygon)
   using C = Polylabel<T>::Quad;
@@ -82,6 +74,7 @@ Point<2,T> Polylabel<T>::get_polylabel_(std::vector<Point<2,T>> const & pts) con
   std::priority_queue<C, std::vector<C>, decltype(cmp)> cellq(cmp);
 
   // cover polygon with initial cells
+  T h = 0.5 * cell_size;
   for ( T x = env.min()[0]; x < env.max()[0]; x += cell_size )
     for ( T y = env.min()[1]; y < env.max()[1]; y += cell_size )
     {
@@ -91,13 +84,13 @@ Point<2,T> Polylabel<T>::get_polylabel_(std::vector<Point<2,T>> const & pts) con
 
   // take centroid as the first best guess
   auto best_cell = get_centroid_cell(pts);
+  // return best_cell.center;
 
-  // second guess: bounding box centroid
+  // second guess: envelope box centroid
   C bbox_cell(0.5*(env.min() + env.max()), 0, pts);
-
   best_cell = (bbox_cell.distance > best_cell.distance) ? bbox_cell : best_cell;
 
-  auto n_prob = cellq.size();
+  // auto n_prob = cellq.size();
   while ( !cellq.empty() ) {
     // pick the most promising cell from the queue
     auto cell = std::move(cellq.top());
@@ -106,76 +99,67 @@ Point<2,T> Polylabel<T>::get_polylabel_(std::vector<Point<2,T>> const & pts) con
     // update the best cell if we found a better one
     if ( cell.distance > best_cell.distance ) {
       best_cell = cell;
-      // std::cout << "found best " << ::round(1e4 * cell.distance) / 1e4 << " after " << n_prob << " probes" << std::endl;
     }
 
     // do not search down further if there is no chance of a better soultion
     if ( cell.potential - best_cell.distance > _precision ) {
-
       // split the cell into four cells
       h = 0.5*cell.half_size;
       cellq.push(C({cell.center[0] - h, cell.center[1] - h}, h, pts));
       cellq.push(C({cell.center[0] + h, cell.center[1] - h}, h, pts));
       cellq.push(C({cell.center[0] - h, cell.center[1] + h}, h, pts));
       cellq.push(C({cell.center[0] + h, cell.center[1] + h}, h, pts));
-      n_prob += 4;
+      // n_prob += 4;
     }
   }
 
-  // std::cout << "num probes: " << n_prob << std::endl;
-  // std::cout << "best distance: " << best_cell.distance << std::endl;
-  // std::cout << "best c = " << best_cell.center << std::endl;
-  // std::cout << std::endl;
+  size_t const n = pts.size();
+  for (size_t i = 0; i < n; ++i) {
+    auto const & p1 = pts[i];
+    auto const & p2 = pts[(i+1)%n];
+    auto dist = point_to_segment_squared_distance(best_cell.center, p1, p2);
+  }
+
 
   return best_cell.center;
 }
 
 // get squared distance from a point to a segment
 template <class T>
-T getSegDistSq(Point<2,T> const &p, Point<2,T> const& a, Point<2,T> const& b) {
-  auto x = a.x();
-  auto y = a.y();
-  auto dx = b.x() - x;
-  auto dy = b.y() - y;
+T point_to_segment_squared_distance(Point<2,T> const &p, Point<2,T> const& a, Point<2,T> const& b) {
 
-  if (dx != 0 || dy != 0) {
+  // from wiki https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+  auto len = (b-a).norm();
+  auto dist = std::fabs((b[0] - a[0])*(b[1] - p[1]) - (b[0] - p[0])*(b[1] - a[1])) /  len;
+  dist = std::min( dist, p.distance(a) );
+  dist = std::min( dist, p.distance(b) );
+  return dist*dist;
 
-    auto t = ((p[0] - x) * dx + (p[1] - y) * dy) / (dx * dx + dy * dy);
-
-    if (t > 1) {
-      x = b.x();
-      y = b.y();
-
-    } else if (t > 0) {
-      x += dx * t;
-      y += dy * t;
-    }
-  }
-
-  dx = p.x() - x;
-  dy = p.y() - y;
-
-  return dx * dx + dy * dy;
 }
 
 template <typename T>
 T Polylabel<T>::point_to_polygon_dist(Point<2,T> const & p, std::vector<Point<2,T>> const & pts)
 {
   bool inside = false;
-  auto midDistSq = std::numeric_limits<T>::max();
+  auto min_dist2 = std::numeric_limits<T>::max();
 
   size_t const n = pts.size();
   for (size_t i = 0; i < n; ++i) {
     auto const & p1 = pts[i];
     auto const & p2 = pts[(i+1)%n];
-
-    if ((p1[1] > p[1]) != (p2[1] > p[1]) && (p[0] < (p2[0] - p1[0]) * (p[1] - p1[1]) / (p2[1] - p1[1]) + p1[0]))
+    // py between p1y and p2y
+    if ((p1[1] > p[1]) != (p2[1] > p[1]) &&
+        // p above segment p1-p2
+        (p[0] < p1[0] + (p2[0] - p1[0]) * (p[1] - p1[1]) / (p2[1] - p1[1]))) {
+        // (point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x)
       inside = !inside;
+    }
 
-    midDistSq = std::min( midDistSq, getSegDistSq(p, p1, p2) );
+
+    min_dist2 = std::min(min_dist2, point_to_segment_squared_distance(p, p1, p2));
   }
 
-  return (inside ? 1 : -1) * std::sqrt(midDistSq);
+  return (inside ? 1. : -1.) * std::sqrt(min_dist2);
 }
 
 template <typename T>
@@ -183,9 +167,10 @@ typename Polylabel<T>::Quad Polylabel<T>::get_centroid_cell(std::vector<Point<2,
 {
   T area = 0;
   Point<2,T> c(0,0);
-  for (size_t i = 0; i < pts.size(); ++i) {
+  size_t const n = pts.size();
+  for (size_t i = 0; i < n; ++i) {
     auto const & a = pts[i];
-    auto const & b = pts[(i+1)%pts.size()];
+    auto const & b = pts[(i+1)%n];
     auto f = a.x() * b.y() - b.x() * a.y();
     c[0] += (a[0] + b[0]) * f;
     c[1] += (a[1] + b[1]) * f;

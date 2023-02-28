@@ -14,18 +14,17 @@ class Envelope
  public:
   Envelope(std::vector<Point<dim,Scalar>> const & cloud)
   {
-    constexpr Scalar lowest = std::numeric_limits<Scalar>::lowest();
-    constexpr Scalar largest = std::numeric_limits<Scalar>::max();
     for (size_t i = 0; i < dim; ++i) {
-      _min[i] = largest;
-      _max[i] = lowest;
+      _min[i] = std::numeric_limits<Scalar>::max();
+      _max[i] = std::numeric_limits<Scalar>::lowest();
     }
 
-    for ( auto const & p : cloud )
+    for ( auto const & p : cloud ) {
       for (size_t i = 0; i < dim; ++i) {
         _min[i] = std::min( _min[i], p[i] );
         _max[i] = std::max( _max[i], p[i] );
       }
+    }
   }
 
   inline Point<dim,Scalar> min() const { return _min; }

@@ -12,6 +12,13 @@ template<int dim, typename Scalar>
 class Envelope
 {
  public:
+  Envelope() {
+    for (size_t i = 0; i < dim; ++i) {
+      _min[i] = std::numeric_limits<Scalar>::max();
+      _max[i] = std::numeric_limits<Scalar>::lowest();
+    }
+  }
+
   Envelope(std::vector<Point<dim,Scalar>> const & cloud)
   {
     for (size_t i = 0; i < dim; ++i) {
@@ -19,11 +26,14 @@ class Envelope
       _max[i] = std::numeric_limits<Scalar>::lowest();
     }
 
-    for ( auto const & p : cloud ) {
-      for (size_t i = 0; i < dim; ++i) {
-        _min[i] = std::min( _min[i], p[i] );
-        _max[i] = std::max( _max[i], p[i] );
-      }
+    for ( auto const & p : cloud )
+      update(p);
+  }
+
+  void udpate(Point<3, Scalar> const & p) {
+    for (size_t i = 0; i < dim; ++i) {
+      _min[i] = std::min( _min[i], p[i] );
+      _max[i] = std::max( _max[i], p[i] );
     }
   }
 

@@ -36,7 +36,7 @@ class Polygon: public Shape<Scalar>
           bool                           reorder_vertices = true);
   // Helper constructor. Construct a polygon (face) from some mesh vertices.
   // Vertices are ordered in a clock-wise manner upon creation.
-  Polygon(const PointSet           & all_mesh_vertices,
+  Polygon(const PointSet<Scalar>           & all_mesh_vertices,
           const std::vector<std::size_t>     & indices);
 
   // helper function: get a plane that contains an edge wich the normal in the
@@ -116,7 +116,7 @@ Polygon<Scalar>::Polygon(const std::vector<Point<3,Scalar>> & all_mesh_vertices,
 
 
 template<typename Scalar>
-Polygon<Scalar>::Polygon(const PointSet           & all_mesh_vertices,
+Polygon<Scalar>::Polygon(const PointSet<Scalar>           & all_mesh_vertices,
                          const std::vector<std::size_t>     & indices)
 {
   assert(indices.size() > 2);

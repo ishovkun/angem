@@ -7,7 +7,7 @@ namespace angem {
 template <typename T>
 class OptimizeDistanceToEdges {
  public:
-  OptimizeDistanceToEdges(T tol, T penalty = 100) : _tol(tol) {}
+  OptimizeDistanceToEdges(T tol) : _tol(tol) {}
   Point<3,T> get(Polygon<T> const & poly) const;
 
  private:
@@ -83,10 +83,8 @@ Point<3,T> OptimizeDistanceToEdges<T>::computeGradient_(Point<3,T> const p, std:
     }
     sum_grad += len*len*grad;
     sum_len += len*len;
-    // sum_grad += grad;
   }
   return sum_grad / sum_len;
-  // return sum_grad;
 }
 
 template <typename T>

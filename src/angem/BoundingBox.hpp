@@ -44,18 +44,25 @@ class BoundingBox {
   }
 
  private:
+
+#ifdef WITH_EIGEN
   angem::Hexahedron<Scalar> compute_(std::vector<Point<3,Scalar>> const & cloud)
   {
     auto const c = compute_center_mass(cloud);
-#ifdef WITH_EIGEN
-    Eigen::Matrix3f covariance;
-    for (size_t i = 0; i < 3; ++i)
-      for (size_t j = 0; j < 3; ++j)
-      {
-        for (size_t k = 0; k < cloud.size(); ++k)
-          covariance(i, j) += ( cloud[k][i] - c[i]) * ( cloud[k][j] - c[j] );
-        covariance(i, j) /= cloud.size() - 1;
-      }
+    Eigen::Matrix3f covariance = Eigen::Matrix3f::Zero();
+    for (const auto& p : cloud) {
+        Eigen::Vector3f diff(p[0] - c[0], p[1] - c[1], p[2] - c[2]);
+        covariance += diff * diff.transpose();
+    }
+    covariance /= cloud.size();
+    // for (size_t i = 0; i < 3; ++i)
+    //   for (size_t j = 0; j < 3; ++j)
+    //   {
+    //     for (size_t k = 0; k < cloud.size(); ++k)
+    //       covariance(i, j) += ( cloud[k][i] - c[i]) * ( cloud[k][j] - c[j] );
+    //     // covariance(i, j) /= cloud.size() - 1;
+    //     covariance(i, j) /= cloud.size();
+    //   }
 
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
     Eigen::Matrix3f ev = eigen_solver.eigenvectors();
@@ -102,10 +109,14 @@ class BoundingBox {
     std::vector<size_t> indices(verts.size());
     std::iota( indices.begin(), indices.end(), 0 );
     return angem::Hexahedron<Scalar>(verts, indices);
-#elif
-    static_assert(false, "Cannot compute bounding box without Eigen");
-#endif
   }
+#elif
+  angem::Hexahedron<Scalar> compute_(std::vector<Point<3,Scalar>> const & cloud)
+  {
+    static_assert(false, "Cannot compute bounding box without Eigen");
+  }
+#endif
+
 
   angem::Hexahedron<double> _box;
 };

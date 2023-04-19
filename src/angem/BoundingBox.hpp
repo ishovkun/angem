@@ -4,6 +4,7 @@
 
 #ifdef WITH_EIGEN
 #include <Eigen/Dense>
+#include "covariance.hpp"
 #endif
 
 namespace angem {
@@ -11,8 +12,8 @@ namespace angem {
 template<typename Scalar>
 class BoundingBox {
  public:
-  BoundingBox(std::vector<Point<3,Scalar>> const & cloud)
-      : _box(compute_(cloud))
+  BoundingBox(std::vector<size_t> const & indices, std::vector<Point<3,Scalar>> const & all_verts)
+      : _box(compute_(indices, all_verts))
   {}
 
   operator Hexahedron<Scalar>() const { return _box; }
@@ -46,25 +47,13 @@ class BoundingBox {
  private:
 
 #ifdef WITH_EIGEN
-  angem::Hexahedron<Scalar> compute_(std::vector<Point<3,Scalar>> const & cloud)
+  angem::Hexahedron<Scalar> compute_(std::vector<size_t> const & indices,
+                                     std::vector<Point<3,Scalar>> const & all_verts)
   {
-    auto const c = compute_center_mass(cloud);
-    Eigen::Matrix3f covariance = Eigen::Matrix3f::Zero();
-    for (const auto& p : cloud) {
-        Eigen::Vector3f diff(p[0] - c[0], p[1] - c[1], p[2] - c[2]);
-        covariance += diff * diff.transpose();
-    }
-    covariance /= cloud.size();
-    // for (size_t i = 0; i < 3; ++i)
-    //   for (size_t j = 0; j < 3; ++j)
-    //   {
-    //     for (size_t k = 0; k < cloud.size(); ++k)
-    //       covariance(i, j) += ( cloud[k][i] - c[i]) * ( cloud[k][j] - c[j] );
-    //     // covariance(i, j) /= cloud.size() - 1;
-    //     covariance(i, j) /= cloud.size();
-    //   }
+    auto const c = compute_center_mass( all_verts, indices );
+    auto cov = covariance<Scalar>(indices, all_verts);
 
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(cov, Eigen::ComputeEigenvectors);
     Eigen::Matrix3f ev = eigen_solver.eigenvectors();
     // make sure basis is right-handed
     ev.col(2) = ev.col(0).cross( ev.col(1) );
@@ -75,23 +64,35 @@ class BoundingBox {
         ev(0, 2), ev(1, 2), ev(2, 2),
       });
 
-    // compute limits
+    // compute envelope
     double const upper = std::numeric_limits<double>::max();
     double const lower = std::numeric_limits<double>::lowest();
     angem::Point<3,double> bbox_min = {upper, upper, upper};
     angem::Point<3,double> bbox_max = {lower, lower, lower};
-
-    for (auto const & p : cloud)
-    {
+    for (size_t k = 0; k < indices.size(); ++k) {
+      auto const & p = all_verts[indices[k]];
       auto const pt = transform * ( p - c );
       for (size_t i = 0; i < 3; ++i) {
         bbox_min[i] = std::min( bbox_min[i], pt[i] );
         bbox_max[i] = std::max( bbox_max[i], pt[i] );
       }
     }
-    auto const delta = bbox_max - bbox_min;
+
+    auto hex = build_hexahedron_(bbox_min, bbox_max);
+
+    auto const transform_inv = invert(transform);
+    for ( auto & v : hex.get_points() ) {
+      v = c + transform_inv * v;
+    }
+    return hex;
+  }
+
+  angem::Hexahedron<Scalar> build_hexahedron_(angem::Point<3,double> const & min,
+                                              angem::Point<3,double> const & max)
+  {
+    auto const delta = max - min;
     std::vector<angem::Point<3,Scalar>> verts(8);  // hex has 8 vertices
-    std::fill( verts.begin(), verts.begin() + 4, bbox_min );
+    std::fill( verts.begin(), verts.begin() + 4, min );
     verts[1][0] += delta[0];
     verts[2][0] += delta[0];
     verts[2][1] += delta[1];
@@ -100,18 +101,14 @@ class BoundingBox {
     std::copy( verts.begin(), verts.begin() + 4, verts.begin() + 4 );
     std::for_each( verts.begin() + 4, verts.end(), [&delta](auto & v) { v[2] += delta[2];} );
 
-    // inverse transform for real coordinates
-    auto const transform_inv = invert(transform);
-    for (auto & v : verts)
-      v = c + transform_inv * v;
-
-    // range array
-    std::vector<size_t> indices(verts.size());
-    std::iota( indices.begin(), indices.end(), 0 );
-    return angem::Hexahedron<Scalar>(verts, indices);
+    std::vector<size_t> hex_indices(verts.size());
+    std::iota( hex_indices.begin(), hex_indices.end(), 0 );
+    return angem::Hexahedron<Scalar>(verts, hex_indices);
   }
+
 #elif
-  angem::Hexahedron<Scalar> compute_(std::vector<Point<3,Scalar>> const & cloud)
+  angem::Hexahedron<Scalar> compute_(std::vector<size_t> const & indices,
+                                     std::vector<Point<3,Scalar>> const & all_verts)
   {
     static_assert(false, "Cannot compute bounding box without Eigen");
   }

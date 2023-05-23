@@ -106,7 +106,7 @@ class BoundingBox {
     return angem::Hexahedron<Scalar>(verts, hex_indices);
   }
 
-#elif
+#else
   angem::Hexahedron<Scalar> compute_(std::vector<size_t> const & indices,
                                      std::vector<Point<3,Scalar>> const & all_verts)
   {

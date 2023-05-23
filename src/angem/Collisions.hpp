@@ -263,6 +263,44 @@ bool collision(const LineSegment<Scalar>    & segment,
   return true;
 }
 
+// intersection of a segment with plane
+template <typename Scalar>
+std::tuple<bool,Point<3,Scalar>> collision(const LineSegment<Scalar>    & segment,
+                                           const Plane<Scalar>          & plane,
+                                           const double                   tol = 1e-10)
+{
+  // Plane : (p - p0) · n = 0
+  // line p = d l + l0
+  // segment : l0, l1
+  // intersection: d = (p0 - l0) · n / (l · n)
+  // ref: wiki line-plane intersection
+  // both points are on the plane
+  auto const & l0 = segment.first();
+  auto const & l1 = segment.second();
+  const Scalar d1 = plane.signed_distance(l0);
+  const Scalar d2 = plane.signed_distance(l1);
+
+  // std::pair<bool, Point<3,Scalar>> ans;
+  bool status = true;
+  Point<3,Scalar> ans;
+
+  // compute intersection point
+  const Point<3,Scalar> l = l1 - l0;
+  auto const & p0 = plane.origin();
+  auto const & n = plane.normal();
+  Scalar const d = dot(p0 - l0, n) / dot(l, n);
+  ans = l0 + d * l;
+
+  if (fabs(d1) + fabs(d2) <= tol) {
+    ans = segment.first();
+  }
+
+  // both points on one side of plane
+  if (d1*d2 > 0) status = false;
+
+  return std::make_tuple(status, ans);
+}
+
 // marks polygons above fracture as 1
 // polygons below fracture as 0
 template <typename Scalar>

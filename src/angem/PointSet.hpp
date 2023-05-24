@@ -8,15 +8,6 @@
 
 namespace angem {
 
-constexpr size_t num_digits(size_t x)
-{
-  size_t ans = 0;
-  while (x > 9) {
-    ans++;
-    x = x / 10;
-  }
-  return ans + 1;
-}
 
 /// @brief Implements a set of points that are indistinguishable within a specified tolerance
 /// @tparam storage_type floating-point presicion of stored points
@@ -58,7 +49,7 @@ class PointSet {
   {
     for (size_t i = 0; i < 3; ++i)
       if ( _min[i] > p[i] )
-        return false;
+        return size();
 
     auto idx = cartesian_indices_(p);
     auto key = compute_key_(idx);
@@ -68,12 +59,15 @@ class PointSet {
     // lookup neighbor cells
     for (size_t i = 0; i < 3; ++i)
     {
-      idx[i] = idx[i] + 1;
+      idx[i]++;
       key = compute_key_(idx);
       id = find_(key, p);
       if ( id < size() ) return id;
+      idx[i]--;
 
-      idx[i] = idx[i] - 2;
+      if ( idx[i] == 0 ) continue;
+
+      idx[i]--;
       key = compute_key_(idx);
       id = find_(key, p);
       if ( id < size() ) return id;
@@ -127,10 +121,18 @@ class PointSet {
   {
     bool updated = false;
     for (size_t i = 0; i < 3; ++i) {
-      _max[i] = std::max(_max[i], static_cast<box_type>(p[i]));
+      auto const p_i = static_cast<box_type>(p[i]);
+      _max[i] = std::max(_max[i], p_i);
+      if ( _min[i] > p_i) {
+        // 0.5*(max - p_i) is empirical, probably can be optimized
+        _min[i] = p[i] - 0.5*(_max[i] - p_i);
 
-      if ( _min[i] > p[i]) {
-        _min[i] = p[i] - 0.5*(_max[i] - p[i]);
+        // make it integer numbger of tolerances,
+        // so that points don't fall into the same bin when remapping
+        size_t const n = std::ceil(std::fabs(_min[i]) / _tol);
+        double const sign = (_min[i] > 0) ? 1. : -1.;
+        _min[i] = sign * (n * _tol);
+
         updated = true;
       }
 #ifndef NDEBUG
@@ -169,8 +171,7 @@ class PointSet {
   size_t find_(std::string const & key, Point<3,storage_type> const & p) const noexcept
   {
     auto it = _mapping.find(key);
-    if (it != _mapping.end())
-    {
+    if (it != _mapping.end()) {
       auto const & candidate = _storage[it->second];
       if ( candidate.distance(p) < _tol )
         return it->second;

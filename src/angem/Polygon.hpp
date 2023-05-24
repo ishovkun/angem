@@ -317,22 +317,13 @@ Scalar Polygon<Scalar>::area() const
 template<typename Scalar>
 std::vector<Edge> Polygon<Scalar>::get_edges() const
 {
-  std::vector<Edge> edges;
+  size_t const n = this->points.size();
+  std::vector<Edge> edges(n);
   for (std::size_t i=0; i<this->points.size(); ++i)
   {
-    std::size_t i1, i2;
-    if (i < this->points.size() - 1)
-    {
-      i1 = i;
-      i2 = i + 1;
-    }
-    else
-    {
-      i1 = i;
-      i2 = 0;
-    }
-
-    edges.push_back({i1, i2});
+    size_t const i1 = i;
+    size_t const i2 = (i+1)%n;
+    edges[i] = std::make_pair(i1, i2);
   }
 
   return edges;

@@ -142,21 +142,22 @@ Plane<Scalar>::Plane(const std::vector<Point<3,Scalar>> & cloud)
   const auto p2 = cloud[v2];
 
   // find third point that is not on the line p1-p2
-  Point<3,Scalar> p3;
-  bool found = false;
+  size_t v3 = v2;
   const Line<3, Scalar> line(p1, p2 - p1);
-  for (std::size_t i=v2+1; i < cloud.size(); ++i)
-  {
-    if (line.distance(cloud[i]) < 1e-6)
-      continue;
-    found = true;
-    p3 = cloud[i];
+  for ( size_t i = v2+1; i < cloud.size(); ++i ) {
+    if (line.distance(cloud[i]) > 1e-10) {
+      v3 = i;
+      break;
+    }
   }
-  if (!found)
-  {
-    throw std::invalid_argument("Cannot initialize a plane from a point cloud");
+  if ( v3 == v2 ) {
+    std::cout << "cloud" << std::endl;
+    for ( auto & p : cloud ) {
+      std::cout << p << "\n";
+    }
+    throw std::invalid_argument("Cannot initialize a plane from a point cloud (could not find point 3)");
   }
-  set_data(p1, p2, p3);
+  set_data(p1, p2, cloud[v3]);
 }
 
 template <typename Scalar>

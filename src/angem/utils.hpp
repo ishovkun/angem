@@ -346,8 +346,7 @@ Point<3,Scalar> polygon_average_normal(std::vector<Point<3,Scalar>> const & coor
   auto const & v1 = coord[indices[0]];
   auto const & v2 = coord[indices[1]];
   Scalar sum_area = 0;
-  for (size_t i = 2; i < indices.size(); ++i)
-  {
+  for (size_t i = 2; i < indices.size(); ++i) {
     auto const & v3 = coord[indices[i]];
     auto normal = angem::cross(v1 - v3, v2 - v3);
     double const area = angem::triangle_area(v1, v2, v3);
@@ -355,7 +354,6 @@ Point<3,Scalar> polygon_average_normal(std::vector<Point<3,Scalar>> const & coor
       ans += area * normal.normalize();
       sum_area += area;
     }
-
   }
   if ( std::isnormal(sum_area) )
     ans /= sum_area;

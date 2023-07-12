@@ -33,7 +33,7 @@ private:
 
 template<typename T>
 Rotation<T>::Rotation(Point<3,T> origin, Point<3,T> axis, double angle)
-    : _origin(origin), _axis(axis.normalize()), _angle(angle),
+    : _origin(origin), _axis(axis.normalized()), _angle(angle),
       _matrix(build_matrix_())
 {}
 

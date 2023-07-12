@@ -104,9 +104,11 @@ class Point
   // Euclidian distance
   Scalar distance(const Point<dim, Scalar> & p) const;
   // Euclidian norm
-  Scalar norm() const;
-  // divide by norm
-  Point<dim,Scalar> & normalize();
+  inline Scalar norm() const;
+  // in-place divide by norm
+  inline void normalize();
+  // Point<dim,Scalar> & normalize();
+  [[nodiscard]] Point<dim,Scalar> normalized() const;
 
   // also this class defines the following external functions
   // point-wise sum
@@ -481,14 +483,21 @@ Scalar Point<dim,Scalar>::norm() const
 
 
 template<int dim, typename Scalar>
-Point<dim,Scalar> & Point<dim,Scalar>::normalize()
+void Point<dim,Scalar>::normalize()
 {
   const Scalar nor = norm();
   if (!std::isfinite(static_cast<Scalar>(1) / nor))
     throw std::invalid_argument("cannot normalize zero vector");
   for (int i=0; i<dim; ++i)
     _storage[i] /= nor;
-  return *this;
+}
+
+template<int dim, typename Scalar>
+Point<dim,Scalar> Point<dim,Scalar>::normalized() const
+{
+  Point<dim,Scalar> ans = *this;
+  ans.normalize();
+  return ans;
 }
 
 // EXTERNAL OPERATORS
@@ -695,14 +704,15 @@ std::size_t insert(const Point<dim,Scalar>        & point,
 template <typename S>
 inline Point<3,S> generate_orthogonal(Point<3,S> p)
 {
-  p = p.normalize();
+  p.normalize();
   Point<3,S> o{0, 0, 1};
   while ( o.cross( p ).norm() == 0 )
     for (size_t i = 0; i < 3; ++i)
       o[i] += std::rand();
-  o = o.normalize();
+  o.normalize();
   o = o - o.dot( p ) * p;
-  return o.normalize();
+  o.normalize();
+  return o;
 }
 
 

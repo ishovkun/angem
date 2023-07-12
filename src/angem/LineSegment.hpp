@@ -84,7 +84,7 @@ Scalar LineSegment<Scalar>::distance(angem::Point<3,Scalar> const &p) const noex
 template<typename Scalar>
 angem::Point<3,Scalar> LineSegment<Scalar>::direction() const noexcept
 {
-  return (this->points[1] - this->points[0]).normalize();
+  return (this->points[1] - this->points[0]).normalized();
 }
 
 

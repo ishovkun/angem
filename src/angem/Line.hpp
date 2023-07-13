@@ -46,7 +46,7 @@ Scalar Line<dim,Scalar>::distance(const Point<dim,Scalar> & p) const
 {
   const Point<dim,Scalar> & ab = _direction;
   const Point<dim,Scalar> ac = p - _point;
-  const Scalar area = ab.cross(ac).norm();
+  const Scalar area = cross(ab, ac).norm();
   const Scalar cd = area / ab.norm();
   return cd;
 }

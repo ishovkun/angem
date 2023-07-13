@@ -93,13 +93,11 @@ class Point
   // dot product
   Scalar dot(const Point<dim, Scalar> & p) const;
   // cross product -- only 3D
-  void cross(const Point<3, Scalar> & p,
-             Point<3, Scalar>       & result) const;
-  Point<3, Scalar> cross(const Point<3, Scalar> & p) const;
+  // inline void cross(const Point<3, Scalar> & p, Point<3, Scalar> & result) const;
+  // inline Point<3, Scalar> cross(const Point<3, Scalar> & p) const;
 
   // if norm of the cross_product is small
-  bool parallel(const Point<dim, Scalar> & other,
-                const double               tol = 1e-5) const;
+  bool parallel(const Point<dim, Scalar> & other, const double tol = 1e-5) const;
 
   // Euclidian distance
   Scalar distance(const Point<dim, Scalar> & p) const;
@@ -421,23 +419,22 @@ Scalar Point<dim,Scalar>::dot(const Point<dim, Scalar> & p) const
 }
 
 
-template<int dim, typename Scalar>
-void Point<dim,Scalar>::cross(const Point<3, Scalar> & p,
-                              Point<3, Scalar>       & result) const
-{
-  result[0] = _storage[1]*p(2) - _storage[2]*p(1);
-  result[1] = _storage[2]*p(0) - _storage[0]*p(2);
-  result[2] = _storage[0]*p(1) - _storage[1]*p(0);
-}
+// template<int dim, typename Scalar>
+// void Point<dim,Scalar>::cross(const Point<3, Scalar> & p, Point<3, Scalar> & result) const
+// {
+//   result[0] = _storage[1]*p(2) - _storage[2]*p(1);
+//   result[1] = _storage[2]*p(0) - _storage[0]*p(2);
+//   result[2] = _storage[0]*p(1) - _storage[1]*p(0);
+// }
 
 
-template<int dim, typename Scalar>
-Point<3,Scalar> Point<dim,Scalar>::cross(const Point<3, Scalar> & p) const
-{
-  Point<3,Scalar> result;
-  cross(p, result);
-  return result;
-}
+// template<int dim, typename Scalar>
+// Point<3,Scalar> Point<dim,Scalar>::cross(const Point<3, Scalar> & p) const
+// {
+//   Point<3,Scalar> result;
+//   cross(p, result);
+//   return result;
+// }
 
 
 template<int dim, typename Scalar>
@@ -446,7 +443,8 @@ bool Point<dim,Scalar>::parallel(const Point<dim, Scalar> & other,
 {
   // auto result = (cross(other)).norm();
   // std::cout << "res = " << result << std::endl;
-  if ( (cross(other)).norm() < tol )
+  // if ( (cross(other)).norm() < tol )
+  if ( (cross(*this, other)).norm() < tol )
   {
     return true;
   }
@@ -611,20 +609,19 @@ Scalar norm(const Point<dim, Scalar> & p1)
 
 
 template<typename Scalar>
-void cross_product(const Point<3, Scalar> & p1,
-                   const Point<3, Scalar> & p2,
-                   Point<3, Scalar>       & result)
+inline void cross_product(const Point<3, Scalar> & x, const Point<3, Scalar> & y, Point<3, Scalar> & ans)
 {
-  p1.cross(p2, result);
+  ans[0] = x[1]*y(2) - x[2]*y(1);
+  ans[1] = x[2]*y(0) - x[0]*y(2);
+  ans[2] = x[0]*y(1) - x[1]*y(0);
 }
 
 
 template<typename Scalar>
-Point<3,Scalar> cross_product(const Point<3, Scalar> & p1,
-                              const Point<3, Scalar> & p2)
+inline Point<3,Scalar> cross_product(const Point<3, Scalar> & p1, const Point<3, Scalar> & p2)
 {
   Point<3,Scalar> result;
-  p1.cross(p2, result);
+  cross_product(p1, p2, result);
   return result;
 }
 
@@ -638,11 +635,10 @@ Scalar dot(const Point<3, Scalar> & p1,
 
 
 template<typename Scalar>
-Point<3,Scalar> cross(const Point<3, Scalar> & p1,
-                      const Point<3, Scalar> & p2)
+inline Point<3,Scalar> cross(const Point<3, Scalar> & p1, const Point<3, Scalar> & p2)
 {
   Point<3,Scalar> result;
-  p1.cross(p2, result);
+  cross_product(p1, p2, result);
   return result;
 }
 
@@ -706,7 +702,7 @@ inline Point<3,S> generate_orthogonal(Point<3,S> p)
 {
   p.normalize();
   Point<3,S> o{0, 0, 1};
-  while ( o.cross( p ).norm() == 0 )
+  while ( cross(o, p ).norm() == 0 )
     for (size_t i = 0; i < 3; ++i)
       o[i] += std::rand();
   o.normalize();

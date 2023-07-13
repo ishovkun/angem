@@ -310,12 +310,13 @@ void Plane<Scalar>::compute_basis(const Point<3,Scalar> & normal)
   {
     rv[cnt] += 1;
     cnt = (cnt < 2) ? cnt+1 : 0;
-  } while (rv.cross(normal).norm() < 1e-8);
+  // } while (rv.cross(normal).norm() < 1e-8);
+  } while (cross(rv, normal).norm() < 1e-8);
 
   Point<3, Scalar> e1 = project_vector(rv);
   e1.normalize();
 
-  Point<3,Scalar> e2 = normal.cross(e1);
+  Point<3,Scalar> e2 = cross(normal, e1);
   e2.normalize();
 
   _basis[0] = e1;

@@ -136,7 +136,7 @@ Scalar Tetrahedron<Scalar>::volume(const Point<3,Scalar> & v0,
   Point<3,Scalar> a = v1 - v0;
   Point<3,Scalar> b = v2 - v0;
   Point<3,Scalar> c = v3 - v0;
-  return static_cast<Scalar>(1./6.) * fabs(a.dot(b.cross(c)));
+  return static_cast<Scalar>(1./6.) * fabs(a.dot(cross(b, c)));
 }
 
 }

@@ -71,17 +71,21 @@ CollisionGJK<Scalar>::update_direction()
     case 2:
       AB = simplex.at(0) - simplex.at(1);
       AO = origin - simplex.at(1);
-      dir = (AB.cross(AO)).cross(AB);
+      // dir = (AB.cross(AO)).cross(AB);
+      // dir = (cross(AB,AO)).cross(AB);
+      dir = cross(cross(AB,AO), AB);
       break;
 
     case 3:
       AB = simplex.at(1) - simplex.at(2);
       AC = simplex.at(0) - simplex.at(2);
       AO = origin - simplex.at(2);
-      tPlane = AC.cross(AB);
+      // tPlane = AC.cross(AB);
+      tPlane = cross(AC, AB);
       if ( dot(cross(AC, tPlane), AO) > 0 )
       {
-        dir = AC.cross(AO.cross(AC));
+        // dir = AC.cross(AO.cross(AC));
+        dir = cross(AC, cross(AO, AC));
         simplex.erase(simplex.begin() + 1);
       }
       else if( dot( cross(tPlane, AB), AO ) <= 0 )
@@ -95,7 +99,7 @@ CollisionGJK<Scalar>::update_direction()
       }
       else
       {
-        dir = AB.cross( AO.cross(AB) );
+        dir = cross(AB, cross(AO, AB) );
         simplex.erase(simplex.begin());
       }
       break;
@@ -108,9 +112,9 @@ CollisionGJK<Scalar>::update_direction()
       const Point<3,Scalar> AD = D - A;
       const Point<3,Scalar> AC = C - A;
       const Point<3,Scalar> AB = B - A;
-      const Point<3,Scalar> normADC = AD.cross(AC);
-      const Point<3,Scalar> normACB = AC.cross(AB);
-      const Point<3,Scalar> normABD = AB.cross(AD);
+      const Point<3,Scalar> normADC = cross(AD, AC);
+      const Point<3,Scalar> normACB = cross(AC, AB);
+      const Point<3,Scalar> normABD = cross(AB, AD);
       const Point<3,Scalar> AO = origin - A;
 
       if (normADC.dot(AO) > 0)

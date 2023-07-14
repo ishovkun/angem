@@ -203,3 +203,4 @@ namespace angem {
 
 }
 
+#include "QuickHull_impl.hpp"

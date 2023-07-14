@@ -1,3 +1,4 @@
+#pragma once
 #include "QuickHull.hpp"
 // #include "MathUtils.hpp"
 #include "qh_structs/Mesh.hpp"
@@ -433,7 +434,7 @@ namespace angem {
                 }
             }
         }
-        
+
         if (maxD == m_epsilonSquared) {
             // A degenerate case: the point cloud seems to consists of a single point
             return MeshBuilder<T>(0, std::min((size_t)1, vertexCount-1),

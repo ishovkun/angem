@@ -410,10 +410,10 @@ void Point<dim,Scalar>::operator/=(const Scalar x)
 
 
 template<int dim, typename Scalar>
-Scalar Point<dim,Scalar>::dot(const Point<dim, Scalar> & p) const
+inline Scalar Point<dim,Scalar>::dot(const Point<dim, Scalar> & p) const
 {
-  Scalar result = static_cast<Scalar>(0);
-  for (int i=0; i<dim; ++i)
+  Scalar result = static_cast<Scalar>(0.);
+  for (int i = 0; i < dim; ++i)
     result += _storage[i] * p(i);
   return result;
 }

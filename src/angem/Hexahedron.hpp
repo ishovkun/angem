@@ -63,8 +63,7 @@ Hexahedron<Scalar> & Hexahedron<Scalar>::operator=(Hexahedron<Scalar> const & ot
 }
 
 template<typename Scalar>
-void
-Hexahedron<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)
+void Hexahedron<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)
 {
   if (vertices.size() == 20 or vertices.size() == 27)
     throw NotImplemented("Only first order Hexes implemented");

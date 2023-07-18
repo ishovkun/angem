@@ -91,7 +91,7 @@ class Point
   // component-wise division
   void operator/=(const Scalar x);
   // dot product
-  Scalar dot(const Point<dim, Scalar> & p) const;
+  inline Scalar dot(const Point<dim, Scalar> & p) const;
   // cross product -- only 3D
   // inline void cross(const Point<3, Scalar> & p, Point<3, Scalar> & result) const;
   // inline Point<3, Scalar> cross(const Point<3, Scalar> & p) const;
@@ -362,7 +362,7 @@ void Point<dim,Scalar>::operator+=(const Point<dim, Scalar> & p)
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::operator-=(const Point<dim, Scalar> & p)
+inline void Point<dim,Scalar>::operator-=(const Point<dim, Scalar> & p)
 {
   for (int i=0; i<dim; ++i)
     _storage[i] -= p(i);
@@ -511,8 +511,7 @@ Point<dim, Scalar> operator+(const Point<dim, Scalar> & p1,
 
 
 template<int dim, typename Scalar>
-Point<dim, Scalar> operator-(const Point<dim, Scalar> & p1,
-                             const Point<dim, Scalar> & p2)
+inline Point<dim, Scalar> operator-(const Point<dim, Scalar> & p1, const Point<dim, Scalar> & p2)
 {
   Point<dim, Scalar> result;
   for (int i=0; i<dim; ++i)
@@ -627,8 +626,7 @@ inline Point<3,Scalar> cross_product(const Point<3, Scalar> & p1, const Point<3,
 
 
 template<typename Scalar>
-Scalar dot(const Point<3, Scalar> & p1,
-           const Point<3, Scalar> & p2)
+inline Scalar dot(const Point<3, Scalar> & p1, const Point<3, Scalar> & p2)
 {
   return p1.dot(p2);
 }

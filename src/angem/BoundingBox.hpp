@@ -71,8 +71,6 @@ class BoundingBox {
       }
     }
 
-    // auto hex = build_hexahedron_(bbox_min, bbox_max);
-    // auto const delta = bbox_max - bbox_min;
     auto const transform_inv = invert(transform);
     for (size_t i = 0; i < 3; ++i) {
       _pca[i].set_zero();
@@ -97,35 +95,12 @@ class BoundingBox {
     return angem::Hexahedron<Scalar>(std::move(coord));
   }
 
-  angem::Hexahedron<Scalar> build_hexahedron_(angem::Point<3,double> const & min,
-                                              angem::Point<3,double> const & max)
-  {
-    auto const delta = max - min;
-    std::vector<angem::Point<3,Scalar>> verts(8);  // hex has 8 vertices
-    std::fill( verts.begin(), verts.begin() + 4, min );
-    verts[1][0] += delta[0];
-    verts[2][0] += delta[0];
-    verts[2][1] += delta[1];
-    verts[3][1] += delta[1];
-
-    std::copy( verts.begin(), verts.begin() + 4, verts.begin() + 4 );
-    std::for_each( verts.begin() + 4, verts.end(), [&delta](auto & v) { v[2] += delta[2];} );
-
-    std::vector<size_t> hex_indices(verts.size());
-    std::iota( hex_indices.begin(), hex_indices.end(), 0 );
-    return angem::Hexahedron<Scalar>(verts, hex_indices);
-  }
-
 #else
-  angem::Hexahedron<Scalar> compute_(std::vector<size_t> const & indices,
-                                     std::vector<Point<3,Scalar>> const & all_verts)
+  void compute_(std::vector<size_t> const & indices, std::vector<Point<3,Scalar>> const & coord)
   {
     static_assert(false, "Cannot compute bounding box without Eigen");
   }
 #endif
-
-
-  // angem::Hexahedron<double> _box;
 
   std::array<angem::Point<3,Scalar>, 3> _pca;
   Point<3,Scalar> _offset;

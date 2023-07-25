@@ -31,6 +31,7 @@ class Hexahedron: public Polyhedron<Scalar>
   // constructor
   Hexahedron(const std::vector<Point<3,Scalar>> & vertices,
              const std::vector<std::size_t>     & indices);
+  Hexahedron(std::vector<Point<3,Scalar>> && coord);
   // copy assignment
   Hexahedron<Scalar> & operator=(Hexahedron<Scalar> const & other);
   // SETTERS
@@ -61,6 +62,13 @@ Hexahedron<Scalar> & Hexahedron<Scalar>::operator=(Hexahedron<Scalar> const & ot
   set_data( other.get_points() );
   return *this;
 }
+
+template<typename Scalar>
+Hexahedron<Scalar>::Hexahedron(std::vector<Point<3,Scalar>> && coord)
+{
+  set_data( coord );
+}
+
 
 template<typename Scalar>
 void Hexahedron<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)

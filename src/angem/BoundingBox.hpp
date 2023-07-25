@@ -12,28 +12,22 @@ namespace angem {
 template<typename Scalar>
 class BoundingBox {
  public:
-  BoundingBox(std::vector<size_t> const & indices, std::vector<Point<3,Scalar>> const & all_verts)
-      : _box(compute_(indices, all_verts))
-  {}
+  BoundingBox(std::vector<size_t> const & indices, std::vector<Point<3,Scalar>> const & coord)
+  {
+    compute_(indices, coord);
+  }
 
-  operator Hexahedron<Scalar>() const { return _box; }
+  operator Hexahedron<Scalar>() const { return build_hexahedron_(); }
 
   angem::Point<3, Scalar> dimensions() const {
     angem::Point<3, Scalar> ans;
-    auto const & points = _box.get_points();
-    ans[0] = points[0].distance(points[1]);
-    ans[1] = points[0].distance(points[3]);
-    ans[2] = points[0].distance(points[4]);
+    for (size_t i = 0; i < 3; ++i)
+      ans[i] = _pca[i].norm();
     return ans;
   }
 
   std::array<angem::Point<3,Scalar>, 3> principal_components() const {
-    std::array<angem::Point<3,Scalar>, 3> ans;
-    auto const & points = _box.get_points();
-    ans[0] = points[1] - points[0];
-    ans[1] = points[3] - points[0];
-    ans[2] = points[4] - points[0];
-    return ans;
+    return _pca;
   }
 
   bool is_valid() const {
@@ -47,8 +41,7 @@ class BoundingBox {
  private:
 
 #ifdef WITH_EIGEN
-  angem::Hexahedron<Scalar> compute_(std::vector<size_t> const & indices,
-                                     std::vector<Point<3,Scalar>> const & all_verts)
+  void compute_(std::vector<size_t> const & indices, std::vector<Point<3,Scalar>> const & all_verts)
   {
     auto const c = compute_center_mass( all_verts, indices );
     auto cov = covariance<Scalar>(indices, all_verts);
@@ -78,13 +71,30 @@ class BoundingBox {
       }
     }
 
-    auto hex = build_hexahedron_(bbox_min, bbox_max);
-
+    // auto hex = build_hexahedron_(bbox_min, bbox_max);
+    // auto const delta = bbox_max - bbox_min;
     auto const transform_inv = invert(transform);
-    for ( auto & v : hex.get_points() ) {
-      v = c + transform_inv * v;
+    for (size_t i = 0; i < 3; ++i) {
+      _pca[i].set_zero();
+      _pca[i][i] = bbox_max[i] - bbox_min[i];
+      _pca[i] = transform_inv * _pca[i];
     }
-    return hex;
+    _offset = c;
+  }
+
+  angem::Hexahedron<Scalar> build_hexahedron_() const
+  {
+    std::vector<angem::Point<3,Scalar>> coord(8);  // hex has 8 vertices
+    std::fill( coord.begin(), coord.begin() + 4, _offset );
+    coord[1] += _pca[0];
+    coord[2] += _pca[0];
+    coord[2] += _pca[1];
+    coord[3] += _pca[1];
+
+    std::copy( coord.begin(), coord.begin() + 4, coord.begin() + 4 );
+    std::for_each( coord.begin() + 4, coord.end(), [&](auto & v) { v += _pca[2];} );
+
+    return angem::Hexahedron<Scalar>(std::move(coord));
   }
 
   angem::Hexahedron<Scalar> build_hexahedron_(angem::Point<3,double> const & min,
@@ -115,7 +125,10 @@ class BoundingBox {
 #endif
 
 
-  angem::Hexahedron<double> _box;
+  // angem::Hexahedron<double> _box;
+
+  std::array<angem::Point<3,Scalar>, 3> _pca;
+  Point<3,Scalar> _offset;
 };
 
 }  // end namespace angem

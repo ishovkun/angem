@@ -266,7 +266,9 @@ Polygon<Scalar>::reorder_indices(std::vector<Point<3, Scalar>> const &vertices,
                                  double                    eps)
 {
   Plane<Scalar> plane(vertices, indices);
-  plane.set_origin( compute_center_mass(vertices, indices) );
+  Point<3,Scalar> c;
+  compute_center_mass(vertices, indices, c);
+  plane.set_origin( c );
 
   size_t const np = indices.size();
   std::vector<Point<3,Scalar>> local(np);

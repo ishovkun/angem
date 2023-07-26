@@ -43,7 +43,8 @@ class BoundingBox {
 #ifdef WITH_EIGEN
   void compute_(std::vector<size_t> const & indices, std::vector<Point<3,Scalar>> const & all_verts)
   {
-    auto const c = compute_center_mass( all_verts, indices );
+    Point<3,Scalar> c;
+    compute_center_mass( all_verts, indices, c );
     auto cov = covariance<Scalar>(indices, all_verts);
 
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(cov, Eigen::ComputeEigenvectors);

@@ -23,14 +23,15 @@ compute_center_mass(const std::vector<Point<dim,Scalar>> & points)
 template<int dim, typename Scalar>
 Point<dim,Scalar>
 compute_center_mass(std::vector<Point<dim,Scalar>> const &all_points,
-                    std::vector<size_t> const & indices)
+                    std::vector<size_t> const & indices,
+                    Point<dim,Scalar> & ans)
 {
   assert( !indices.empty() );
-  Point<dim, Scalar> center = {0, 0, 0};
+  ans.set_zero();
   for (size_t const i : indices)
-    center += all_points[i];
-  center /= static_cast<Scalar>( indices.size() );
-  return center;
+    ans += all_points[i];
+  ans /= static_cast<Scalar>( indices.size() );
+  return ans;
 }
 
 template<int dim, typename Scalar, typename Iterable>
@@ -318,7 +319,8 @@ void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool p
 template<typename Scalar>
 Scalar polygon_area(std::vector<Point<3,Scalar>> const & coord, std::vector<size_t> const & vertices)
 {
-  auto const cm = compute_center_mass(coord, vertices);
+  Point<3,Scalar> cm;
+  compute_center_mass(coord, vertices, cm);
   size_t const nv = vertices.size();
   Scalar ans = 0;
   for (size_t i = 0; i < nv; ++i) {

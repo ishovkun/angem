@@ -23,7 +23,8 @@ template<typename Scalar>
 Eigen::Matrix3f covariance(std::vector<size_t> const & indices,
                            std::vector<Point<3,Scalar>> const & all_points)
 {
-  auto const c = compute_center_mass( all_points, indices );
+  Point<3,Scalar> c;
+  compute_center_mass( all_points, indices, c);
 
   Eigen::Matrix3f cov = Eigen::Matrix3f::Zero();
   for (size_t k = 0; k < indices.size(); ++k) {

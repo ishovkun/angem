@@ -78,18 +78,18 @@ class Point
   // compares the norms, can be used for sorting
   bool operator< (const Point<dim, Scalar> & other) const;
   // point-wise sum
-  void operator+=(const Point<dim, Scalar> & p);
+  inline void operator+=(const Point<dim, Scalar> & p);
   // point-wise difference
-  void operator-=(const Point<dim, Scalar> & p);
+  inline void operator-=(const Point<dim, Scalar> & p);
   // add to each component
-  void operator+=(const Scalar x);
+  inline void operator+=(const Scalar x);
   // subtract from each component
-  void operator-=(const Scalar x);
+  inline void operator-=(const Scalar x);
   // component-wise multiplication
-  void operator*=(const Scalar x);
+  inline void operator*=(const Scalar x);
   // Point<dim,Scalar> operator*(const Scalar x);
   // component-wise division
-  void operator/=(const Scalar x);
+  inline void operator/=(const Scalar x);
   // dot product
   inline Scalar dot(const Point<dim, Scalar> & p) const;
   // cross product -- only 3D
@@ -354,7 +354,7 @@ bool Point<dim,Scalar>::operator< (const Point<dim, Scalar> & other) const
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::operator+=(const Point<dim, Scalar> & p)
+inline void Point<dim,Scalar>::operator+=(const Point<dim, Scalar> & p)
 {
   for (int i=0; i<dim; ++i)
     _storage[i] += p(i);
@@ -370,7 +370,7 @@ inline void Point<dim,Scalar>::operator-=(const Point<dim, Scalar> & p)
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::operator+=(const Scalar x)
+inline void Point<dim,Scalar>::operator+=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
     _storage[i] += x;
@@ -378,7 +378,7 @@ void Point<dim,Scalar>::operator+=(const Scalar x)
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::operator-=(const Scalar x)
+inline void Point<dim,Scalar>::operator-=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
     _storage[i] -= x;
@@ -386,7 +386,7 @@ void Point<dim,Scalar>::operator-=(const Scalar x)
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::operator*=(const Scalar x)
+inline void Point<dim,Scalar>::operator*=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
     _storage[i] *= x;
@@ -402,7 +402,7 @@ void Point<dim,Scalar>::operator*=(const Scalar x)
 
 
 template<int dim, typename Scalar>
-void Point<dim,Scalar>::operator/=(const Scalar x)
+inline void Point<dim,Scalar>::operator/=(const Scalar x)
 {
   for (int i=0; i<dim; ++i)
     _storage[i] /= x;
@@ -418,32 +418,19 @@ inline Scalar Point<dim,Scalar>::dot(const Point<dim, Scalar> & p) const
   return result;
 }
 
-
-// template<int dim, typename Scalar>
-// void Point<dim,Scalar>::cross(const Point<3, Scalar> & p, Point<3, Scalar> & result) const
+// template<>
+// inline double Point<3,double>::dot(Point<3,double> const & other) const
 // {
-//   result[0] = _storage[1]*p(2) - _storage[2]*p(1);
-//   result[1] = _storage[2]*p(0) - _storage[0]*p(2);
-//   result[2] = _storage[0]*p(1) - _storage[1]*p(0);
+//   double ans0 = _storage[0] * other._storage[0];
+//   double ans1 = _storage[1] * other._storage[1];
+//   double ans2 = _storage[2] * other._storage[2];
+//   return ans0 + ans1 + ans2;
 // }
-
-
-// template<int dim, typename Scalar>
-// Point<3,Scalar> Point<dim,Scalar>::cross(const Point<3, Scalar> & p) const
-// {
-//   Point<3,Scalar> result;
-//   cross(p, result);
-//   return result;
-// }
-
 
 template<int dim, typename Scalar>
 bool Point<dim,Scalar>::parallel(const Point<dim, Scalar> & other,
                                  const double               tol) const
 {
-  // auto result = (cross(other)).norm();
-  // std::cout << "res = " << result << std::endl;
-  // if ( (cross(other)).norm() < tol )
   if ( (cross(*this, other)).norm() < tol )
   {
     return true;
@@ -577,10 +564,13 @@ Point<dim, Scalar> operator-(const Point<dim, Scalar> & p)
 
 
 template<int dim, typename Scalar>
-Scalar operator*(const Point<dim, Scalar> & p1,
-                 const Point<dim, Scalar> & p2)
+Scalar operator*(const Point<dim, Scalar> & x,
+                 const Point<dim, Scalar> & y)
 {
-  return p1.dot(p2);
+  Scalar ans = static_cast<Scalar>(0.);
+  for (int i = 0; i < dim; ++i)
+    ans += x(i) * y(i);
+  return ans;
 }
 
 

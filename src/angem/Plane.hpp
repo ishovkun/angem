@@ -227,7 +227,7 @@ void Plane<Scalar>::set_data(const Point<3,Scalar> & p1,
     if (p1 == p2 || p2 == p3 || p1 == p3)
       throw std::invalid_argument("Duplicated points while initializing plane");
     Scalar const d = (p1 - p2).norm() + (p2 - p3).norm();
-    if (((p2 - p1).cross(p3 - p2)).norm() < 1e-10 * d)
+    if ((cross(p2 - p1, p3 - p2)).norm() < 1e-10 * d)
       throw std::invalid_argument("Initializing plane with colinear vectors");
   }
 #endif

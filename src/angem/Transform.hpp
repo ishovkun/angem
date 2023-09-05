@@ -24,8 +24,13 @@ class Transform
     angem::Tensor2<3,T> mat{scale[0], 0., 0.,
                             0., scale[1], 0.,
                             0., 0., scale[2]};
-    return Transform(offset, mat);
- > }
+    return Transform<T> (offset, mat);
+  } 
+
+  static  Transform<T> createOffset(Point<3,T>const& offset) {
+    return Transform<T>(offset, Tensor2<3,T>::make_unit_tensor());
+  }
+
   /*
    ** Constructor: defines a transform
    */

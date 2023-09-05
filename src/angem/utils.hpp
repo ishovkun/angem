@@ -1,11 +1,38 @@
 #pragma once
 #include "Point.hpp"
+#include "Tensor2.hpp"
 #include <algorithm>
 #include <limits>  // std::numeric_limits
 #include <cmath>
 
 namespace angem
 {
+
+template<typename T>
+Tensor2<3,T> build_rotation_matrix(Point<3,T> const & axis, double angle)
+{
+  T const c = std::cos(angle);
+  T const s = std::sin(angle);
+  T const t = static_cast<T>(1) - c;
+  auto const & a = axis;
+
+  Tensor2<3,T> m;
+  for (size_t i = 0; i < 3; ++i)
+    for (size_t j = 0; j < 3; ++j)
+      m(i, j) = t * a[i]*a[j];
+
+  for (size_t i = 0; i < 3; ++i)
+    m(i, i) += c;
+
+  m(0, 1) += - a[2]*s;
+  m(0, 2) += + a[1]*s;
+  m(1, 0) += + a[2]*s;
+  m(2, 0) += - a[1]*s;
+  m(2, 1) += - a[0]*s;
+  m(1, 2) += + a[0]*s;
+
+  return m;
+}
 
 template<int dim, typename Scalar>
 Point<dim,Scalar>

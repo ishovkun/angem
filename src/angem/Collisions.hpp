@@ -493,7 +493,7 @@ bool point_inside(Polygon<Scalar> const & poly, Point<3,Scalar> const & x)
   });
   Point<3,Scalar> c; c.set_zero();
 
-  angem::Plane<Scalar> plane( c, angem::polygon_average_normal(verts) );
+  angem::Plane<Scalar> plane( c, angem::polygon_average_normal  (verts) );
   auto verts2d = plane.get_planar_coordinates(verts);
 
   auto x2d = local_coord(x-offset);

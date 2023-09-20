@@ -317,32 +317,6 @@ void reorder_from(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool p
   if ( preserve_index ) index = idx_copy;
 }
 
-// // Same as reorder_from
-// template<typename Scalar, typename IdxType>
-// void reorder(std::vector<Scalar> &arr, std::vector<IdxType> & index)
-// {
-//   reorder_from(arr, index);
-// }
-
-// template<typename Scalar>
-// Point<3,Scalar> polygon_center(std::vector<Point<3,Scalar>> const & coord, std::vector<size_t> const & indices)
-// {
-//   Point<3,Scalar> ans;
-//   auto const & v1 = coord[indices[0]];
-//   auto const & v2 = coord[indices[1]];
-//   Scalar sum_area = 0;
-//   for (size_t i = 2; i < indices.size(); ++i)
-//   {
-//     auto const c = compute_center_mass(coord, {indices[0], indices[1], indices[i]});
-//     auto const & v3 = coord[indices[i]];
-//     Scalar area = angem::triangle_area(v1, v2, v3);
-//     sum_area += area;
-//     ans += c*area;
-//   }
-//   ans /= sum_area;
-//   return ans;
-// }
-
 template<typename Scalar>
 Scalar polygon_area(std::vector<Point<3,Scalar>> const & coord, std::vector<size_t> const & vertices)
 {

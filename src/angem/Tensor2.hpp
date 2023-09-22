@@ -345,6 +345,13 @@ template <typename T>
 Tensor2<3,T> invert(const Tensor2<3,T> & a)
 {
   Tensor2<3,T> result;
+  invert(a, result);
+  return result;
+}
+
+template <typename T>
+inline void invert(const Tensor2<3,T> & a, Tensor2<3,T> & result)
+{
   const T deta = det<T>(a);
   assert( std::isnormal(deta) );
   result(0,0) =   ( a(1,1) * a(2,2) - a(1,2) * a(2,1) ) / deta;
@@ -356,8 +363,8 @@ Tensor2<3,T> invert(const Tensor2<3,T> & a)
   result(2,0) =   ( a(1,0) * a(2,1) - a(1,1) * a(2,0) ) / deta;
   result(2,1) = - ( a(0,0) * a(2,1) - a(0,1) * a(2,0) ) / deta;
   result(2,2) =   ( a(0,0) * a(1,1) - a(0,1) * a(1,0) ) / deta;
-  return result;
 }
+
 
 //    left dot product
 template <int dim, typename T>

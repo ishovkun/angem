@@ -358,7 +358,7 @@ bool Polygon<Scalar>::point_inside(const Point<3, Scalar> & p ,
 template<typename Scalar>
 Plane<Scalar> Polygon<Scalar>::get_side(const Edge & edge) const
 {
-  if (edge.first >= this->points.size() or edge.second >= this->points.size())
+  if (edge.first >= this->points.size() || edge.second >= this->points.size())
     throw std::out_of_range("Edge does not exist");
 
   const Point<3,Scalar> point3 = this->points[edge.first] +

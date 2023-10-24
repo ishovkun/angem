@@ -73,7 +73,7 @@ Hexahedron<Scalar>::Hexahedron(std::vector<Point<3,Scalar>> && coord)
 template<typename Scalar>
 void Hexahedron<Scalar>::set_data(const std::vector<Point<3,Scalar>> & vertices)
 {
-  if (vertices.size() == 20 or vertices.size() == 27)
+  if (vertices.size() == 20 || vertices.size() == 27)
     throw NotImplemented("Only first order Hexes implemented");
 
   assert(vertices.size() == 8);

@@ -164,7 +164,7 @@ CollisionGJK<Scalar>::check(const Shape<Scalar> & shape1,
 
     simplex.push_back(s);
     d = update_direction();
-    if(d.x() == 0 and d.y() == 0 and d.z() == 0)
+    if(d.x() == 0 && d.y() == 0 && d.z() == 0)
       return true;
   }
 

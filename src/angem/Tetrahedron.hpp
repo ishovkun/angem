@@ -121,7 +121,7 @@ Scalar Tetrahedron<Scalar>::volume() const
   Point<3,Scalar> a = this->points[1] - this->points[0];
   Point<3,Scalar> b = this->points[2] - this->points[0];
   Point<3,Scalar> c = this->points[3] - this->points[0];
-  return static_cast<Scalar>(1./6.) * a.dot(b.cross(c));
+  return static_cast<Scalar>(1./6.) * a.dot(cross(b, c));
 }
 
 

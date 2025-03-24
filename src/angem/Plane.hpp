@@ -252,13 +252,10 @@ Scalar Plane<Scalar>::get_zero_intercept() const noexcept
 template <typename Scalar>
 Scalar Plane<Scalar>::signed_distance(const Point<3,Scalar> & p) const
 {
-  /* dot product of point by perpendicular vector:
-   * if < 0: point is below the plane
-   */
   /* signed distance from point p (vertex) to plane
    * with normal n and containing point x0:
    * d = (p - x0) · n
-   * if d<0, point below the plane
+   * if d < 0, point below the plane
    */
   return (p - _origin).dot(normal());
 }

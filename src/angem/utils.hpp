@@ -273,7 +273,8 @@ void reorder_to(std::vector<Scalar> &arr, std::vector<IdxType> & index, bool pre
   if ( preserve_index ) index = idx_copy;
 }
 
-/* Reorder array so that elements are taken from index location.
+/* NOTE: It's either called scatter or gather operation
+ * Reorder array so that elements are taken from index location.
  * Value from arr[index[i]] will be placed into arr[i].
  * Input:
  * \param[in,out] arr : array to be reordered
